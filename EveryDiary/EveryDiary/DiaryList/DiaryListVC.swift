@@ -1,5 +1,5 @@
 //
-//  MotivationVC.swift
+//  MainVC.swift
 //  EveryDiary
 //
 //  Created by t2023-m0044 on 2/21/24.
@@ -7,8 +7,9 @@
 
 import UIKit
 
-class MotivationVC: UIViewController {
+class DiaryListVC: UIViewController {
 
+    
     private lazy var settingButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
@@ -29,8 +30,7 @@ class MotivationVC: UIViewController {
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
         
-        view.backgroundColor = .systemBrown
-        // Do any additional setup after loading the view.
+        view.backgroundColor = .systemOrange
     }
     
     @objc private func tabSettingBTN() {

@@ -1,14 +1,14 @@
 //
-//  MotivationVC.swift
+//  CalendarVC.swift
 //  EveryDiary
 //
-//  Created by t2023-m0044 on 2/21/24.
+//  Created by t2023-m0044 on 2/23/24.
 //
 
 import UIKit
 
-class MotivationVC: UIViewController {
-
+class CalendarVC: UIViewController {
+    
     private lazy var settingButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
@@ -24,12 +24,12 @@ class MotivationVC: UIViewController {
         return button
     }()
     
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemGray
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
-        
-        view.backgroundColor = .systemBrown
         // Do any additional setup after loading the view.
     }
     
@@ -64,4 +64,5 @@ class MotivationVC: UIViewController {
             writeDiaryButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
+    
 }

@@ -7,7 +7,7 @@
 
 import UIKit
 
-class WriteDiaryVC: UITabBarController {
+class WriteDiaryVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()

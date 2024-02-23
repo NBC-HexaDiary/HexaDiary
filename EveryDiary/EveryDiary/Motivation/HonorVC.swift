@@ -1,18 +1,17 @@
 //
-//  MapVC.swift
+//  HonorVC.swift
 //  EveryDiary
 //
-//  Created by t2023-m0044 on 2/21/24.
+//  Created by t2023-m0044 on 2/23/24.
 //
 
 import UIKit
 
-class MapVC: UITabBarController {
+class HonorVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = .systemGreen
+
         // Do any additional setup after loading the view.
     }
     
