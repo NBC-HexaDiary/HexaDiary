@@ -15,6 +15,7 @@ class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setTabBar()
+        customTabBar()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -25,9 +26,15 @@ class TabBarController: UITabBarController {
     private func setTabBar() {
         self.viewControllers = [firstVC,secondVC,thirdVC]
         
-        firstVC.tabBarItem = UITabBarItem(title: "나의 일기",image: UIImage(systemName:"pencil.tip"), tag: 1)
-        secondVC.tabBarItem = UITabBarItem(title: "불 켜기",image: UIImage(systemName:"paperplane.fill"), tag: 2)
-        thirdVC.tabBarItem = UITabBarItem(title: "캘린더",image: UIImage(systemName:"tray"), tag: 3)
-
+        firstVC.tabBarItem = UITabBarItem(title: "나의 일기",image: UIImage(named: "diary"), tag: 1)
+        secondVC.tabBarItem = UITabBarItem(title: "불 켜기",image: UIImage(named: "light"), tag: 2)
+        thirdVC.tabBarItem = UITabBarItem(title: "캘린더",image: UIImage(named: "calendar"), tag: 3)
+    }
+    
+    private func customTabBar() {
+        let tabBar: UITabBar = self.tabBar
+        tabBar.tintColor = UIColor(named: "Main")
+        tabBar.unselectedItemTintColor = UIColor(named: "SubText")
+        tabBar.backgroundColor = UIColor(named: "TabBar")
     }
 }
