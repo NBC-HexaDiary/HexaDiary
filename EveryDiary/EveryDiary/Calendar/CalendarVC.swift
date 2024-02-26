@@ -6,30 +6,51 @@
 //
 
 import UIKit
+import SnapKit
 
 class CalendarVC: UIViewController {
     
-    private lazy var settingButton : UIButton = {
-        var config = UIButton.Configuration.plain()
-        let button = UIButton(configuration: config)
-        button.setTitle("세팅뷰 이동", for: .normal)
-        button.addTarget(self, action: #selector(tabSettingBTN), for: .touchUpInside)
+    private lazy var settingButton : UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
         return button
     }()
+    
+    private lazy var calendarLabel : UILabel = {
+        let label = UILabel()
+        label.text = "캘린더"
+        label.font = UIFont(name: "SF-Pro-Rounded-Bold", size: 50)?.withSize(50)
+        label.textColor = UIColor(named: "Main")
+        label.allowsDefaultTighteningForTruncation = true
+        return label
+    }()
+    
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
-        button.setTitle("일기작성뷰 이동", for: .normal)
+        button.setImage(UIImage(named: "write"), for: .normal)
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
     }()
     
-
+    private lazy var calendarView : UICalendarView = {
+        var view = UICalendarView()
+        view.wantsDateDecorations = true
+        return view
+    }()
+    
+    private let safeArea: UIView = {
+        let vc = UIView()
+        vc.backgroundColor = .black
+        return vc
+    }()
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemGray
+        view.backgroundColor = UIColor(named: "Background")
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
+        configurateViews()
         // Do any additional setup after loading the view.
     }
     
@@ -44,25 +65,100 @@ class CalendarVC: UIViewController {
         self.present(writeDiaryVC, animated: true)
     }
     
+    private func setNavigationBar() {
+        navigationItem.rightBarButtonItem = settingButton
+        navigationController?.navigationBar.tintColor = UIColor(named: "Main")
+    }
+    
     private func addSubviewsCalendarVC() {
-        view.addSubview(settingButton)
         view.addSubview(writeDiaryButton)
+        view.addSubview(calendarView)
+        view.addSubview(calendarLabel)
     }
     
     private func autoLayoutCalendarVC() {
-        settingButton.translatesAutoresizingMaskIntoConstraints = false
-        writeDiaryButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            settingButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            settingButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            settingButton.widthAnchor.constraint(equalToConstant: 200),
-            settingButton.heightAnchor.constraint(equalToConstant: 50),
-            
-            writeDiaryButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            writeDiaryButton.topAnchor.constraint(equalTo: settingButton.bottomAnchor, constant: 20),
-            writeDiaryButton.widthAnchor.constraint(equalToConstant: 200),
-            writeDiaryButton.heightAnchor.constraint(equalToConstant: 50)
-        ])
+        writeDiaryButton.snp.makeConstraints { make in
+            make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
+        }
+        calendarView.snp.makeConstraints { make in
+            make.centerX.equalTo(view)
+            make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
+        }
+        calendarLabel.snp.makeConstraints { make in
+            make.top.equalTo(view).offset(50)
+            make.left.equalTo(view).offset(16)
+            make.size.equalTo(CGSize(width:100, height: 50))
+        }
     }
     
+    private func configurateViews() {
+        customCalendar()
+        setDateComponents()
+        setNavigationBar()
+        dataSelectCalendar()
+    }
+    
+    private func customCalendar() {
+        calendarView.tintColor = UIColor(named: "Main")
+        calendarView.backgroundColor = UIColor(named: "Cell")
+        calendarView.calendar = Calendar(identifier: .gregorian)
+        calendarView.locale = Locale(identifier: "ko-KR")
+        calendarView.fontDesign = .rounded
+        calendarView.layer.cornerRadius = 10
+        calendarView.delegate = self
+    }
+    
+    private func dataSelectCalendar() {
+        let dataSelection = UICalendarSelectionSingleDate(delegate: self)
+        calendarView.selectionBehavior = dataSelection
+    }
+    
+    private func setDateComponents() {
+        let fromDateComponents = DateComponents(
+            calendar: calendarView.calendar,
+            year: 2024,
+            month: 1,
+            day: 1
+        )
+        guard let fromDate = fromDateComponents.date else {
+            fatalError("Invalid date components: \(fromDateComponents)")
+        }
+        let calendarViewDateRange = DateInterval(start: fromDate, end: .distantFuture)
+        calendarView.availableDateRange = calendarViewDateRange
+    }
+}
+
+extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDelegate {
+    func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
+        let vc = DiaryListVC()
+        vc.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
+        guard let day = dateComponents.day else {
+            return nil
+        }
+        if day.isMultiple(of: 2) {
+            return .default(color: UIColor(named: "Decoration"), size: .medium)
+        } else {
+            return .default(color: UIColor(named: "Main"), size: .medium)
+        }
+        
+    }
+    func dateSelection(_ selection: UICalendarSelectionSingleDate, canSelectDate dateComponents: DateComponents?) -> Bool {
+        guard let day = dateComponents?.day else { return false }
+        if day % 2 == 0 {
+            return false
+        } else {
+            return true
+        }
+    }
+}
+
+
+#Preview {
+    CalendarVC()
 }
