@@ -5,6 +5,8 @@
 //  Created by t2023-m0044 on 2/21/24.
 //
 
+// 호호호 잘 올라 가나욤
+
 import UIKit
 
 class MotivationVC: UIViewController {
