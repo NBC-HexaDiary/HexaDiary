@@ -19,7 +19,7 @@ class CalendarVC: UIViewController {
         let label = UILabel()
         label.text = "캘린더"
         label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
-        label.textColor = UIColor(named: "Main")
+        label.textColor = UIColor(named: "main")
         return label
     }()
     
@@ -30,15 +30,7 @@ class CalendarVC: UIViewController {
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
     }()
-    func checkFont() {
-            for family in UIFont.familyNames {
-                print("*** \(family) ***")
-                for name in UIFont.fontNames(forFamilyName: family) {
-                    print(name)
-                }
-                print("-----------")
-            }
-        }
+
     private lazy var calendarView : UICalendarView = {
         var view = UICalendarView()
         view.wantsDateDecorations = true
@@ -54,12 +46,10 @@ class CalendarVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(named: "Background")
+        view.backgroundColor = UIColor(named: "background")
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
         configurateViews()
-        checkFont()
-        // Do any additional setup after loading the view.
     }
     
     @objc private func tabSettingBTN() {
@@ -75,7 +65,7 @@ class CalendarVC: UIViewController {
     
     private func setNavigationBar() {
         navigationItem.rightBarButtonItem = settingButton
-        navigationController?.navigationBar.tintColor = UIColor(named: "Main")
+        navigationController?.navigationBar.tintColor = UIColor(named: "theme")
     }
     
     private func addSubviewsCalendarVC() {
@@ -109,8 +99,8 @@ class CalendarVC: UIViewController {
     }
     
     private func customCalendar() {
-        calendarView.tintColor = UIColor(named: "Main")
-        calendarView.backgroundColor = UIColor(named: "Cell")
+        calendarView.tintColor = UIColor(named: "theme")
+        calendarView.backgroundColor = UIColor(named: "cell")
         calendarView.calendar = Calendar(identifier: .gregorian)
         calendarView.locale = Locale(identifier: "ko-KR")
         calendarView.fontDesign = .rounded
@@ -150,9 +140,9 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
             return nil
         }
         if day.isMultiple(of: 2) {
-            return .default(color: UIColor(named: "Decoration"), size: .medium)
+            return .default(color: UIColor(named: "decoration"), size: .medium)
         } else {
-            return .default(color: UIColor(named: "Main"), size: .medium)
+            return .default(color: UIColor(named: "main"), size: .medium)
         }
         
     }

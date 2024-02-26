@@ -12,6 +12,6 @@ class WriteDiaryVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor(named: "Background")
+        view.backgroundColor = UIColor(named: "background")
     }
 }

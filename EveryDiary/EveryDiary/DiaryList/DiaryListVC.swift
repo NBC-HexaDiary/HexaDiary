@@ -20,7 +20,7 @@ class DiaryListVC: UIViewController {
         let label = UILabel()
         label.text = "하루일기"
         label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
-        label.textColor = UIColor(named: "Main")
+        label.textColor = UIColor(named: "theme")
         return label
     }()
     
@@ -34,7 +34,7 @@ class DiaryListVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(named: "Background")
+        view.backgroundColor = UIColor(named: "background")
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
         setNavigationBar()
@@ -54,7 +54,7 @@ class DiaryListVC: UIViewController {
     }
     private func setNavigationBar() {
         navigationItem.rightBarButtonItem = settingButton
-        navigationController?.navigationBar.tintColor = UIColor(named: "Main")
+        navigationController?.navigationBar.tintColor = UIColor(named: "theme")
     }
     
     private func addSubviewsCalendarVC() {

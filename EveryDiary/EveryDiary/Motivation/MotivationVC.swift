@@ -55,7 +55,7 @@ class MotivationVC: UIViewController {
     
     private func setNavigationBar() {
         navigationItem.rightBarButtonItem = settingButton
-        navigationController?.navigationBar.tintColor = UIColor(named: "Main")
+        navigationController?.navigationBar.tintColor = UIColor(named: "theme")
     }
     
     private func autoLayoutCalendarVC() {
