@@ -6,31 +6,31 @@
 //
 
 import UIKit
+import SnapKit
 
 class DiaryListVC: UIViewController {
 
     
-    private lazy var settingButton : UIButton = {
-        var config = UIButton.Configuration.plain()
-        let button = UIButton(configuration: config)
-        button.setTitle("세팅뷰 이동", for: .normal)
-        button.addTarget(self, action: #selector(tabSettingBTN), for: .touchUpInside)
+    private lazy var settingButton : UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
         return button
     }()
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
-        button.setTitle("일기작성뷰 이동", for: .normal)
+        button.setImage(UIImage(named: "write"), for: .normal)
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(named: "Background")
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
+        setNavigationBar()
         
-        view.backgroundColor = .systemOrange
+
     }
     
     @objc private func tabSettingBTN() {
@@ -43,25 +43,19 @@ class DiaryListVC: UIViewController {
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
     }
+    private func setNavigationBar() {
+        navigationItem.rightBarButtonItem = settingButton
+        navigationController?.navigationBar.tintColor = UIColor(named: "Main")
+    }
     
     private func addSubviewsCalendarVC() {
-        view.addSubview(settingButton)
         view.addSubview(writeDiaryButton)
     }
     
     private func autoLayoutCalendarVC() {
-        settingButton.translatesAutoresizingMaskIntoConstraints = false
-        writeDiaryButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            settingButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            settingButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            settingButton.widthAnchor.constraint(equalToConstant: 200),
-            settingButton.heightAnchor.constraint(equalToConstant: 50),
-            
-            writeDiaryButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            writeDiaryButton.topAnchor.constraint(equalTo: settingButton.bottomAnchor, constant: 20),
-            writeDiaryButton.widthAnchor.constraint(equalToConstant: 200),
-            writeDiaryButton.heightAnchor.constraint(equalToConstant: 50)
-        ])
+        writeDiaryButton.snp.makeConstraints { make in
+            make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
+        }
     }
 }

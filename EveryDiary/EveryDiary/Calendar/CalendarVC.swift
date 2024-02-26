@@ -18,9 +18,8 @@ class CalendarVC: UIViewController {
     private lazy var calendarLabel : UILabel = {
         let label = UILabel()
         label.text = "캘린더"
-        label.font = UIFont(name: "SF-Pro-Rounded-Bold", size: 50)?.withSize(50)
+        label.font = .systemFont(ofSize: 33)
         label.textColor = UIColor(named: "Main")
-        label.allowsDefaultTighteningForTruncation = true
         return label
     }()
     
