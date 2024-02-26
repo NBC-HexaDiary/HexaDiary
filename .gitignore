@@ -102,3 +102,4 @@ iOSInjectionProject/
 *.xcuserstate
 *.DS_Store
 *.xcconfig
+GoogleService-Info.plist
