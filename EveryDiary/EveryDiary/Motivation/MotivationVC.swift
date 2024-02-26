@@ -16,15 +16,15 @@ class MotivationVC: UIViewController {
     
     let buildings = BuildingView()
 
-    private lazy var settingButton: UIBarButtonItem = {
-        let button = UIBarButtonItem(title: "세팅뷰 이동", style: .plain, target: self, action: #selector(tabSettingBTN))
+    private lazy var settingButton : UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
         return button
     }()
     
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
-        button.setTitle("일기작성뷰 이동", for: .normal)
+        button.setImage(UIImage(named: "write"), for: .normal)
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
     }()
@@ -50,12 +50,18 @@ class MotivationVC: UIViewController {
     private func addSubviewsCalendarVC() {
         view.addSubview(buildings)
         view.addSubview(writeDiaryButton)
+        setNavigationBar()
+    }
+    
+    private func setNavigationBar() {
         navigationItem.rightBarButtonItem = settingButton
+        navigationController?.navigationBar.tintColor = UIColor(named: "Main")
     }
     
     private func autoLayoutCalendarVC() {
         writeDiaryButton.snp.makeConstraints { make in
-            make.centerX.centerY.equalToSuperview()
+            make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
         }
         buildings.snp.makeConstraints { make in
             make.top.bottom.leading.trailing.equalToSuperview()
