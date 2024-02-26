@@ -18,7 +18,7 @@ class CalendarVC: UIViewController {
     private lazy var calendarLabel : UILabel = {
         let label = UILabel()
         label.text = "캘린더"
-        label.font = .systemFont(ofSize: 33)
+        label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
         label.textColor = UIColor(named: "Main")
         return label
     }()
@@ -30,7 +30,15 @@ class CalendarVC: UIViewController {
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
     }()
-    
+    func checkFont() {
+            for family in UIFont.familyNames {
+                print("*** \(family) ***")
+                for name in UIFont.fontNames(forFamilyName: family) {
+                    print(name)
+                }
+                print("-----------")
+            }
+        }
     private lazy var calendarView : UICalendarView = {
         var view = UICalendarView()
         view.wantsDateDecorations = true
@@ -50,6 +58,7 @@ class CalendarVC: UIViewController {
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
         configurateViews()
+        checkFont()
         // Do any additional setup after loading the view.
     }
     

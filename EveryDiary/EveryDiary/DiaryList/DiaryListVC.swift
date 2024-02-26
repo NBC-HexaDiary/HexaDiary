@@ -15,6 +15,15 @@ class DiaryListVC: UIViewController {
         let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
         return button
     }()
+    
+    private lazy var themeLabel : UILabel = {
+        let label = UILabel()
+        label.text = "하루일기"
+        label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
+        label.textColor = UIColor(named: "Main")
+        return label
+    }()
+    
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
@@ -50,12 +59,18 @@ class DiaryListVC: UIViewController {
     
     private func addSubviewsCalendarVC() {
         view.addSubview(writeDiaryButton)
+        view.addSubview(themeLabel)
     }
     
     private func autoLayoutCalendarVC() {
         writeDiaryButton.snp.makeConstraints { make in
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
+        }
+        themeLabel.snp.makeConstraints { make in
+            make.top.equalTo(view).offset(50)
+            make.left.equalTo(view).offset(16)
+            make.size.equalTo(CGSize(width:120, height: 50))
         }
     }
 }
