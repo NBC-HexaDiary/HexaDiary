@@ -5,19 +5,22 @@
 //  Created by t2023-m0044 on 2/21/24.
 //
 
-// 호호호 잘 올라 가나욤
-
 import UIKit
+import SnapKit
+
+#Preview{
+    MotivationVC()
+}
 
 class MotivationVC: UIViewController {
+    
+    let buildings = BuildingView()
 
-    private lazy var settingButton : UIButton = {
-        var config = UIButton.Configuration.plain()
-        let button = UIButton(configuration: config)
-        button.setTitle("세팅뷰 이동", for: .normal)
-        button.addTarget(self, action: #selector(tabSettingBTN), for: .touchUpInside)
+    private lazy var settingButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "세팅뷰 이동", style: .plain, target: self, action: #selector(tabSettingBTN))
         return button
     }()
+    
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
@@ -28,11 +31,9 @@ class MotivationVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .white
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
-        
-        view.backgroundColor = .systemBrown
-        // Do any additional setup after loading the view.
     }
     
     @objc private func tabSettingBTN() {
@@ -47,23 +48,17 @@ class MotivationVC: UIViewController {
     }
     
     private func addSubviewsCalendarVC() {
-        view.addSubview(settingButton)
+        view.addSubview(buildings)
         view.addSubview(writeDiaryButton)
+        navigationItem.rightBarButtonItem = settingButton
     }
     
     private func autoLayoutCalendarVC() {
-        settingButton.translatesAutoresizingMaskIntoConstraints = false
-        writeDiaryButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            settingButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            settingButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            settingButton.widthAnchor.constraint(equalToConstant: 200),
-            settingButton.heightAnchor.constraint(equalToConstant: 50),
-            
-            writeDiaryButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            writeDiaryButton.topAnchor.constraint(equalTo: settingButton.bottomAnchor, constant: 20),
-            writeDiaryButton.widthAnchor.constraint(equalToConstant: 200),
-            writeDiaryButton.heightAnchor.constraint(equalToConstant: 50)
-        ])
+        writeDiaryButton.snp.makeConstraints { make in
+            make.centerX.centerY.equalToSuperview()
+        }
+        buildings.snp.makeConstraints { make in
+            make.top.bottom.leading.trailing.equalToSuperview()
+        }
     }
 }
