@@ -25,7 +25,7 @@ class DiaryListVC: UIViewController {
         let label = UILabel()
         label.text = "하루일기"
         label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
-        label.textColor = UIColor(named: "theme")
+        label.textColor = .mainTheme
         return label
     }()
     
@@ -76,9 +76,9 @@ class DiaryListVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(named: "background")
-        addSubviewsCalendarVC()
-        autoLayoutCalendarVC()
+        view.backgroundColor = .mainBackground
+        addSubviewsDiaryListVC()
+        autoLayoutDiaryListVC()
         setNavigationBar()
         journalCollectionView.dataSource = self
         journalCollectionView.delegate = self
@@ -100,9 +100,8 @@ extension DiaryListVC {
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: searchBar)
         self.navigationItem.leftBarButtonItem?.isHidden = true
         self.navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
-        self.navigationController?.navigationBar.tintColor = UIColor(named: "Main")
+        self.navigationController?.navigationBar.tintColor = .mainTheme
     }
-    
     private func setNavigationItem(imageNamed name: String, titleText: String, for action: Selector) -> UIBarButtonItem {
         var config = UIButton.Configuration.plain()
         if name == "" {
@@ -173,7 +172,7 @@ extension DiaryListVC: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         // DiaryEntry 배열을 사용하여 월별로 구분된 섹션의 수를 계산
         
-//        let months = Set(diaries.map { $0.date.toString(dateFormat: "yyyyMM") })
+        //        let months = Set(diaries.map { $0.date.toString(dateFormat: "yyyyMM") })
         print("numberOfSections : \(months.count)")
         
         return months.count
@@ -181,52 +180,47 @@ extension DiaryListVC: UICollectionViewDataSource {
     // 각 섹션 별 아이템 수 반환
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // 섹션(월별)에 해당하는 DiaryEntry 수를 반환
-//        let sortedDiaries = diaries.sorted { $0.date < $1.date }
-//        let sectionMonth = sortedDiaries.map { $0.date.toString(dateFormat: "yyyyMM") }.unique()[section]
-//        let count = sortedDiaries.filter { $0.date.toString(dateFormat: "yyyyMM") == sectionMonth }.count
+        //        let sortedDiaries = diaries.sorted { $0.date < $1.date }
+        //        let sectionMonth = sortedDiaries.map { $0.date.toString(dateFormat: "yyyyMM") }.unique()[section]
+        //        let count = sortedDiaries.filter { $0.date.toString(dateFormat: "yyyyMM") == sectionMonth }.count
         
         let month = months[section]
         let count = monthlyDiaries[month]?.count ?? 0
         print("numberOfItemsInSection : \(count)")
         return count
-      
-    private func setNavigationBar() {
-        navigationItem.rightBarButtonItem = settingButton
-        navigationController?.navigationBar.tintColor = UIColor(named: "theme")
     }
-    
-    // 셀 구성
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: JournalCollectionViewCell.reuseIdentifier, for: indexPath) as? JournalCollectionViewCell else {
-            fatalError("Unable to dequeue JournalCollectionViewCell")
+        // 셀 구성
+        func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: JournalCollectionViewCell.reuseIdentifier, for: indexPath) as? JournalCollectionViewCell else {
+                fatalError("Unable to dequeue JournalCollectionViewCell")
+            }
+            // 섹션에 맞는 일기 찾기
+            let sortedDiaries = diaries.sorted { $0.date < $1.date }
+            let sectionMonth = sortedDiaries.map { $0.date.toString(dateFormat: "yyyyMM") }.unique()[indexPath.section]
+            let sectionDiaries = sortedDiaries.filter { $0.date.toString(dateFormat: "yyyyMM") == sectionMonth }
+            let diary = diaries[indexPath.row]
+            
+            cell.setJournalCollectionViewCell(
+                title: diary.title,
+                content: diary.content,
+                weather: diary.weather,
+                emotion: diary.emotion,
+                date: diary.dateString
+            )
+            print("cell : \(cell)")
+            return cell
         }
-        // 섹션에 맞는 일기 찾기
-        let sortedDiaries = diaries.sorted { $0.date < $1.date }
-        let sectionMonth = sortedDiaries.map { $0.date.toString(dateFormat: "yyyyMM") }.unique()[indexPath.section]
-        let sectionDiaries = sortedDiaries.filter { $0.date.toString(dateFormat: "yyyyMM") == sectionMonth }
-        let diary = diaries[indexPath.row]
         
-        cell.setJournalCollectionViewCell(
-            title: diary.title,
-            content: diary.content,
-            weather: diary.weather,
-            emotion: diary.emotion,
-            date: diary.dateString
-        )
-        print("cell : \(cell)")
-        return cell
-    }
-    
-    // 헤더뷰 구성
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        guard let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HeaderView.reuseIdentifier, for: indexPath) as? HeaderView else {
-            fatalError("Invalid view type")
+        // 헤더뷰 구성
+        func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+            guard let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HeaderView.reuseIdentifier, for: indexPath) as? HeaderView else {
+                fatalError("Invalid view type")
+            }
+            let month = months[indexPath.section]
+            headerView.titleLabel.text = month
+            return headerView
         }
-        let month = months[indexPath.section]
-        headerView.titleLabel.text = month
-        return headerView
     }
-}
 
 extension DiaryListVC: UICollectionViewDelegateFlowLayout {
     // 헤더의 크기 설정
