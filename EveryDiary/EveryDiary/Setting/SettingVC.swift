@@ -7,24 +7,131 @@
 
 import UIKit
 
-class SettingVC: UIViewController {
+import SnapKit
+import FirebaseAuth
+import Firebase
+import GoogleSignIn
 
+class SettingVC: UIViewController {
+    
+    private lazy var backgroundImage : UIImageView = {
+        let image = UIImageView()
+        image.image = UIImage(named: "View.Background2")
+        return image
+    }()
+    
+    private var emailTextField : UITextField = {
+        let textField = UITextField()
+        textField.placeholder = "이메일을 입력하세요"
+        textField.borderStyle = .roundedRect
+        return textField
+    }()
+    private var pwTextFikeld : UITextField = {
+        let pwText = UITextField()
+        pwText.placeholder = "패스워드를 입력하세요"
+        pwText.borderStyle = .roundedRect
+        return pwText
+    }()
+    
+    private lazy var loginButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        let loginBTN = UIButton(configuration: config)
+        loginBTN.setTitle("로그인", for: .normal)
+        loginBTN.tintColor = .theme
+        loginBTN.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
+        return loginBTN
+    }()
+    
+    private lazy var signgoogleButton : GIDSignInButton = {
+        let btn = GIDSignInButton()
+        btn.colorScheme = .light
+        btn.style = .wide
+        btn.addTarget(self, action: #selector(handleGIDSignInButton), for: .touchUpInside)
+        return btn
+    }()
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        addSubviewsSettingVC()
+        autoLayoutSettingVC()
         
-        view.backgroundColor = .systemPink
-        // Do any additional setup after loading the view.
+        
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    private func addSubviewsSettingVC() {
+        view.addSubview(backgroundImage)
+        view.sendSubviewToBack(backgroundImage)
+        //        view.addSubview(emailTextField)
+        //        view.addSubview(pwTextFikeld)
+        //        view.addSubview(loginButton)
+        view.addSubview(signgoogleButton)
     }
-    */
-
+    
+    private func autoLayoutSettingVC() {
+        //        emailTextField.snp.makeConstraints { make in
+        //            make.centerX.equalTo(view.safeAreaLayoutGuide)
+        //            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-25)
+        //            make.width.equalTo(view.safeAreaLayoutGuide).offset(-10)
+        //        }
+        //        pwTextFikeld.snp.makeConstraints { make in
+        //            make.centerX.equalTo(view.safeAreaLayoutGuide)
+        //            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(25)
+        //            make.width.equalTo(view.safeAreaLayoutGuide).offset(-10)
+        //        }
+        //        loginButton.snp.makeConstraints { make in
+        //            make.centerX.equalTo(view.safeAreaLayoutGuide)
+        //            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(70)
+        //        }
+        backgroundImage.snp.makeConstraints { make in
+            make.edges.equalTo(view).inset(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0))
+        }
+        signgoogleButton.snp.makeConstraints { make in
+            make.centerX.equalTo(view)
+            make.centerY.equalTo(view)
+        }
+        
+    }
+    
+    @objc func loginButtonTapped(){
+        Auth.auth().signIn(withEmail: emailTextField.text!, password: pwTextFikeld.text!) { (user, error) in
+            if user != nil {
+                print("로그인 성공")
+                self.navigationController?.popViewController(animated: true)
+            } else {
+                print("로그인 실패")
+            }
+        }
+    }
+    
+    @objc func handleGIDSignInButton() {
+        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
+        // Create Google Sign In configuration object.
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
+        GIDSignIn.sharedInstance.signIn(withPresenting: self) { signInResult, error in
+            guard error == nil else { return }
+            guard let user = signInResult?.user,
+                  let idToken = user.idToken?.tokenString
+            else { return }
+            
+            let emailAddress = user.profile?.email
+            let fullName = user.profile?.name
+            let profilePicUrl = user.profile?.imageURL(withDimension: 320)
+            
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
+            
+            Auth.auth().signIn(with: credential) { result, error in }
+        }
+    }
+    
+    func signOut() {
+        let firebaseAuth = Auth.auth()
+        do {
+            try firebaseAuth.signOut()
+        } catch let signOutError as NSError {
+            print("Error Signing out:  %@", signOutError)
+        }
+    }
+    
 }

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+
 import SnapKit
 
 class CalendarVC: UIViewController {
@@ -19,7 +20,7 @@ class CalendarVC: UIViewController {
         let label = UILabel()
         label.text = "캘린더"
         label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
-        label.textColor = UIColor(named: "main")
+        label.textColor = UIColor(named: "theme")
         return label
     }()
     
@@ -30,7 +31,7 @@ class CalendarVC: UIViewController {
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
     }()
-
+    
     private lazy var calendarView : UICalendarView = {
         var view = UICalendarView()
         view.wantsDateDecorations = true
@@ -142,7 +143,7 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
         if day.isMultiple(of: 2) {
             return .default(color: UIColor(named: "decoration"), size: .medium)
         } else {
-            return .default(color: UIColor(named: "main"), size: .medium)
+            return .default(color: UIColor(named: "theme"), size: .medium)
         }
         
     }

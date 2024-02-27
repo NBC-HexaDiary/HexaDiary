@@ -4,10 +4,23 @@
 <dict>
 	<key>UIAppFonts</key>
 	<array>
-		<string>SFProRounded-Regular.otf</string>
 		<string>SFProDisplay-Regular.otf</string>
-		<string>SFProRounded-Bold.otf</string>
+		<string>SFProRounded-Regular.otf</string>
 		<string>SFProDisplay-Bold.otf</string>
+		<string>SFProRounded-Bold.otf</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>setGID</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.994025581548-ffqf5gn7au9mrc7esr42lc1mfnh5p2d2</string>
+			</array>
+		</dict>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
