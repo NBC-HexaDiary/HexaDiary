@@ -59,6 +59,7 @@ class MotivationVC: UIViewController {
         setNavigationBar()
     }
     
+
     private func autoLayout() {
         background.snp.makeConstraints{ make in
             make.top.bottom.leading.trailing.equalToSuperview()

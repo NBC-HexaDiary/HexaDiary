@@ -6,6 +6,7 @@
 //
 
 import UIKit
+
 import SnapKit
 
 class CalendarVC: UIViewController {
@@ -19,7 +20,7 @@ class CalendarVC: UIViewController {
         let label = UILabel()
         label.text = "캘린더"
         label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
-        label.textColor = UIColor(named: "main")
+        label.textColor = UIColor(named: "mainTheme")
         return label
     }()
     
@@ -30,15 +31,7 @@ class CalendarVC: UIViewController {
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
     }()
-    func checkFont() {
-            for family in UIFont.familyNames {
-                print("*** \(family) ***")
-                for name in UIFont.fontNames(forFamilyName: family) {
-                    print(name)
-                }
-                print("-----------")
-            }
-        }
+    
     private lazy var calendarView : UICalendarView = {
         var view = UICalendarView()
         view.wantsDateDecorations = true
@@ -54,12 +47,10 @@ class CalendarVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(named: "Background")
+        view.backgroundColor = UIColor(named: "mainBackground")
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
         configurateViews()
-        checkFont()
-        // Do any additional setup after loading the view.
     }
     
     @objc private func tabSettingBTN() {
@@ -75,7 +66,7 @@ class CalendarVC: UIViewController {
     
     private func setNavigationBar() {
         navigationItem.rightBarButtonItem = settingButton
-        navigationController?.navigationBar.tintColor = UIColor(named: "main")
+        navigationController?.navigationBar.tintColor = UIColor(named: "mainTheme")
     }
     
     private func addSubviewsCalendarVC() {
@@ -105,12 +96,12 @@ class CalendarVC: UIViewController {
         customCalendar()
         setDateComponents()
         setNavigationBar()
-        dataSelectCalendar()
+        dateSelectCalendar()
     }
     
     private func customCalendar() {
-        calendarView.tintColor = UIColor(named: "main")
-        calendarView.backgroundColor = UIColor(named: "Cell")
+        calendarView.tintColor = .mainTheme
+        calendarView.backgroundColor = .mainCell
         calendarView.calendar = Calendar(identifier: .gregorian)
         calendarView.locale = Locale(identifier: "ko-KR")
         calendarView.fontDesign = .rounded
@@ -118,7 +109,7 @@ class CalendarVC: UIViewController {
         calendarView.delegate = self
     }
     
-    private func dataSelectCalendar() {
+    private func dateSelectCalendar() {
         let dataSelection = UICalendarSelectionSingleDate(delegate: self)
         calendarView.selectionBehavior = dataSelection
     }
@@ -150,9 +141,9 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
             return nil
         }
         if day.isMultiple(of: 2) {
-            return .default(color: UIColor(named: "Decoration"), size: .medium)
+            return .default(color: .subBackground, size: .medium)
         } else {
-            return .default(color: UIColor(named: "main"), size: .medium)
+            return .default(color: .mainTheme, size: .medium)
         }
         
     }
