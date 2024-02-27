@@ -15,6 +15,11 @@ import SnapKit
 class MotivationVC: UIViewController {
     
     let buildings = BuildingView()
+    
+    private lazy var background : UIImageView = {
+        let background = UIImageView(image: UIImage(named: "View.Background"))
+        return background
+    }()
 
     private lazy var settingButton : UIBarButtonItem = {
         let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
@@ -32,8 +37,8 @@ class MotivationVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        addSubviewsCalendarVC()
-        autoLayoutCalendarVC()
+        addSubview()
+        autoLayout()
     }
     
     @objc private func tabSettingBTN() {
@@ -47,18 +52,18 @@ class MotivationVC: UIViewController {
         self.present(writeDiaryVC, animated: true)
     }
     
-    private func addSubviewsCalendarVC() {
+    private func addSubview() {
+        view.addSubview(background)
         view.addSubview(buildings)
         view.addSubview(writeDiaryButton)
         setNavigationBar()
     }
     
-    private func setNavigationBar() {
-        navigationItem.rightBarButtonItem = settingButton
-        navigationController?.navigationBar.tintColor = UIColor(named: "theme")
-    }
-    
-    private func autoLayoutCalendarVC() {
+
+    private func autoLayout() {
+        background.snp.makeConstraints{ make in
+            make.top.bottom.leading.trailing.equalToSuperview()
+        }
         writeDiaryButton.snp.makeConstraints { make in
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
@@ -66,5 +71,10 @@ class MotivationVC: UIViewController {
         buildings.snp.makeConstraints { make in
             make.top.bottom.leading.trailing.equalToSuperview()
         }
+    }
+    
+    private func setNavigationBar() {
+        navigationItem.rightBarButtonItem = settingButton
+        navigationController?.navigationBar.tintColor = UIColor(named: "main")
     }
 }
