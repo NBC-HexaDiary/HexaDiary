@@ -7,6 +7,22 @@
 
 import Foundation
 
+extension Bundle {
+    
+    var apiKey: String {
+        guard let filePath = Bundle.main.path(forResource: "Api", ofType: "plist"),
+              let plistDict = NSDictionary(contentsOfFile: filePath) else {
+            fatalError("Couldn't find file 'Api.plist'.")
+        }
+        
+        guard let value = plistDict.object(forKey: "OPENWEATHERMAP_KEY") as? String else {
+            fatalError("Couldn't find key 'API_Key' in 'Api.plist'.")
+        }
+        
+        return value
+    }
+}
+
 // 에러 정의
 enum NetworkError: Error {
     case badUrl
@@ -16,23 +32,24 @@ enum NetworkError: Error {
 
 class WeatherService {
     // .plist에서 API Key 가져오기
-    private var apiKey: String {
-        get {
-            // 생성한 .plist 파일 경로 불러오기
-            guard let filePath = Bundle.main.path(forResource: "Api", ofType: "plist") else {
-                fatalError("Couldn't find file 'Api.plist'.")
-            }
-            
-            // .plist를 딕셔너리로 받아오기
-            let plist = NSDictionary(contentsOfFile: filePath)
-            
-            // 딕셔너리에서 값 찾기
-            guard let value = plist?.object(forKey: "OPENWEATHERMAP_KEY") as? String else {
-                fatalError("Couldn't find key 'OPENWEATHERMAP_KEY' in 'Api.plist'.")
-            }
-            return value
-        }
-    }
+//    private var apiKey: String {
+//        get {
+//            // 생성한 .plist 파일 경로 불러오기
+//            guard let filePath = Bundle.main.path(forResource: "Api", ofType: "plist") else {
+//                fatalError("Couldn't find file 'Api.plist'.")
+//            }
+//            
+//            // .plist를 딕셔너리로 받아오기
+//            let plist = NSDictionary(contentsOfFile: filePath)
+//            
+//            // 딕셔너리에서 값 찾기
+//            guard let value = plist?.object(forKey: "OPENWEATHERMAP_KEY") as? String else {
+//                fatalError("Couldn't find key 'OPENWEATHERMAP_KEY' in 'Api.plist'.")
+//            }
+//            return value
+//        }
+//    }
+    let apiKey = Bundle.main.apiKey
     
     func getWeather(completion: @escaping (Result<WeatherResponse, NetworkError>) -> Void) {
         
