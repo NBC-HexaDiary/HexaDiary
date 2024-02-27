@@ -37,7 +37,7 @@ class SettingVC: UIViewController {
         var config = UIButton.Configuration.plain()
         let loginBTN = UIButton(configuration: config)
         loginBTN.setTitle("로그인", for: .normal)
-        loginBTN.tintColor = .theme
+        loginBTN.tintColor = UIColor(named: "mainTheme")
         loginBTN.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         return loginBTN
     }()
@@ -105,12 +105,16 @@ class SettingVC: UIViewController {
     }
     
     @objc func handleGIDSignInButton() {
+        // 버튼 클릭 시, 인증
         guard let clientID = FirebaseApp.app()?.options.clientID else { return }
         // Create Google Sign In configuration object.
         let config = GIDConfiguration(clientID: clientID)
         GIDSignIn.sharedInstance.configuration = config
         GIDSignIn.sharedInstance.signIn(withPresenting: self) { signInResult, error in
             guard error == nil else { return }
+            
+            // 인증을 해도 계정 등록 절차가 필요하다
+            // 구글 인증 토큰 받고 -> 사용자 정보 토큰 생성 -> 파이어베이스 인증 등록
             guard let user = signInResult?.user,
                   let idToken = user.idToken?.tokenString
             else { return }
@@ -121,7 +125,9 @@ class SettingVC: UIViewController {
             
             let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
             
-            Auth.auth().signIn(with: credential) { result, error in }
+            Auth.auth().signIn(with: credential) { result, error in
+                //사용자 등록 후 처리할 코드
+            }
         }
     }
     
