@@ -9,6 +9,7 @@ import Foundation
 
 import Firebase
 import FirebaseFirestore
+//import FirebaseAuth
 
 class DiaryManager {
     let db = Firestore.firestore()
@@ -21,6 +22,12 @@ class DiaryManager {
     //다이어리 추가
     func addDiary(diary: DiaryEntry, completion: @escaping (Error?) -> Void) {
         var newDiary = diary
+//        guard let userID = Auth.auth().currentUser?.uid else {
+//            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+//            return
+//        }
+//        newDiary.userID = userID // 현재 사용자의 UID를 저장
+//        let documentReference = db.collection("users").document(userID).collection("diaries").document() // 사용자의 UID를 기반으로 경로 설정
         let documentReference = db.collection("diaries").document()
         newDiary.id = documentReference.documentID
         do {
