@@ -253,5 +253,6 @@ extension WriteDiaryVC {
 //        UIView.animate(withDuration: 0.3, delay: 0.3, options: .transitionCurlDown) { [weak self] in
 //            self?.view.layoutIfNeeded()
 //        }
+        view.backgroundColor = UIColor(named: "background")
     }
 }
