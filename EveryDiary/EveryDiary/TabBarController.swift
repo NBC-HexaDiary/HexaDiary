@@ -33,7 +33,7 @@ class TabBarController: UITabBarController {
     
     private func customTabBar() {
         let tabBar: UITabBar = self.tabBar
-        tabBar.tintColor = UIColor(named: "Main")
+        tabBar.tintColor = UIColor(named: "main")
         tabBar.unselectedItemTintColor = UIColor(named: "SubText")
         tabBar.backgroundColor = UIColor(named: "TabBar")
     }

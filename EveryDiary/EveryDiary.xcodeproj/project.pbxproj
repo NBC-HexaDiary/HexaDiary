@@ -16,7 +16,6 @@
 		6BA0115B2B886A9100A26CE0 /* HonorVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA0115A2B886A9100A26CE0 /* HonorVC.swift */; };
 		6BA0115F2B8878F600A26CE0 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA0115E2B8878F600A26CE0 /* DataModel.swift */; };
 		6BA011612B88790800A26CE0 /* FireStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA011602B88790800A26CE0 /* FireStore.swift */; };
-		6BA011632B887A5B00A26CE0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6BA011622B887A5B00A26CE0 /* GoogleService-Info.plist */; };
 		6BABC3692B85D107009267B3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BABC3682B85D107009267B3 /* AppDelegate.swift */; };
 		6BABC36B2B85D107009267B3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BABC36A2B85D107009267B3 /* SceneDelegate.swift */; };
 		6BABC3722B85D109009267B3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6BABC3712B85D109009267B3 /* Assets.xcassets */; };
@@ -31,6 +30,7 @@
 		6BB3CE442B85F6B1005BC3E1 /* DiaryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */; };
 		6BB3CE462B8619D0005BC3E1 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE452B8619D0005BC3E1 /* FirebaseFirestore */; };
 		6BB3CE482B8619D5005BC3E1 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE472B8619D5005BC3E1 /* FirebaseFirestoreSwift */; };
+		6BDC53DE2B8CB6AE000BCA3D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6BDC53DD2B8CB6AD000BCA3D /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,7 +43,6 @@
 		6BA0115A2B886A9100A26CE0 /* HonorVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HonorVC.swift; sourceTree = "<group>"; };
 		6BA0115E2B8878F600A26CE0 /* DataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModel.swift; sourceTree = "<group>"; };
 		6BA011602B88790800A26CE0 /* FireStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FireStore.swift; sourceTree = "<group>"; };
-		6BA011622B887A5B00A26CE0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6BABC3652B85D107009267B3 /* EveryDiary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EveryDiary.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6BABC3682B85D107009267B3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6BABC36A2B85D107009267B3 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -55,6 +54,7 @@
 		6BB3CE3D2B85F66E005BC3E1 /* SettingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingVC.swift; sourceTree = "<group>"; };
 		6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationVC.swift; sourceTree = "<group>"; };
 		6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryListVC.swift; sourceTree = "<group>"; };
+		6BDC53DD2B8CB6AD000BCA3D /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Desktop/GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,7 +141,7 @@
 				6BABC36A2B85D107009267B3 /* SceneDelegate.swift */,
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
-				6BA011622B887A5B00A26CE0 /* GoogleService-Info.plist */,
+				6BDC53DD2B8CB6AD000BCA3D /* GoogleService-Info.plist */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
 			);
 			path = EveryDiary;
@@ -264,7 +264,7 @@
 				6BABC3722B85D109009267B3 /* Assets.xcassets in Resources */,
 				6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */,
 				6B95C04C2B8C7A5A00DBB175 /* SFProDisplay-Regular.otf in Resources */,
-				6BA011632B887A5B00A26CE0 /* GoogleService-Info.plist in Resources */,
+				6BDC53DE2B8CB6AE000BCA3D /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

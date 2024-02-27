@@ -19,7 +19,7 @@ class CalendarVC: UIViewController {
         let label = UILabel()
         label.text = "캘린더"
         label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
-        label.textColor = UIColor(named: "Main")
+        label.textColor = UIColor(named: "main")
         return label
     }()
     
@@ -75,7 +75,7 @@ class CalendarVC: UIViewController {
     
     private func setNavigationBar() {
         navigationItem.rightBarButtonItem = settingButton
-        navigationController?.navigationBar.tintColor = UIColor(named: "Main")
+        navigationController?.navigationBar.tintColor = UIColor(named: "main")
     }
     
     private func addSubviewsCalendarVC() {
@@ -109,7 +109,7 @@ class CalendarVC: UIViewController {
     }
     
     private func customCalendar() {
-        calendarView.tintColor = UIColor(named: "Main")
+        calendarView.tintColor = UIColor(named: "main")
         calendarView.backgroundColor = UIColor(named: "Cell")
         calendarView.calendar = Calendar(identifier: .gregorian)
         calendarView.locale = Locale(identifier: "ko-KR")
@@ -152,7 +152,7 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
         if day.isMultiple(of: 2) {
             return .default(color: UIColor(named: "Decoration"), size: .medium)
         } else {
-            return .default(color: UIColor(named: "Main"), size: .medium)
+            return .default(color: UIColor(named: "main"), size: .medium)
         }
         
     }
