@@ -39,7 +39,7 @@ class JournalCollectionViewCell: UICollectionViewCell {
         super.init(frame: frame)
         addSubView()
         setLayout()
-        contentView.backgroundColor = .cell
+        contentView.backgroundColor = .mainCell
         contentView.layer.cornerRadius = 20
     }
     

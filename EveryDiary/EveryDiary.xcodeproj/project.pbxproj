@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3F0FEFE72B8CBCCF001539AE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3F0FEFE62B8CBCCF001539AE /* GoogleService-Info.plist */; };
 		3F0FEFE92B8D8881001539AE /* JournalCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */; };
 		3F0FEFEB2B8D88B9001539AE /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */; };
 		3F0FEFED2B8DFDB2001539AE /* DateSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */; };
@@ -87,6 +86,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6B3C4CC42B8E062E00C53005 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				3F0FEFE62B8CBCCF001539AE /* GoogleService-Info.plist */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		6B95BF822B8C78DD00DBB175 /* Font */ = {
 			isa = PBXGroup;
 			children = (
@@ -128,6 +135,7 @@
 				6BABC3672B85D107009267B3 /* EveryDiary */,
 				6BABC3662B85D107009267B3 /* Products */,
 				6BABC3C92B85D805009267B3 /* Frameworks */,
+				6B3C4CC42B8E062E00C53005 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -280,7 +288,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6B95C0512B8C7A5A00DBB175 /* SFProRounded-Regular.otf in Resources */,
-				3F0FEFE72B8CBCCF001539AE /* GoogleService-Info.plist in Resources */,
 				6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */,
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
 				6BABC3722B85D109009267B3 /* Assets.xcassets in Resources */,

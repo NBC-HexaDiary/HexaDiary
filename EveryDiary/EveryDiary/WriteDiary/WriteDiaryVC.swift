@@ -102,7 +102,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
         addSubView()
         setLayout()
         
-        view.backgroundColor = .background
+        view.backgroundColor = .mainBackground
     }
 }
 
@@ -166,9 +166,9 @@ extension WriteDiaryVC: UIImagePickerControllerDelegate, UINavigationControllerD
         button.addTarget(self, action: action, for: .touchUpInside)
         
         // 추가적인 속성 설정 (예: 타이틀 색상, 배경색, 이미지 틴트색상)
-        button.setTitleColor(.main, for: .normal)
+        button.setTitleColor(.mainTheme, for: .normal)
         button.backgroundColor = .clear
-        button.tintColor = .main
+        button.tintColor = .mainTheme
         
         return button
     }
@@ -249,7 +249,7 @@ extension WriteDiaryVC {
         // 이미지가 nil이면 높이를 0, 아니면 view의 너비와 동일하게 설정
         imageViewHeightConstraint?.constant = image == nil ? 0 : view.frame.width
         
-        view.backgroundColor = UIColor(named: "mainBackground")
+        view.backgroundColor = .mainBackground
 
 //        // 변경사항을 애니메이션과 함께 적용
 //        UIView.animate(withDuration: 0.3, delay: 0.3, options: .transitionCurlDown) { [weak self] in
