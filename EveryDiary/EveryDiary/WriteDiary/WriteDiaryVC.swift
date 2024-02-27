@@ -249,10 +249,12 @@ extension WriteDiaryVC {
         // 이미지가 nil이면 높이를 0, 아니면 view의 너비와 동일하게 설정
         imageViewHeightConstraint?.constant = image == nil ? 0 : view.frame.width
         
+        view.backgroundColor = UIColor(named: "mainBackground")
+
 //        // 변경사항을 애니메이션과 함께 적용
 //        UIView.animate(withDuration: 0.3, delay: 0.3, options: .transitionCurlDown) { [weak self] in
 //            self?.view.layoutIfNeeded()
 //        }
-        view.backgroundColor = UIColor(named: "background")
+
     }
 }

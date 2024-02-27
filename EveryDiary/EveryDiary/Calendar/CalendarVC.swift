@@ -20,7 +20,7 @@ class CalendarVC: UIViewController {
         let label = UILabel()
         label.text = "캘린더"
         label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
-        label.textColor = UIColor(named: "theme")
+        label.textColor = UIColor(named: "mainTheme")
         return label
     }()
     
@@ -47,7 +47,7 @@ class CalendarVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(named: "background")
+        view.backgroundColor = UIColor(named: "mainBackground")
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
         configurateViews()
@@ -66,7 +66,7 @@ class CalendarVC: UIViewController {
     
     private func setNavigationBar() {
         navigationItem.rightBarButtonItem = settingButton
-        navigationController?.navigationBar.tintColor = UIColor(named: "theme")
+        navigationController?.navigationBar.tintColor = UIColor(named: "mainTheme")
     }
     
     private func addSubviewsCalendarVC() {
@@ -96,12 +96,12 @@ class CalendarVC: UIViewController {
         customCalendar()
         setDateComponents()
         setNavigationBar()
-        dataSelectCalendar()
+        dateSelectCalendar()
     }
     
     private func customCalendar() {
-        calendarView.tintColor = UIColor(named: "theme")
-        calendarView.backgroundColor = UIColor(named: "cell")
+        calendarView.tintColor = .mainTheme
+        calendarView.backgroundColor = .mainCell
         calendarView.calendar = Calendar(identifier: .gregorian)
         calendarView.locale = Locale(identifier: "ko-KR")
         calendarView.fontDesign = .rounded
@@ -109,7 +109,7 @@ class CalendarVC: UIViewController {
         calendarView.delegate = self
     }
     
-    private func dataSelectCalendar() {
+    private func dateSelectCalendar() {
         let dataSelection = UICalendarSelectionSingleDate(delegate: self)
         calendarView.selectionBehavior = dataSelection
     }
@@ -141,9 +141,9 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
             return nil
         }
         if day.isMultiple(of: 2) {
-            return .default(color: UIColor(named: "decoration"), size: .medium)
+            return .default(color: .subBackground, size: .medium)
         } else {
-            return .default(color: UIColor(named: "theme"), size: .medium)
+            return .default(color: .mainTheme, size: .medium)
         }
         
     }
