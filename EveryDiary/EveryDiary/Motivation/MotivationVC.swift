@@ -69,7 +69,7 @@ class MotivationVC: UIViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
         }
         buildings.snp.makeConstraints { make in
-            make.top.bottom.leading.trailing.equalToSuperview()
+            make.top.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
         }
     }
     

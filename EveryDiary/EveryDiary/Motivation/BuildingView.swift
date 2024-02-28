@@ -8,6 +8,8 @@
 
 import Foundation
 import UIKit
+import SnapKit
+
 #Preview{
     BuildingView()
 }
@@ -17,12 +19,17 @@ class BuildingView: UIView {
     let backgroundLayer = CALayer()
     let backBuildingLayer = CAShapeLayer()
     let buildingLayer = CAShapeLayer()
-    let windowSize = CGSize(width: 10, height: 20)
-    let windowSpacing: CGFloat = 20
+    let windowSize = CGSize(width: 10, height: 22)
+    let windowSpacing: CGFloat = 15
+    
+    struct WindowLayout {
+        let columns: [[Int]]
+    }
     
     struct BuildingSize {
         let position: CGPoint
         let size: CGSize
+        let windowLayout: WindowLayout
     }
 
     override init(frame: CGRect) {
@@ -34,11 +41,9 @@ class BuildingView: UIView {
     }
     
     override func draw(_ rect: CGRect) {
-        //backgroundLayer.frame = CGRect(x: 0, y: 0, width: self.bounds.width, height: self.bounds.height)
         drawBackBuilding()
         drawBuilding()
         layoutSubviews()
-        windowDateData()
     }
     
     // UIView에 맞춰 동적으로 크기 변경
@@ -48,22 +53,27 @@ class BuildingView: UIView {
         backgroundLayer.frame = self.bounds
         backBuildingLayer.frame = self.bounds
         buildingLayer.frame = self.bounds
-        
+        //backBuilding 위치와 크기
         buildings = [
-            BuildingSize(position: CGPoint(x: 0, y: backgroundLayer.bounds.height),
-                         size: CGSize(width: backgroundLayer.bounds.width * 0.14, height: backgroundLayer.bounds.height * 0.65)),
+            BuildingSize(position: CGPoint(x: 0, y: backgroundLayer.bounds.height * 0.97),
+                         size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1], [1, 1], [1, 0], [1, 1], [1]])),
+
+            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.21, y: backgroundLayer.bounds.height * 0.99),
+                         size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.31), windowLayout: WindowLayout(columns: [[0, 1, 1], [1, 0, 1],[1, 1], [0, 1]])),
             
-            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.1575, y: backgroundLayer.bounds.height),
-                         size: CGSize(width: backgroundLayer.bounds.width * 0.2625, height: backgroundLayer.bounds.height * 0.65)),
+            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.51, y: backgroundLayer.bounds.height * 1.02),
+                         size: CGSize(width: backgroundLayer.bounds.width * 0.048, height: backgroundLayer.bounds.height * 0.25), windowLayout: WindowLayout(columns: [[1, 1, 0],[0, 1, 1], [1, 0, 1], [0, 1]])),
             
-            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.455, y: backgroundLayer.bounds.height),
-                         size: CGSize(width: backgroundLayer.bounds.width * 0.21, height: backgroundLayer.bounds.height * 0.95)),
+            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.73, y: backgroundLayer.bounds.height * 1.03),
+                         size: CGSize(width: (backgroundLayer.bounds.width - backgroundLayer.bounds.width * 0.92), height: backgroundLayer.bounds.height * 0.4), windowLayout: WindowLayout(columns: [[0, 0, 1], [1, 1], [1, 0, 1], [1, 1]])),
             
-            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.68, y: backgroundLayer.bounds.height),
-                         size: CGSize(width: (backgroundLayer.bounds.width - backgroundLayer.bounds.width * 0.68), height: backgroundLayer.bounds.height * 0.6))
+            BuildingSize(position: CGPoint(x: 0, y: backgroundLayer.bounds.height * 0.9),
+                         size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1, 1]])),
+            
+            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.94, y: backgroundLayer.bounds.height * 0.89),
+                         size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[1]]))
         ]
-        
-        //windowDateData()
+        drawWindowsInBuilding()
     }
     
     //MARK: 빌딩 그림 UIBezierPath
@@ -162,47 +172,29 @@ class BuildingView: UIView {
         let windowPath = UIBezierPath(rect: CGRect(origin: position, size: windowSize))
         let windowLayer = CAShapeLayer()
         windowLayer.path = windowPath.cgPath
-        windowLayer.fillColor = UIColor.yellow.cgColor
+        windowLayer.fillColor = UIColor.darkGray.cgColor
         buildingLayer.addSublayer(windowLayer)
     }
     
-    func drawWindowsInBuilding(_ building: BuildingSize) {
-        let numberOfColumns = 2
-        let numberOfRow = [4, 3]
-
-        //각 창문의 위치를 계산
-        for i in 0..<numberOfColumns {
-            for j in 0..<numberOfRow[i] {
-                let windowPosition = CGPoint (
-                    x: building.position.x + (building.size.width / 6) + CGFloat(i) * (windowSize.width + windowSpacing),
-                    y: self.bounds.height - CGFloat(j + 1) * (windowSize.height + windowSpacing)
-                )
-                drawWindows(at: windowPosition)
+    func drawWindowsInBuilding() {
+        for building in buildings {
+            let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
+            for (i, row) in building.windowLayout.columns.enumerated() {
+                for (j, columns) in row.enumerated() {
+                    let windowWidth = building.size.width / CGFloat(columns)
+                    let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(j), y: building.position.y - windowHeight * CGFloat(i+1))
+                    drawWindows(at: windowPosition)
+                }
             }
         }
     }
     
-    func windowDateData() {
-        let date = Date()
-        let calendar = Calendar.current
-        let range = calendar.range(of: .day, in: .month, for: date)!
-        let numberDays = range.count
-        
-        let maxBuildingIndex = min(buildings.count - 1, 27)
-        
-        //드디어 창문 그린다
-        if numberDays <= maxBuildingIndex + 1 {
-            for i in 0..<numberDays {
-                drawWindowsInBuilding(buildings[i])
-            }
-        } else {
-            for i in 0...maxBuildingIndex {
-                drawWindowsInBuilding(buildings[i])
-            }
-            for i in maxBuildingIndex + 1..<numberDays {
-                let windowPosition = CGPoint(x: CGFloat(i - 28) * (windowSize.width + windowSpacing), y: buildings.last?.position.y ?? 0)
-                drawWindows(at: windowPosition)
-            }
-        }
-    }
+//    func windowDateData() {
+//        let date = Date()
+//        let calendar = Calendar.current
+//        let range = calendar.range(of: .day, in: .month, for: date)!
+//        let numberDays = range.count
+//
+//    }
 }
+
