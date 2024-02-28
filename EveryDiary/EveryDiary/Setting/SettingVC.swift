@@ -14,121 +14,61 @@ import GoogleSignIn
 
 class SettingVC: UIViewController {
     
-    private lazy var backgroundImage : UIImageView = {
-        let image = UIImageView()
-        image.image = UIImage(named: "View.Background2")
-        return image
-    }()
-    
-    private var emailTextField : UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "이메일을 입력하세요"
-        textField.borderStyle = .roundedRect
-        return textField
-    }()
-    private var pwTextFikeld : UITextField = {
-        let pwText = UITextField()
-        pwText.placeholder = "패스워드를 입력하세요"
-        pwText.borderStyle = .roundedRect
-        return pwText
-    }()
+    private let settings: [SettingItem] = [
+        SettingItem(title: "알림", iconName: "notification",number: 1),
+        SettingItem(title: "잠금", iconName: "lock", number: 2)
+    ]
     
     private lazy var loginButton: UIButton = {
         var config = UIButton.Configuration.plain()
         let loginBTN = UIButton(configuration: config)
-        loginBTN.setTitle("로그인", for: .normal)
+        loginBTN.setImage(UIImage(named: "logIn"), for: .normal)
         loginBTN.tintColor = UIColor(named: "mainTheme")
         loginBTN.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         return loginBTN
     }()
     
-    private lazy var signgoogleButton : GIDSignInButton = {
-        let btn = GIDSignInButton()
-        btn.colorScheme = .light
-        btn.style = .wide
-        btn.addTarget(self, action: #selector(handleGIDSignInButton), for: .touchUpInside)
-        return btn
+    private lazy var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumLineSpacing = 20
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .subTheme
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(SettingCell.self, forCellWithReuseIdentifier: "SettingCell")
+        return collectionView
     }()
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         addSubviewsSettingVC()
         autoLayoutSettingVC()
-        
-        
     }
     
     private func addSubviewsSettingVC() {
-        view.addSubview(backgroundImage)
-        view.sendSubviewToBack(backgroundImage)
-        //        view.addSubview(emailTextField)
-        //        view.addSubview(pwTextFikeld)
-        //        view.addSubview(loginButton)
-        view.addSubview(signgoogleButton)
+        view.backgroundColor = .mainBackground
+        view.addSubview(loginButton)
+        view.addSubview(collectionView)
     }
     
     private func autoLayoutSettingVC() {
-        //        emailTextField.snp.makeConstraints { make in
-        //            make.centerX.equalTo(view.safeAreaLayoutGuide)
-        //            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-25)
-        //            make.width.equalTo(view.safeAreaLayoutGuide).offset(-10)
-        //        }
-        //        pwTextFikeld.snp.makeConstraints { make in
-        //            make.centerX.equalTo(view.safeAreaLayoutGuide)
-        //            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(25)
-        //            make.width.equalTo(view.safeAreaLayoutGuide).offset(-10)
-        //        }
-        //        loginButton.snp.makeConstraints { make in
-        //            make.centerX.equalTo(view.safeAreaLayoutGuide)
-        //            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(70)
-        //        }
-        backgroundImage.snp.makeConstraints { make in
-            make.edges.equalTo(view).inset(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0))
+        loginButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide)
+            make.left.equalTo(view.safeAreaLayoutGuide)
         }
-        signgoogleButton.snp.makeConstraints { make in
-            make.centerX.equalTo(view)
-            make.centerY.equalTo(view)
+        collectionView.snp.makeConstraints { make in
+            make.top.equalTo(loginButton).offset(50)
+            make.leading.equalTo(view.safeAreaLayoutGuide)
+            make.trailing.equalTo(view.safeAreaLayoutGuide)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-50)
         }
-        
     }
     
     @objc func loginButtonTapped(){
-        Auth.auth().signIn(withEmail: emailTextField.text!, password: pwTextFikeld.text!) { (user, error) in
-            if user != nil {
-                print("로그인 성공")
-                self.navigationController?.popViewController(animated: true)
-            } else {
-                print("로그인 실패")
-            }
-        }
-    }
-    
-    @objc func handleGIDSignInButton() {
-        // 버튼 클릭 시, 인증
-        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
-        // Create Google Sign In configuration object.
-        let config = GIDConfiguration(clientID: clientID)
-        GIDSignIn.sharedInstance.configuration = config
-        GIDSignIn.sharedInstance.signIn(withPresenting: self) { signInResult, error in
-            guard error == nil else { return }
-            
-            // 인증을 해도 계정 등록 절차가 필요하다
-            // 구글 인증 토큰 받고 -> 사용자 정보 토큰 생성 -> 파이어베이스 인증 등록
-            guard let user = signInResult?.user,
-                  let idToken = user.idToken?.tokenString
-            else { return }
-            
-            let emailAddress = user.profile?.email
-            let fullName = user.profile?.name
-            let profilePicUrl = user.profile?.imageURL(withDimension: 320)
-            
-            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
-            
-            Auth.auth().signIn(with: credential) { result, error in
-                //사용자 등록 후 처리할 코드
-            }
-        }
+        let loginVC = LoginVC()
+        loginVC.modalPresentationStyle = .automatic
+        self.present(loginVC, animated: true)
     }
     
     func signOut() {
@@ -139,5 +79,48 @@ class SettingVC: UIViewController {
             print("Error Signing out:  %@", signOutError)
         }
     }
+}
+
+extension SettingVC : UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return settings.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SettingCell", for: indexPath) as! SettingCell
+        let setting = settings[indexPath.item]
+        cell.textLabel.text = setting.title
+        cell.iconImageView.image = UIImage(named: setting.iconName)
+        
+        let separatorView = UIView()
+        separatorView.backgroundColor = .mainTheme
+        cell.addSubview(separatorView)
+        separatorView.snp.makeConstraints { make in
+            make.leading.trailing.bottom.equalToSuperview()
+            make.height.equalTo(1)
+        }
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let selectedItem = settings[indexPath.item]
+        
+        switch selectedItem.number {
+        case 1:
+            let notificationVC = NotificationVC()
+            navigationController?.pushViewController(notificationVC, animated: true)
+        case 2:
+            let lockVC = LockVC()
+            navigationController?.pushViewController(lockVC, animated: true)
+        default:
+            print("error")
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let width = collectionView.bounds.width
+        let height: CGFloat = 50
+        return CGSize(width: width, height: height)
+    }
 }

@@ -32,3 +32,9 @@ extension DiaryEntry {
         self.weather = weather
     }
 }
+
+struct SettingItem {
+    var title: String
+    var iconName: String
+    var number: Int
+}
