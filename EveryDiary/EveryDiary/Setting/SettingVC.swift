@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CryptoKit
 
 import SnapKit
 import FirebaseAuth
@@ -28,16 +29,17 @@ class SettingVC: UIViewController {
         return loginBTN
     }()
     
-    private lazy var collectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.minimumLineSpacing = 20
-        
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .subTheme
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.register(SettingCell.self, forCellWithReuseIdentifier: "SettingCell")
-        return collectionView
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(SettingCell.self, forCellReuseIdentifier: "SettingCell")
+        tableView.rowHeight = 100
+        tableView.isScrollEnabled = false
+        tableView.backgroundColor = .mainBackground
+        tableView.separatorStyle = .none
+        tableView.separatorColor = .mainTheme
+        return tableView
     }()
     
     override func viewDidLoad() {
@@ -46,10 +48,19 @@ class SettingVC: UIViewController {
         autoLayoutSettingVC()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        tableView.selectRow(at: .none,
+                            animated: true,
+                            scrollPosition: .top)
+    }
+    
     private func addSubviewsSettingVC() {
         view.backgroundColor = .mainBackground
         view.addSubview(loginButton)
-        view.addSubview(collectionView)
+        view.addSubview(tableView)
+        setNavigationBar()
     }
     
     private func autoLayoutSettingVC() {
@@ -57,11 +68,11 @@ class SettingVC: UIViewController {
             make.top.equalTo(view.safeAreaLayoutGuide)
             make.left.equalTo(view.safeAreaLayoutGuide)
         }
-        collectionView.snp.makeConstraints { make in
+        tableView.snp.makeConstraints { make in
             make.top.equalTo(loginButton).offset(50)
-            make.leading.equalTo(view.safeAreaLayoutGuide)
-            make.trailing.equalTo(view.safeAreaLayoutGuide)
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-50)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(10)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-10)
+            make.bottom.equalTo(view).offset(-300)
         }
     }
     
@@ -71,7 +82,7 @@ class SettingVC: UIViewController {
         self.present(loginVC, animated: true)
     }
     
-    func signOut() {
+    private func signOut() {
         let firebaseAuth = Auth.auth()
         do {
             try firebaseAuth.signOut()
@@ -79,32 +90,29 @@ class SettingVC: UIViewController {
             print("Error Signing out:  %@", signOutError)
         }
     }
+    
+    private func setNavigationBar() {
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "설정", style: .plain, target: nil, action: nil)
+    }
 }
 
-extension SettingVC : UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+extension SettingVC : UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return settings.count
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SettingCell", for: indexPath) as! SettingCell
-        let setting = settings[indexPath.item]
-        cell.textLabel.text = setting.title
-        cell.iconImageView.image = UIImage(named: setting.iconName)
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "SettingCell", for: indexPath) as! SettingCell
+        cell.backgroundColor = .mainBackground
         
-        let separatorView = UIView()
-        separatorView.backgroundColor = .mainTheme
-        cell.addSubview(separatorView)
-        separatorView.snp.makeConstraints { make in
-            make.leading.trailing.bottom.equalToSuperview()
-            make.height.equalTo(1)
-        }
+        let setting = settings[indexPath.row]
+        cell.titleLabel.text = setting.title
+        cell.iconImageView.image = UIImage(named: setting.iconName)
         return cell
     }
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let selectedItem = settings[indexPath.item]
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedItem = settings[indexPath.row]
         
         switch selectedItem.number {
         case 1:
@@ -116,11 +124,5 @@ extension SettingVC : UICollectionViewDelegate, UICollectionViewDataSource, UICo
         default:
             print("error")
         }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = collectionView.bounds.width
-        let height: CGFloat = 50
-        return CGSize(width: width, height: height)
     }
 }

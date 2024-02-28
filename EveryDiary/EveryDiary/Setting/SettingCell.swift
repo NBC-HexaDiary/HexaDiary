@@ -9,9 +9,9 @@ import UIKit
 
 import SnapKit
 
-class SettingCell: UICollectionViewCell {
+class SettingCell: UITableViewCell {
     
-    let iconImageView : UIImageView = {
+    lazy var iconImageView : UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
         imageView.layer.borderColor = UIColor(named: "mainTheme")?.cgColor
@@ -19,36 +19,78 @@ class SettingCell: UICollectionViewCell {
         return imageView
     }()
     
-    let textLabel : UILabel = {
+    lazy var titleLabel : UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "SFProRounded-Bold", size: 20)
+        label.font = UIFont(name: "SFProRounded-Regular", size: 20)
         label.textColor = .mainTheme
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        
-        addSubview(textLabel)
-        addSubview(iconImageView)
-        
-        iconImageView.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(8)
-            make.bottom.equalToSuperview().offset(-8)
-            make.left.equalToSuperview().offset(16)
-            make.right.equalTo(textLabel).offset(16)
-            make.width.height.equalTo(30)
-        }
-        textLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(8)
-            make.bottom.equalToSuperview().offset(-8)
-            make.right.equalToSuperview().offset(-16)
-            make.left.equalTo(iconImageView).offset(16)
-        }
-    }
+    lazy var rightArrowImage : UIImageView = {
+        let arrowView = UIImageView()
+        arrowView.image = UIImage(systemName: "chevron.right")
+        arrowView.tintColor = .mainTheme
+        return arrowView
+    }()
     
+    
+//    override func layoutSubviews() {
+//        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 0, left: 5, bottom: 5, right: 0))
+//    }
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: "SettingCell")
+        
+        selectionStyle = .none
+        contentView.layer.cornerRadius = 10
+        addSubViewSettingCell()
+        autoLayoutSettingCell()
+    }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    private func addSubViewSettingCell() {
+        addSubview(titleLabel)
+        addSubview(iconImageView)
+        addSubview(rightArrowImage)
+    }
+    
+    private func autoLayoutSettingCell() {
+        iconImageView.snp.makeConstraints { make in
+            make.leading.equalToSuperview().inset(16)
+            make.centerY.equalToSuperview()
+            make.width.height.equalTo(30)
+        }
+        titleLabel.snp.makeConstraints { make in
+            make.leading.equalTo(iconImageView.snp.trailing).offset(16)
+            make.centerY.equalToSuperview()
+            make.trailing.equalTo(rightArrowImage.snp.leading).inset(8)
+            make.height.equalTo(30)
+        }
+        rightArrowImage.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().inset(16)
+            make.centerY.equalToSuperview()
+            make.width.height.equalTo(16)
+        }
+    }
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+
+        if selected {
+            contentView.layer.borderWidth = 2
+            contentView.layer.borderColor = UIColor(named: "mainTheme")?.cgColor
+        } else {
+            contentView.layer.borderWidth = 1
+            contentView.layer.borderColor = UIColor(named: "subBackground")?.cgColor
+        }
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 16, left: 4, bottom: 16, right: 4))
+    }
+
 }
