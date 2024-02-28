@@ -28,7 +28,7 @@ class DiaryManager {
 //        }
 //        newDiary.userID = userID // 현재 사용자의 UID를 저장
 //        let documentReference = db.collection("users").document(userID).collection("diaries").document() // 사용자의 UID를 기반으로 경로 설정
-        let documentReference = db.collection("diaries").document()
+        let documentReference = db.collection("diaries").document() //나중에 로그인 구현되면 여긴 필요없어요
         newDiary.id = documentReference.documentID
         do {
             try documentReference.setData(from: newDiary) { error in
