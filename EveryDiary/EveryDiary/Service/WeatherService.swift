@@ -4,25 +4,34 @@
 //
 //  Created by Dahlia on 2/27/24.
 //
-
 import Foundation
+import CoreLocation
 
-// 에러 정의
 enum NetworkError: Error {
     case badUrl
     case noData
     case decodingError
 }
 
-class WeatherService {
+class WeatherService: NSObject, CLLocationManagerDelegate {
     
+    let locationManager = CLLocationManager()
     let apiKey = Bundle.main.apiKey
     
+    override init() {
+        super.init()
+        self.locationManager.delegate = self
+        self.locationManager.requestWhenInUseAuthorization()
+        self.locationManager.startUpdatingLocation()
+    }
+    
     func getWeather(completion: @escaping (Result<WeatherResponse, NetworkError>) -> Void) {
+        guard let location = locationManager.location else {
+            return completion(.failure(.noData))
+        }
         
-        // API 호출을 위한 URL
-        let url = URL(string: "https://api.openweathermap.org/data/2.5/weather?q=seoul&appid=\(apiKey)")
-        guard let url = url else {
+        let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(location.coordinate.latitude)&lon=\(location.coordinate.longitude)&appid=\(apiKey)"
+        guard let url = URL(string: urlString) else {
             return completion(.failure(.badUrl))
         }
         
@@ -32,17 +41,15 @@ class WeatherService {
             }
             
             do {
-                // Data 타입으로 받은 리턴을 디코드
                 let weatherResponse = try JSONDecoder().decode(WeatherResponse.self, from: data)
-
-                // 성공
-                print(weatherResponse)
-                completion(.success(weatherResponse)) // 성공한 데이터 저장
+                completion(.success(weatherResponse))
             } catch {
-                print("Error decoding data:", error)
                 completion(.failure(.decodingError))
             }
-        }.resume() // 이 dataTask 시작
-
+        }.resume()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Failed to find user's location: \(error.localizedDescription)")
     }
 }
