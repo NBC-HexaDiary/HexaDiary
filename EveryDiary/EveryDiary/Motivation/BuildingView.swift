@@ -59,14 +59,19 @@ class BuildingView: UIView {
                          size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1], [1, 1], [1, 0], [1, 1], [1]])),
 
             BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.21, y: backgroundLayer.bounds.height * 0.99),
-                         size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.4), windowLayout: WindowLayout(columns: [[0, 1, 1], [1, 0, 1],[1, 1], [0, 1], [1, 1]])),
+                         size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.31), windowLayout: WindowLayout(columns: [[0, 1, 1], [1, 0, 1],[1, 1], [0, 1]])),
             
             BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.51, y: backgroundLayer.bounds.height * 1.02),
                          size: CGSize(width: backgroundLayer.bounds.width * 0.048, height: backgroundLayer.bounds.height * 0.25), windowLayout: WindowLayout(columns: [[1, 1, 0],[0, 1, 1], [1, 0, 1], [0, 1]])),
             
             BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.73, y: backgroundLayer.bounds.height * 1.03),
-                         size: CGSize(width: (backgroundLayer.bounds.width - backgroundLayer.bounds.width * 0.92), height: backgroundLayer.bounds.height * 0.47), windowLayout: WindowLayout(columns: [[0, 0, 1], [1, 1], [1, 0, 1], [1, 1], [0, 0, 1]]))
+                         size: CGSize(width: (backgroundLayer.bounds.width - backgroundLayer.bounds.width * 0.92), height: backgroundLayer.bounds.height * 0.4), windowLayout: WindowLayout(columns: [[0, 0, 1], [1, 1], [1, 0, 1], [1, 1]])),
             
+            BuildingSize(position: CGPoint(x: 0, y: backgroundLayer.bounds.height * 0.9),
+                         size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1, 1]])),
+            
+            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.94, y: backgroundLayer.bounds.height * 0.89),
+                         size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[1]]))
         ]
         drawWindowsInBuilding()
     }
@@ -167,7 +172,7 @@ class BuildingView: UIView {
         let windowPath = UIBezierPath(rect: CGRect(origin: position, size: windowSize))
         let windowLayer = CAShapeLayer()
         windowLayer.path = windowPath.cgPath
-        windowLayer.fillColor = UIColor.lightGray.cgColor
+        windowLayer.fillColor = UIColor.darkGray.cgColor
         buildingLayer.addSublayer(windowLayer)
     }
     
@@ -184,12 +189,12 @@ class BuildingView: UIView {
         }
     }
     
-    func windowDateData() {
-        let date = Date()
-        let calendar = Calendar.current
-        let range = calendar.range(of: .day, in: .month, for: date)!
-        let numberDays = range.count
-
-    }
+//    func windowDateData() {
+//        let date = Date()
+//        let calendar = Calendar.current
+//        let range = calendar.range(of: .day, in: .month, for: date)!
+//        let numberDays = range.count
+//
+//    }
 }
 
