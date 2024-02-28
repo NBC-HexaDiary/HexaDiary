@@ -10,6 +10,8 @@
 		1AF880D32B8DB5A2004076EB /* Api.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880D22B8DB5A2004076EB /* Api.plist */; };
 		1AF880D52B8DB715004076EB /* WeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D42B8DB715004076EB /* WeatherModel.swift */; };
 		1AF880D82B8DC135004076EB /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D72B8DC135004076EB /* WeatherService.swift */; };
+		1AF880E02B8E0C7F004076EB /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880DF2B8E0C7F004076EB /* GoogleService-Info.plist */; };
+		1AF880E22B8EC021004076EB /* EveryDiary++Bundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */; };
 		3F0FEFE92B8D8881001539AE /* JournalCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */; };
 		3F0FEFEB2B8D88B9001539AE /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */; };
 		3F0FEFED2B8DFDB2001539AE /* DateSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */; };
@@ -46,6 +48,8 @@
 		1AF880D22B8DB5A2004076EB /* Api.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Api.plist; sourceTree = "<group>"; };
 		1AF880D42B8DB715004076EB /* WeatherModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherModel.swift; sourceTree = "<group>"; };
 		1AF880D72B8DC135004076EB /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		1AF880DF2B8E0C7F004076EB /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EveryDiary++Bundle.swift"; sourceTree = "<group>"; };
 		3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSelectVC.swift; sourceTree = "<group>"; };
@@ -95,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				1AF880D72B8DC135004076EB /* WeatherService.swift */,
+				1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -170,6 +175,7 @@
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
+				1AF880DF2B8E0C7F004076EB /* GoogleService-Info.plist */,
 				1AF880D22B8DB5A2004076EB /* Api.plist */,
 				6B88F30F2B8E0E1D0071A6DF /* GoogleService-Info.plist */,
 			);
@@ -295,7 +301,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6B95C0512B8C7A5A00DBB175 /* SFProRounded-Regular.otf in Resources */,
-				6B88F3102B8E0E1D0071A6DF /* GoogleService-Info.plist in Resources */,
+				1AF880E02B8E0C7F004076EB /* GoogleService-Info.plist in Resources */,
 				1AF880D32B8DB5A2004076EB /* Api.plist in Resources */,
 				6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */,
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
@@ -315,6 +321,7 @@
 				6BB3CE422B85F6A0005BC3E1 /* MotivationVC.swift in Sources */,
 				6BA011612B88790800A26CE0 /* FireStore.swift in Sources */,
 				6BA0115F2B8878F600A26CE0 /* DataModel.swift in Sources */,
+				1AF880E22B8EC021004076EB /* EveryDiary++Bundle.swift in Sources */,
 				6BB3CE3E2B85F66E005BC3E1 /* SettingVC.swift in Sources */,
 				6BA0115B2B886A9100A26CE0 /* HonorVC.swift in Sources */,
 				1AF880D52B8DB715004076EB /* WeatherModel.swift in Sources */,
