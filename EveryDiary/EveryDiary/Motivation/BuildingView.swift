@@ -167,7 +167,7 @@ class BuildingView: UIView {
         let windowPath = UIBezierPath(rect: CGRect(origin: position, size: windowSize))
         let windowLayer = CAShapeLayer()
         windowLayer.path = windowPath.cgPath
-        windowLayer.fillColor = UIColor.yellow.cgColor
+        windowLayer.fillColor = UIColor.lightGray.cgColor
         buildingLayer.addSublayer(windowLayer)
     }
     
