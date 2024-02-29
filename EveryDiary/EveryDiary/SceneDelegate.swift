@@ -20,6 +20,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let navigationController = UINavigationController(rootViewController: mainVC)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
+//        let launchVC = LaunchViewController() // LaunchViewController를 초기 뷰 컨트롤러로 설정합니다. 테스트테스트
+//            let navigationController = UINavigationController(rootViewController: launchVC)
+//            window?.rootViewController = navigationController
+//            window?.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

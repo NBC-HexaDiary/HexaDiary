@@ -9,12 +9,16 @@
 import Foundation
 import UIKit
 import SnapKit
+import Firebase
+import FirebaseFirestore
 
 #Preview{
     BuildingView()
 }
 
 class BuildingView: UIView {
+    let db = Firestore.firestore()
+    
     var buildings: [BuildingSize] = []
     let backgroundLayer = CALayer()
     let backBuildingLayer = CAShapeLayer()
@@ -70,8 +74,7 @@ class BuildingView: UIView {
             BuildingSize(position: CGPoint(x: 0, y: backgroundLayer.bounds.height * 0.9),
                          size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1, 1]])),
             
-            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.94, y: backgroundLayer.bounds.height * 0.89),
-                         size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[1]]))
+            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.94, y: backgroundLayer.bounds.height * 0.89), size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[1]]))
         ]
         drawWindowsInBuilding()
     }
@@ -168,33 +171,73 @@ class BuildingView: UIView {
     }
     
     //MARK: 창문 관련 함수
-    func drawWindows(at position: CGPoint) {
+    func drawWindows(at position: CGPoint, color: UIColor) {
         let windowPath = UIBezierPath(rect: CGRect(origin: position, size: windowSize))
         let windowLayer = CAShapeLayer()
         windowLayer.path = windowPath.cgPath
-        windowLayer.fillColor = UIColor.darkGray.cgColor
+        windowLayer.fillColor = color.cgColor
         buildingLayer.addSublayer(windowLayer)
     }
     
     func drawWindowsInBuilding() {
-        for building in buildings {
-            let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
-            for (i, row) in building.windowLayout.columns.enumerated() {
-                for (j, columns) in row.enumerated() {
-                    let windowWidth = building.size.width / CGFloat(columns)
-                    let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(j), y: building.position.y - windowHeight * CGFloat(i+1))
-                    drawWindows(at: windowPosition)
+        let currentYear = Calendar.current.component(.year, from: Date())
+        let currentMonth = Calendar.current.component(.month, from: Date())
+        
+        fetchDiariesForCurrentMonth(year: currentYear, month: currentMonth) { (diaries, error) in
+            if let error = error {
+                print("Error fetching diaries: \(error)")
+                return
+            }
+            
+            if let diaries = diaries {
+                let diaryDays = diaries.compactMap { diaryEntry -> Int? in
+                    if let dateString = diaryEntry.dateString.split(separator: "/").last, let day = Int(dateString) {
+                        return day
+                    } else {
+                        return nil
+                    }
+                }
+            
+                for building in self.buildings {
+                    let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
+                    for (i, row) in building.windowLayout.columns.enumerated() {
+                        for (j, columns) in row.enumerated() {
+                            let windowWidth = building.size.width / CGFloat(columns)
+                            let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(j), y: building.position.y - windowHeight * CGFloat(i+1))
+                            
+                            let day = i * row.count + j + 1
+                            if diaryDays.contains(day) {
+                                self.drawWindows(at: windowPosition, color: .yellow)
+                            } else {
+                                self.drawWindows(at: windowPosition, color: .darkGray)
+                            }
+                        }
+                    }
                 }
             }
         }
     }
-    
-//    func windowDateData() {
-//        let date = Date()
-//        let calendar = Calendar.current
-//        let range = calendar.range(of: .day, in: .month, for: date)!
-//        let numberDays = range.count
-//
-//    }
+}
+
+extension BuildingView {
+    func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+        let startOfMonth = "\(year)/\(month)/01"
+        let endOfMonth = "\(year)/\(month + 1)/01"
+        
+        db.collection("diaries").order(by: "dateString").getDocuments { (querySnapshot, error) in
+            if let error = error {
+                print("Error getting documents: \(error)")
+                completion(nil, error)
+            } else {
+                var diaries = [DiaryEntry]()
+                for document in querySnapshot!.documents {
+                    if let diary = try? document.data(as: DiaryEntry.self) {
+                        diaries.append(diary)
+                    }
+                }
+                completion(diaries, nil)
+            }
+        }
+    }
 }
 

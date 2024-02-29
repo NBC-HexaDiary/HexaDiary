@@ -5,6 +5,7 @@
 //  Created by Dahlia on 2/27/24.
 //
 import Foundation
+
 import CoreLocation
 
 enum NetworkError: Error {
@@ -31,6 +32,7 @@ class WeatherService: NSObject, CLLocationManagerDelegate {
         }
         
         let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(location.coordinate.latitude)&lon=\(location.coordinate.longitude)&appid=\(apiKey)"
+        
         guard let url = URL(string: urlString) else {
             return completion(.failure(.badUrl))
         }
@@ -39,7 +41,6 @@ class WeatherService: NSObject, CLLocationManagerDelegate {
             guard let data = data, error == nil else {
                 return completion(.failure(.noData))
             }
-            
             do {
                 let weatherResponse = try JSONDecoder().decode(WeatherResponse.self, from: data)
                 completion(.success(weatherResponse))

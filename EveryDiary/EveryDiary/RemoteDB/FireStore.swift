@@ -8,8 +8,8 @@
 import Foundation
 
 import Firebase
+import FirebaseAuth
 import FirebaseFirestore
-//import FirebaseAuth
 
 class DiaryManager {
     let db = Firestore.firestore()
@@ -19,30 +19,81 @@ class DiaryManager {
         listener?.remove()
     }
     
-    //다이어리 추가
+    // 사용자 ID 가져오기
+    private func getUserID() -> String? {
+        return Auth.auth().currentUser?.uid
+    }
+    
+    // 다이어리 추가
     func addDiary(diary: DiaryEntry, completion: @escaping (Error?) -> Void) {
-        var newDiary = diary
-//        guard let userID = Auth.auth().currentUser?.uid else {
-//            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
-//            return
-//        }
-//        newDiary.userID = userID // 현재 사용자의 UID를 저장
-//        let documentReference = db.collection("users").document(userID).collection("diaries").document() // 사용자의 UID를 기반으로 경로 설정
-        let documentReference = db.collection("diaries").document() //나중에 로그인 구현되면 여긴 필요없어요
-        newDiary.id = documentReference.documentID
-        do {
-            try documentReference.setData(from: newDiary) { error in
-                completion(error)
+        // WeatherService 인스턴스 생성
+        let weatherService = WeatherService()
+        
+        // 날씨 정보 가져오기
+        weatherService.getWeather { result in
+            switch result {
+            case .success(let weatherResponse):
+                // 날씨 정보에서 날씨 설명 가져오기
+                let weatherDescription = weatherResponse.weather.first?.description ?? "Unknown"
+                
+                // 다이어리에 날씨 정보 추가
+                var diaryWithWeather = diary
+                diaryWithWeather.weather = weatherDescription
+                // 다른 날씨정보를 추가하려면 모델을 추가합시다
+                
+                // 사용자 ID 가져오기
+                guard let userID = self.getUserID() else {
+                    completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+                    return
+                }
+                
+                // 다이어리 추가
+                var newDiaryWithUserID = diaryWithWeather
+                newDiaryWithUserID.userID = userID
+                let documentReference = self.db.collection("users").document(userID).collection("diaries").document()
+                newDiaryWithUserID.id = documentReference.documentID
+                do {
+                    try documentReference.setData(from: newDiaryWithUserID) { error in
+                        completion(error)
+                    }
+                } catch {
+                    print("Error adding document: \(error)")
+                    completion(error)
+                }
+                
+            case .failure:
+                // 날씨 정보를 가져오지 못할 경우 기본값으로 다이어리 추가
+                // 사용자 ID 가져오기
+                guard let userID = self.getUserID() else {
+                    completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+                    return
+                }
+                
+                // 다이어리 추가
+                var newDiaryWithUserID = diary
+                newDiaryWithUserID.userID = userID
+                let documentReference = self.db.collection("users").document(userID).collection("diaries").document()
+                newDiaryWithUserID.id = documentReference.documentID
+                do {
+                    try documentReference.setData(from: newDiaryWithUserID) { error in
+                        completion(error)
+                    }
+                } catch {
+                    print("Error adding document: \(error)")
+                    completion(error)
+                }
             }
-        } catch {
-            print("Error adding document: \(error)")
-            completion(error)
         }
     }
     
-    //다이어리 조회
+    
+    // 다이어리 조회
     func fetchDiaries(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
-        db.collection("diaries").order(by: "dateString").getDocuments { (querySnapshot, error) in
+        guard let userID = getUserID() else {
+            completion(nil, NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            return
+        }
+        db.collection("users").document(userID).collection("diaries").order(by: "dateString").getDocuments { (querySnapshot, error) in
             if let error = error {
                 print("Error getting documents: \(error)")
                 completion(nil, error)
@@ -56,11 +107,16 @@ class DiaryManager {
                 completion(diaries, nil)
             }
         }
-    }
+    } //퍼가요~
     
-    //다이어리 감지
+    // 다이어리 실시간 감지
+    // 수정이 필요합니다 -> 사용 안함
     func observeDiariesRealTime(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
-        listener = db.collection("diaries").addSnapshotListener { querySnapshot, error in
+        guard let userID = getUserID() else {
+            completion(nil, NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            return
+        }
+        listener = db.collection("users").document(userID).collection("diaries").order(by: "dateString").addSnapshotListener { querySnapshot, error in
             if let error = error {
                 print("Error listening for real-time updates: \(error)")
                 completion(nil, error)
@@ -76,9 +132,13 @@ class DiaryManager {
         }
     }
     
-    //다이어리 삭제
+    // 다이어리 삭제
     func deleteDiary(diaryID: String, completion: @escaping (Error?) -> Void) {
-        db.collection("diaries").document(diaryID).delete { error in
+        guard let userID = getUserID() else {
+            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            return
+        }
+        db.collection("users").document(userID).collection("diaries").document(diaryID).delete { error in
             if let error = error {
                 print("Error deleting document: \(error)")
                 completion(error)
@@ -88,10 +148,14 @@ class DiaryManager {
         }
     }
     
-    //다이어리 업데이트
+    // 다이어리 업데이트
     func updateDiary(diaryID: String, newDiary: DiaryEntry, completion: @escaping (Error?) -> Void) {
+        guard let userID = getUserID() else {
+            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            return
+        }
         do {
-            try db.collection("diaries").document(diaryID).setData(from: newDiary) { error in
+            try db.collection("users").document(userID).collection("diaries").document(diaryID).setData(from: newDiary) { error in
                 if let error = error {
                     print("Error updating document: \(error)")
                     completion(error)
@@ -105,3 +169,32 @@ class DiaryManager {
         }
     }
 }
+
+// 날씨 데이터 추가하기
+// addDiary에 추가했는데 혹시 모르니 일단 킵
+//extension DiaryManager {
+//    func addWeatherToDiary(diary: DiaryEntry, completion: @escaping (DiaryEntry) -> Void) {
+//        // WeatherService 인스턴스 생성
+//        let weatherService = WeatherService()
+//        
+//        // 날씨 정보 가져오기
+//        weatherService.getWeather { result in
+//            switch result {
+//            case .success(let weatherResponse):
+//                // 날씨 정보에서 날씨 설명 가져오기
+//                let weatherDescription = weatherResponse.weather.first?.description ?? "Unknown"
+//                
+//                // 다이어리에 날씨 정보 추가
+//                var diaryWithWeather = diary
+//                diaryWithWeather.weather = weatherDescription
+//                
+//                // 완성된 다이어리 반환
+//                completion(diaryWithWeather)
+//                
+//            case .failure:
+//                // 날씨 정보를 가져오지 못할 경우 기존 다이어리 반환
+//                completion(diary)
+//            }
+//        }
+//    }
+//}

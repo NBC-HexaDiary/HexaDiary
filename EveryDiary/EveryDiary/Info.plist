@@ -2,6 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>지역이 어디세요</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>페이스아이디 테스트 입니다.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>SFProDisplay-Regular.otf</string>
+		<string>SFProRounded-Regular.otf</string>
+		<string>SFProDisplay-Bold.otf</string>
+		<string>SFProRounded-Bold.otf</string>
+	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
