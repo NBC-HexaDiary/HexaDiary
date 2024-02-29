@@ -69,7 +69,7 @@ extension JournalCollectionViewCell {
             make.top.equalTo(contentView).offset(15)
             make.height.equalTo(24)
             make.leading.equalTo(contentView.snp.leading).offset(15)
-            make.trailing.equalTo(contentView).offset(-19)
+            make.trailing.equalTo(imageView.snp.leading).offset(-5)
         }
         contentText.snp.makeConstraints { make in
             make.top.equalTo(contentTitle.snp.bottom).offset(4)

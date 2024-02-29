@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "fi_log-out.png",
+      "filename" : "fi_lock.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "fi_log-out@2x.png",
+      "filename" : "fi_lock@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "fi_log-out@3x.png",
+      "filename" : "fi_lock@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
