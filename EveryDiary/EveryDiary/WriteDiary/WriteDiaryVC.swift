@@ -24,7 +24,7 @@ class WriteDiaryVC: UIViewController {
     private lazy var dateString: String = {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "ko_KR")
-        dateFormatter.dateFormat = "yyyy. MM. dd(E)" // 원하는 날짜 및 시간 형식 지정
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z" // 원하는 날짜 및 시간 형식 지정
 
         // Date를 String으로 변환
         let dateString = dateFormatter.string(from: selectedDate)
@@ -86,6 +86,7 @@ class WriteDiaryVC: UIViewController {
         textField.placeholder = "제목을 입력하세요."
         textField.tintColor = .green
         textField.font = UIFont(name: "SFProDisplay-Bold", size: 26)
+        textField.textColor = .black
         return textField
     }()
     
@@ -108,6 +109,7 @@ class WriteDiaryVC: UIViewController {
         let textView = UITextView()
         textView.backgroundColor = .clear
         textView.font = UIFont(name: "SFProDisplay-Regular", size: 18)
+        textView.textColor = .black
 //        textView.text = """
 //Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 //"""
@@ -173,36 +175,40 @@ extension WriteDiaryVC {
         self.dismiss(animated: true)
     }
     
-    func configureWithDiary(diary: DiaryEntry) {
-            // UI 컴포넌트에 일기 내용 반영
-            titleTextField.text = diary.title
-            contentTextView.text = diary.content
-            
-            // 날짜 형식 설정
-            let dateFormatter = DateFormatter()
-            dateFormatter.locale = Locale(identifier: "ko_KR")
-            dateFormatter.dateFormat = "yyyy. MM. dd(E)"
-            let dateString = dateFormatter.string(from: diary.date)
-            datePickingButton.setTitle(dateString, for: .normal)
-            
-            emotionButton.setImage(UIImage(named: diary.emotion)?.withRenderingMode(.alwaysOriginal), for: .normal)
-            weatherButton.setImage(UIImage(named: diary.weather)?.withRenderingMode(.alwaysOriginal), for: .normal)
-        }
+//    func configureWithDiary(diary: DiaryEntry) {
+//            // UI 컴포넌트에 일기 내용 반영
+//            titleTextField.text = diary.title
+//            contentTextView.text = diary.content
+//            
+//            // 날짜 형식 설정
+//            let dateFormatter = DateFormatter()
+//            dateFormatter.locale = Locale(identifier: "ko_KR")
+//            dateFormatter.dateFormat = "yyyy. MM. dd(E)"
+//            let dateString = dateFormatter.string(from: diary.date)
+//            datePickingButton.setTitle(dateString, for: .normal)
+//            
+//            emotionButton.setImage(UIImage(named: diary.emotion)?.withRenderingMode(.alwaysOriginal), for: .normal)
+//            weatherButton.setImage(UIImage(named: diary.weather)?.withRenderingMode(.alwaysOriginal), for: .normal)
+//        }
     func activeEditMode(with diary: DiaryEntry) {
         // UI 내 일기 내용 반영
         self.diaryID = diary.id
         self.titleTextField.text = diary.title
         self.contentTextView.text = diary.content
-        self.selectedDate = diary.date
+//        self.selectedDate = diary.date
         self.selectedEmotion = diary.emotion
         self.selectedWeather = diary.weather
         
         // 날짜 형식 업데이트
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "ko_KR")
-        dateFormatter.dateFormat = "yyyy. MM. dd(E)"
-        let dateString = dateFormatter.string(from: diary.date)
-        self.datePickingButton.setTitle(dateString, for: .normal)
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+        if let date = dateFormatter.date(from: diary.dateString) {
+            self.selectedDate = date
+            dateFormatter.dateFormat = "yyyy. MM. dd(E)"
+            let dateString = dateFormatter.string(from: date)
+            self.datePickingButton.setTitle(dateString, for: .normal)
+        }
         
         // 이미지 업데이트
         self.emotionButton.setImage(UIImage(named: diary.emotion)?.withRenderingMode(.alwaysOriginal), for: .normal)

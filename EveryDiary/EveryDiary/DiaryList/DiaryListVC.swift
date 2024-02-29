@@ -86,10 +86,9 @@ class DiaryListVC: UIViewController {
             journalCollectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderView.reuseIdentifier)
         loadDiaries()
     }
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        print("monthlyDiaries : \(monthlyDiaries)")
-        journalCollectionView.reloadData()
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadDiaries()
     }
 }
 
@@ -121,7 +120,6 @@ extension DiaryListVC {
         diaryManager.fetchDiaries { [weak self] (diaries, error) in
             guard let self = self else { return }
             if let diaries = diaries {
-                print("Fetched diaries : \(diaries)")
                 // 월별로 데이터 분류
                 self.organizeDiariesByMonth(diaries: diaries)
                 DispatchQueue.main.async {
@@ -134,16 +132,27 @@ extension DiaryListVC {
     }
     private func organizeDiariesByMonth(diaries: [DiaryEntry]) {
         var organizedDiaries: [String: [DiaryEntry]] = [:]
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy.MM"
-        
-        diaries.forEach { diary in
-            let month = dateFormatter.string(from: diary.date)
-            var diariesForMonth = organizedDiaries[month, default: [] ]
-            diariesForMonth.append(diary)
-            // 날짜에 따라 오름차순(<)으로 했는데, 내림차순으로(>)정렬된다.. 무슨일이지..
-            organizedDiaries[month] = diariesForMonth.sorted(by: { $0.date < $1.date })
-        }
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+            dateFormatter.locale = Locale(identifier: "ko_KR")
+
+            for diary in diaries {
+                guard let diaryDate = dateFormatter.date(from: diary.dateString) else { continue }
+                let monthKey = diaryDate.toString(dateFormat: "yyyy.MM") // 월별 키 생성
+                
+                var diariesForMonth = organizedDiaries[monthKey, default: []]
+                diariesForMonth.append(diary)
+                organizedDiaries[monthKey] = diariesForMonth
+            }
+
+            // 각 월별로 시간 순서대로 정렬
+            for (month, diariesInMonth) in organizedDiaries {
+                organizedDiaries[month] = diariesInMonth.sorted(by: {
+                    guard let date1 = dateFormatter.date(from: $0.dateString),
+                          let date2 = dateFormatter.date(from: $1.dateString) else { return false }
+                    return date1 < date2
+                })
+            }
         self.monthlyDiaries = organizedDiaries
         self.months = organizedDiaries.keys.sorted().reversed() // reversed 내림차순 정렬
     }
