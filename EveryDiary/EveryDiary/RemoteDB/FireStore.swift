@@ -12,6 +12,7 @@ import FirebaseAuth
 import FirebaseFirestore
 
 class DiaryManager {
+    static let shared = DiaryManager()
     let db = Firestore.firestore()
     private var listener: ListenerRegistration?
     
@@ -139,6 +140,21 @@ class DiaryManager {
             return
         }
         db.collection("users").document(userID).collection("diaries").document(diaryID).delete { error in
+            if let error = error {
+                print("Error deleting document: \(error)")
+                completion(error)
+            } else {
+                completion(nil)
+            }
+        }
+    }
+    
+    func deleteAllDiary(completion: @escaping (Error?) -> Void) {
+        guard let userID = getUserID() else {
+            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            return
+        }
+        db.collection("users").document("U7KO2rfVU0OvA5dbuHgzvRG6tJE3").delete() { error in
             if let error = error {
                 print("Error deleting document: \(error)")
                 completion(error)
