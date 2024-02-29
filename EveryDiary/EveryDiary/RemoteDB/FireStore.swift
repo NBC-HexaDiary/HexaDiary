@@ -56,7 +56,7 @@ class DiaryManager {
                 completion(diaries, nil)
             }
         }
-    }
+    } //퍼가요~
     
     //다이어리 감지
     func observeDiariesRealTime(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
