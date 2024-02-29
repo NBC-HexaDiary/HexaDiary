@@ -107,7 +107,7 @@ class DiaryManager {
                 completion(diaries, nil)
             }
         }
-    }
+    } //퍼가요~
     
     // 다이어리 실시간 감지
     // 수정이 필요합니다 -> 사용 안함
