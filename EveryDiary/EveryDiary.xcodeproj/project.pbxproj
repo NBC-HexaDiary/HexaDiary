@@ -16,12 +16,12 @@
 		3F0FEFEB2B8D88B9001539AE /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */; };
 		3F0FEFED2B8DFDB2001539AE /* DateSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */; };
 		3F0FEFFA2B8F2819001539AE /* DateConditionSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */; };
+		3F0FEFFC2B9059F9001539AE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3F0FEFFB2B9059F9001539AE /* GoogleService-Info.plist */; };
 		6B3C4CCA2B8ECF3F00C53005 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */; };
 		6B3C4CCD2B8EDACD00C53005 /* SettingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CCC2B8EDACD00C53005 /* SettingCell.swift */; };
 		6B3C4CCF2B8EE80700C53005 /* NotificationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CCE2B8EE80700C53005 /* NotificationVC.swift */; };
 		6B3C4CD12B8EE81300C53005 /* LockVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CD02B8EE81300C53005 /* LockVC.swift */; };
 		6B42613D2B8C579F00F12CE3 /* BuildingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B42613C2B8C579F00F12CE3 /* BuildingView.swift */; };
-		6B88F3102B8E0E1D0071A6DF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6B88F30F2B8E0E1D0071A6DF /* GoogleService-Info.plist */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
 		6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */; };
 		6B95C04C2B8C7A5A00DBB175 /* SFProDisplay-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0412B8C7A5900DBB175 /* SFProDisplay-Regular.otf */; };
@@ -47,25 +47,24 @@
 		6BB3CE442B85F6B1005BC3E1 /* DiaryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */; };
 		6BB3CE462B8619D0005BC3E1 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE452B8619D0005BC3E1 /* FirebaseFirestore */; };
 		6BB3CE482B8619D5005BC3E1 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE472B8619D5005BC3E1 /* FirebaseFirestoreSwift */; };
-		D21151E12B8F070A00C1ED1D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D21151E02B8F070A00C1ED1D /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1AF880D22B8DB5A2004076EB /* Api.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Api.plist; sourceTree = "<group>"; };
 		1AF880D42B8DB715004076EB /* WeatherModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherModel.swift; sourceTree = "<group>"; };
 		1AF880D72B8DC135004076EB /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EveryDiary++Bundle.swift"; sourceTree = "<group>"; };
+		1AF880E32B8F182B004076EB /* SetFaceID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetFaceID.swift; sourceTree = "<group>"; };
 		3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSelectVC.swift; sourceTree = "<group>"; };
 		3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateConditionSelectVC.swift; sourceTree = "<group>"; };
-		1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EveryDiary++Bundle.swift"; sourceTree = "<group>"; };
-		1AF880E32B8F182B004076EB /* SetFaceID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetFaceID.swift; sourceTree = "<group>"; };
+		3F0FEFFB2B9059F9001539AE /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		6B3C4CCC2B8EDACD00C53005 /* SettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingCell.swift; sourceTree = "<group>"; };
 		6B3C4CCE2B8EE80700C53005 /* NotificationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationVC.swift; sourceTree = "<group>"; };
 		6B3C4CD02B8EE81300C53005 /* LockVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockVC.swift; sourceTree = "<group>"; };
 		6B42613C2B8C579F00F12CE3 /* BuildingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingView.swift; sourceTree = "<group>"; };
-		6B88F30F2B8E0E1D0071A6DF /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Desktop/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProDisplay-Bold.otf"; sourceTree = "<group>"; };
 		6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProRounded-Bold.otf"; sourceTree = "<group>"; };
 		6B95C0412B8C7A5900DBB175 /* SFProDisplay-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProDisplay-Regular.otf"; sourceTree = "<group>"; };
@@ -85,7 +84,6 @@
 		6BB3CE3D2B85F66E005BC3E1 /* SettingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingVC.swift; sourceTree = "<group>"; };
 		6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationVC.swift; sourceTree = "<group>"; };
 		6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryListVC.swift; sourceTree = "<group>"; };
-		D21151E02B8F070A00C1ED1D /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -188,9 +186,8 @@
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
-				D21151E02B8F070A00C1ED1D /* GoogleService-Info.plist */,
 				1AF880D22B8DB5A2004076EB /* Api.plist */,
-				6B88F30F2B8E0E1D0071A6DF /* GoogleService-Info.plist */,
+				3F0FEFFB2B9059F9001539AE /* GoogleService-Info.plist */,
 			);
 			path = EveryDiary;
 			sourceTree = "<group>";
@@ -319,7 +316,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6B95C0512B8C7A5A00DBB175 /* SFProRounded-Regular.otf in Resources */,
-				D21151E12B8F070A00C1ED1D /* GoogleService-Info.plist in Resources */,
+				3F0FEFFC2B9059F9001539AE /* GoogleService-Info.plist in Resources */,
 				1AF880D32B8DB5A2004076EB /* Api.plist in Resources */,
 				6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */,
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
