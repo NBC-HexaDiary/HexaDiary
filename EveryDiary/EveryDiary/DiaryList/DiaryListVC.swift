@@ -89,6 +89,7 @@ class DiaryListVC: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         print("monthlyDiaries : \(monthlyDiaries)")
+        journalCollectionView.reloadData()
     }
 }
 
@@ -138,10 +139,13 @@ extension DiaryListVC {
         
         diaries.forEach { diary in
             let month = dateFormatter.string(from: diary.date)
-            organizedDiaries[month, default: [] ].append(diary)
+            var diariesForMonth = organizedDiaries[month, default: [] ]
+            diariesForMonth.append(diary)
+            // 날짜에 따라 오름차순(<)으로 했는데, 내림차순으로(>)정렬된다.. 무슨일이지..
+            organizedDiaries[month] = diariesForMonth.sorted(by: { $0.date < $1.date })
         }
         self.monthlyDiaries = organizedDiaries
-        self.months = organizedDiaries.keys.sorted()
+        self.months = organizedDiaries.keys.sorted().reversed() // reversed 내림차순 정렬
     }
     
     @objc private func magnifyingButtonTapped() {
@@ -179,48 +183,70 @@ extension DiaryListVC: UICollectionViewDataSource {
     }
     // 각 섹션 별 아이템 수 반환
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // 섹션(월별)에 해당하는 DiaryEntry 수를 반환
-        //        let sortedDiaries = diaries.sorted { $0.date < $1.date }
-        //        let sectionMonth = sortedDiaries.map { $0.date.toString(dateFormat: "yyyyMM") }.unique()[section]
-        //        let count = sortedDiaries.filter { $0.date.toString(dateFormat: "yyyyMM") == sectionMonth }.count
-        
         let month = months[section]
         let count = monthlyDiaries[month]?.count ?? 0
         print("numberOfItemsInSection : \(count)")
         return count
     }
-        // 셀 구성
-        func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: JournalCollectionViewCell.reuseIdentifier, for: indexPath) as? JournalCollectionViewCell else {
-                fatalError("Unable to dequeue JournalCollectionViewCell")
-            }
-            // 섹션에 맞는 일기 찾기
-            let sortedDiaries = diaries.sorted { $0.date < $1.date }
-            let sectionMonth = sortedDiaries.map { $0.date.toString(dateFormat: "yyyyMM") }.unique()[indexPath.section]
-            let sectionDiaries = sortedDiaries.filter { $0.date.toString(dateFormat: "yyyyMM") == sectionMonth }
-            let diary = diaries[indexPath.row]
+    // 셀 구성
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: JournalCollectionViewCell.reuseIdentifier, for: indexPath) as? JournalCollectionViewCell else {
+            fatalError("Unable to dequeue JournalCollectionViewCell")
+        }
+        // 섹션에 해당하는 월 찾기
+        let month = months[indexPath.section]
+        // 해당 월에 해당하는 일기 찾기
+        if let diariesForMonth = monthlyDiaries[month] {
+            // 현재 셀에 해당하는 일기 찾기
+            let diary = diariesForMonth[indexPath.row]
             
-            cell.setJournalCollectionViewCell(
-                title: diary.title,
-                content: diary.content,
-                weather: diary.weather,
-                emotion: diary.emotion,
-                date: diary.dateString
-            )
-            print("cell : \(cell)")
-            return cell
-        }
-        
-        // 헤더뷰 구성
-        func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-            guard let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HeaderView.reuseIdentifier, for: indexPath) as? HeaderView else {
-                fatalError("Invalid view type")
+            // 날짜 포맷 변경
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"  // 원본 날짜 형식
+            if let date = dateFormatter.date(from: diary.dateString) {
+                dateFormatter.dateFormat = "yyyy.MM.dd" // 새로운 날짜 형식
+                let formattedDateString = dateFormatter.string(from: date)
+                
+                cell.setJournalCollectionViewCell(
+                    title: diary.title,
+                    content: diary.content,
+                    weather: diary.weather,
+                    emotion: diary.emotion,
+                    date: formattedDateString   // 변경된 날짜 형식 사용
+                )
             }
-            let month = months[indexPath.section]
-            headerView.titleLabel.text = month
-            return headerView
+        } else {
+            fatalError("No diaries found for month : \(month)")
         }
+        return cell
     }
+    
+    // 헤더뷰 구성
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        guard let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HeaderView.reuseIdentifier, for: indexPath) as? HeaderView else {
+            fatalError("Invalid view type")
+        }
+        let month = months[indexPath.section]
+        headerView.titleLabel.text = month
+        return headerView
+    }
+    
+    // cell 선택시
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let month = months[indexPath.section]
+        guard let diary = monthlyDiaries[month]?[indexPath.row] else { return }
+        
+        let writeDiaryVC = WriteDiaryVC()
+        
+        // 선택된 일기 정보를 전달하고, 수정 버튼을 활성화
+        writeDiaryVC.activeEditMode(with: diary)
+        
+        // 일기 수정 화면으로 전환
+        writeDiaryVC.modalPresentationStyle = .automatic
+        self.present(writeDiaryVC, animated: true, completion: nil)
+    }
+    
+}
 
 extension DiaryListVC: UICollectionViewDelegateFlowLayout {
     // 헤더의 크기 설정
@@ -239,17 +265,17 @@ extension DiaryListVC: UICollectionViewDelegateFlowLayout {
 extension DiaryListVC {
     private func addSubviewsDiaryListVC() {
         view.addSubview(themeLabel)
-//        view.addSubview(journalCollectionView)
+        view.addSubview(journalCollectionView)
         view.addSubview(writeDiaryButton)
     }
     
     private func autoLayoutDiaryListVC() {
-//        journalCollectionView.snp.makeConstraints { make in
-//            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(50)
-//            make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
-//            make.leading.equalTo(self.view.safeAreaLayoutGuide).offset(16)
-//            make.trailing.equalTo(self.view.safeAreaLayoutGuide).offset(-16)
-//        }
+        journalCollectionView.snp.makeConstraints { make in
+            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(50)
+            make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
+            make.leading.equalTo(self.view.safeAreaLayoutGuide).offset(16)
+            make.trailing.equalTo(self.view.safeAreaLayoutGuide).offset(-16)
+        }
         writeDiaryButton.snp.makeConstraints { make in
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)

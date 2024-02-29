@@ -7,11 +7,15 @@
 
 import UIKit
 
+import SnapKit
+
 protocol DateSelectDelegate: AnyObject {
-    func didSelectDate(_ Date: Date)
+    func didSelectDate(_ date: Date)
 }
 
 class DateSelectVC: UIViewController {
+    weak var delegate: DateSelectDelegate?
+    
     private lazy var contentView : UIView = {
         let contentView = UIView()
         contentView.layer.cornerRadius = 15
@@ -19,60 +23,59 @@ class DateSelectVC: UIViewController {
         return contentView
     }()
     
-    private lazy var dateView: UICalendarView = {
-        var view = UICalendarView()
-        view.wantsDateDecorations = true
-        return view
+    private lazy var datePicker: UIDatePicker = {
+        var picker = UIDatePicker()
+        picker.preferredDatePickerStyle = .inline
+        picker.datePickerMode = .date
+        picker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
+        return picker
     }()
-    
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-    }
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black.withAlphaComponent(0.2)
-        dateView.backgroundColor = .white
-        
+        view.backgroundColor = .white
+//        datePicker.backgroundColor = .white
+
         addSubViews()
         makeConstraints()
         
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapOutsideContentView))
-        view.addGestureRecognizer(tapGesture)
-        contentView.isUserInteractionEnabled = true
+//        tapGustureCheck()
     }
     
-    @objc private func handleTapOutsideContentView(_ sender: UITapGestureRecognizer) {
-        let location = sender.location(in: view)
-        if !contentView.frame.contains(location) {
-            dismiss(animated: false, completion: nil)
-        }
+    @objc private func dateChanged(_ sender: UIDatePicker) {
+        delegate?.didSelectDate(sender.date)
     }
+    
+//    private func tapGustureCheck() {
+//        // contentView로 구현했을때, contentView 밖을 선택하는 gesture를 추적
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapOutsideContentView))
+//        view.addGestureRecognizer(tapGesture)
+//        contentView.isUserInteractionEnabled = true
+//    }
+//    
+//    // gesture가 감지되면, dismiss시키는 메서드
+//    @objc private func handleTapOutsideContentView(_ sender: UITapGestureRecognizer) {
+//        let location = sender.location(in: view)
+//        if !contentView.frame.contains(location) {
+//            dismiss(animated: false, completion: nil)
+//        }
+//    }
     
     private func addSubViews() {
-        self.view.addSubview(contentView)
-        contentView.addSubview(dateView)
+//        self.view.addSubview(contentView)
+//        contentView.addSubview(dateView)
+        self.view.addSubview(datePicker)
     }
     
     private func makeConstraints() {
-        contentView.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).offset(70)
-            make.leading.equalTo(self.view.safeAreaLayoutGuide.snp.leading).offset(16)
-            make.width.equalTo(250)
-            make.height.equalTo(250)
-        }
+//        contentView.snp.makeConstraints { make in
+//            make.center.equalToSuperview()
+//            make.width.equalTo(250)
+//            make.height.equalTo(250)
+//        }
         
-        dateView.snp.makeConstraints { make in
-            make.top.equalTo(contentView.snp.top)
-            make.bottom.equalTo(contentView.snp.bottom)
-            make.leading.equalTo(contentView.snp.leading)
-            make.trailing.equalTo(contentView.snp.trailing)
+        datePicker.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
         }
     }
 }
