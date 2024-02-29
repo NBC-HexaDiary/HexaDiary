@@ -5,12 +5,10 @@
 //  Created by Dahlia on 2/28/24.
 //
 
-import Foundation
-
 import LocalAuthentication
 
 public protocol AuthenticateStateDelegate: AnyObject {
-    // loggedIn상태인지 loggedOut 상태인지 표출
+    // loggedIn상태인지 loggedOut 상태인지
     func didUpdateState(_ state: BiometricsAuth.AuthenticationState)
 }
 
@@ -37,8 +35,7 @@ public class BiometricsAuth {
 
         var error: NSError?
         if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-            let reason = "Log in to your account"
-            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { [weak self] isSuccess, error in
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Log in to your account") { [weak self] isSuccess, error in
                 // 내부적으로 Face ID가 실패한 경우 자동으로 암호 입력
                 // 성공하면 아래 DispatchQueue 실행
                 if isSuccess {
@@ -51,14 +48,6 @@ public class BiometricsAuth {
             }
         } else {
             print(error?.localizedDescription ?? "Can't evaluate policy")
-        }
-    }
-}
-
-extension DiaryListVC: AuthenticateStateDelegate {
-    func didUpdateState(_ state: BiometricsAuth.AuthenticationState) {
-        if case .loggedIn = state {
-            print("로그인 성공")
         }
     }
 }
