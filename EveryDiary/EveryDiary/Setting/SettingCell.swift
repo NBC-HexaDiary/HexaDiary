@@ -10,16 +10,17 @@ import UIKit
 import SnapKit
 
 class SettingCell: UITableViewCell {
+    static let id = "SettingCell"
+
     
-    lazy var iconImageView : UIImageView = {
+    private lazy var iconImageView : UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
-        imageView.layer.borderColor = UIColor(named: "mainTheme")?.cgColor
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
-    lazy var titleLabel : UILabel = {
+    private lazy var titleLabel : UILabel = {
         let label = UILabel()
         label.font = UIFont(name: "SFProRounded-Regular", size: 20)
         label.textColor = .mainTheme
@@ -27,20 +28,15 @@ class SettingCell: UITableViewCell {
         return label
     }()
     
-    lazy var rightArrowImage : UIImageView = {
+    private lazy var rightArrowImage : UIImageView = {
         let arrowView = UIImageView()
         arrowView.image = UIImage(systemName: "chevron.right")
         arrowView.tintColor = .mainTheme
         return arrowView
     }()
     
-    
-//    override func layoutSubviews() {
-//        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 0, left: 5, bottom: 5, right: 0))
-//    }
-    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: "SettingCell")
+        super.init(style: style, reuseIdentifier: SettingCell.id)
         
         selectionStyle = .none
         contentView.layer.cornerRadius = 10
@@ -92,5 +88,9 @@ class SettingCell: UITableViewCell {
         
         contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 16, left: 4, bottom: 16, right: 4))
     }
-
+    
+    func prepare(title: String, iconImage: String) {
+        self.titleLabel.text = title
+        self.iconImageView.image = UIImage(named: iconImage)
+    }
 }

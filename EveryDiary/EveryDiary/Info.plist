@@ -26,6 +26,18 @@
 			</array>
 		</dict>
 	</array>
+	<key>SignInWithApplePrivateKey</key>
+	<string>MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgBybCqClNnZAdkbJP
+xgGYsxTv8ZFbDxEmnKm4f4Yd8zKgCgYIKoZIzj0DAQehRANCAAQbGXjUmmW18HU5
++lev6+WtGaQMq1CyHh3BuNn/4sUGCsb4EGFPyQ3iczcgWvzsz5+3s7DDYmLh8Z9I
+cGWhzwkO</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>SFProDisplay-Regular.otf</string>
+		<string>SFProRounded-Regular.otf</string>
+		<string>SFProDisplay-Bold.otf</string>
+		<string>SFProRounded-Bold.otf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -83,7 +83,7 @@ class CalendarVC: UIViewController {
         calendarView.snp.makeConstraints { make in
             make.centerX.equalTo(view)
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
+            make.top.equalTo(calendarLabel.snp.bottom).offset(10)
         }
         calendarLabel.snp.makeConstraints { make in
             make.top.equalTo(view).offset(50)
@@ -131,7 +131,7 @@ class CalendarVC: UIViewController {
 
 extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDelegate {
     func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
-        let vc = DiaryListVC()
+        let vc = CalendarListVC()
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }
@@ -157,7 +157,3 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
     }
 }
 
-
-#Preview {
-    CalendarVC()
-}
