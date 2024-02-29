@@ -141,7 +141,7 @@ extension SettingVC {
         let alert = UIAlertController(title: "Delete Account", message: "Are you sure you want to delete your account? This action cannot be undone.", preferredStyle: .alert)
         
         let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { _ in
-            self.deleteAccount()
+            self.deleteUserDataFromFirebase()
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         
@@ -151,17 +151,17 @@ extension SettingVC {
         present(alert, animated: true, completion: nil)
     }
 
-    // 사용자가 계정을 삭제하기를 확인한 후, Apple ID를 삭제하도록 요청하는 함수
-    func deleteAccount() {
-        // Apple ID를 삭제하도록 사용자에게 안내하는 코드 추가
-        
-        // 예: 사용자가 Apple ID를 삭제하도록 요청하는 URL을 열도록 요청
-        if let url = URL(string: "https://privacy.apple.com/") {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        } else {
-            print("Failed to open Apple ID deletion URL.")
-        }
-    }
+//    // 사용자가 계정을 삭제하기를 확인한 후, Apple ID를 삭제하도록 요청하는 함수
+//    func deleteAccount() {
+//        // Apple ID를 삭제하도록 사용자에게 안내하는 코드 추가
+//        
+//        // 예: 사용자가 Apple ID를 삭제하도록 요청하는 URL을 열도록 요청
+//        if let url = URL(string: "https://privacy.apple.com/") {
+//            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+//        } else {
+//            print("Failed to open Apple ID deletion URL.")
+//        }
+//    }
 }
 
 
@@ -245,7 +245,6 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
                 print("로그아웃")
             case 2:
                 print("회원 탈퇴")
-                deleteUserDataFromFirebase()
                 showDeleteAccountMessage()
             default:
                 print("Error")
