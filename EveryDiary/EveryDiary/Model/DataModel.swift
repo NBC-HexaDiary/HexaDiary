@@ -33,8 +33,8 @@ extension DiaryEntry {
     }
 }
 
-struct SettingItem {
-    var title: String
-    var iconName: String
-    var number: Int
+enum CellModel {
+    case profileItem(email: String, name: String, image: String?)
+    case settingItem(title: String, iconImage: String, number:Int)
+    case signOutItem(title: String, iconImage: String, number:Int)
 }
