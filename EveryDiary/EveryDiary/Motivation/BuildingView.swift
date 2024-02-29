@@ -4,7 +4,6 @@
 //
 //  Created by t2023-m0099 on 2/26/24.
 //
-// 재사용성을 어떻게 높일 수 있을까?
 
 import Foundation
 import UIKit
@@ -19,6 +18,7 @@ import FirebaseAuth
 
 class BuildingView: UIView {
     let db = Firestore.firestore()
+    var diaryDays: [Int] = []
     
     var buildings: [BuildingSize] = []
     let backgroundLayer = CALayer()
@@ -48,9 +48,8 @@ class BuildingView: UIView {
     override func draw(_ rect: CGRect) {
         drawBackBuilding()
         drawBuilding()
-        drawWindowsInBuilding()
-        layoutSubviews()
-        
+        drawWindowInBuilding()
+        //layoutSubviews()
     }
     
     // UIView에 맞춰 동적으로 크기 변경
@@ -63,7 +62,7 @@ class BuildingView: UIView {
         //backBuilding 위치와 크기
         buildings = [
             BuildingSize(position: CGPoint(x: 0, y: backgroundLayer.bounds.height * 0.97),
-                         size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1], [1, 1], [1, 0], [1, 1], [1]])),
+                         size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1], [1, 1], [1], [1, 1], [1]])),
             
             BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.21, y: backgroundLayer.bounds.height * 0.99),
                          size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.31), windowLayout: WindowLayout(columns: [[0, 1, 1], [1, 0, 1],[1, 1], [0, 1]])),
@@ -181,7 +180,7 @@ class BuildingView: UIView {
         buildingLayer.addSublayer(windowLayer)
     }
     
-    func drawWindowsInBuilding() {
+    func windowsInBuildingData() {
         let currentYear = Calendar.current.component(.year, from: Date())
         let currentMonth = Calendar.current.component(.month, from: Date())
         
@@ -193,32 +192,54 @@ class BuildingView: UIView {
             
             if let diaries = diaries {
                 let diaryDays = diaries.compactMap { diaryEntry -> Int? in
-                    if let dayString = diaryEntry.dateString.split(separator: "-")[2].split(separator: " ").first, let day = Int(dayString) {
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+                    if let date = dateFormatter.date(from: diaryEntry.dateString) {
+                        let day = Calendar.current.component(.day, from: date)
                         return day
                     } else {
                         return nil
                     }
                 }
-                
                 DispatchQueue.main.async {
-                    for building in self.buildings {
-                        let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
-                        for (i, row) in building.windowLayout.columns.enumerated() {
-                            for (j, columns) in row.enumerated() {
-                                let windowWidth = building.size.width / CGFloat(columns)
-                                let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(j), y: building.position.y - windowHeight * CGFloat(i+1))
-                                
-                                let day = i * row.count + j + 1
-                                if diaryDays.contains(day) {
-                                    self.drawWindows(at: windowPosition, color: .yellow)
-                                    print("데이터 있음")
-                                } else {
-                                    self.drawWindows(at: windowPosition, color: .darkGray)
-                                    print("데이터 없음")
-                                }
-                            }
-                        }
+                    self.diaryDays = diaryDays
+                    self.setNeedsDisplay()
+                }
+                print("Diary days: \(diaryDays)")
+                
+                print("Total Buildings: \(self.buildings.count)")
+                for (index, building) in self.buildings.enumerated() {
+                    print("Building \(index + 1):")
+                    print("Position: \(building.position), Size: \(building.size)")
+                    print("Window Layout: \(building.windowLayout.columns)")
+                }
+            }
+        }
+    }
+    
+    func drawWindowInBuilding() {
+        print("drawWindowInBuilding() calledSSIBAL WHY")
+        
+        var windowOrder = 1
+        
+        for (buildingIndex, building) in self.buildings.enumerated() {
+            let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
+            for (i, row) in building.windowLayout.columns.enumerated() {
+                for (j, columns) in row.enumerated() {
+                    //0은 데이터 비교 안 함
+                    if columns == 0 { continue }
+                    //각 건물의 창문을 그릴 위치를 계산
+                    let windowWidth = building.size.width / CGFloat(columns)
+                    let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(j), y: building.position.y - windowHeight * CGFloat(i+1))
+                    
+                    if diaryDays.contains(windowOrder) {
+                        self.drawWindows(at: windowPosition, color: .yellow)
+                        print("Building \(buildingIndex + 1), Window \(windowOrder): 데이터 있음")
+                    } else {
+                        self.drawWindows(at: windowPosition, color: .lightGray)
+                        print("Building \(buildingIndex + 1), Window \(windowOrder): 데이터 없음")
                     }
+                    windowOrder += 1
                 }
             }
         }
@@ -226,18 +247,19 @@ class BuildingView: UIView {
 }
 
 extension BuildingView {
-    
-    private func getUserID() -> String? {
-        return Auth.auth().currentUser?.uid
-    }
-    
     func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+        func getUserID() -> String? {
+            return Auth.auth().currentUser?.uid
+        }
+        
         guard let userID = getUserID() else {
             completion(nil, NSError(domain: "Auth Error", code: 401, userInfo: nil))
             return
         }
-        let startOfMonth = "\(year)-\(String(format: "%02d", month))-01 00:00:00"
-        let endOfMonth = month == 12 ? "\(year + 1)-01-01 00:00:00" : "\(year)-\(String(format: "%02d", month + 1))-01 00:00:00"
+        
+        let startOfMonth = "\(year)-\(String(format: "%02d", month))-01 00:00:00 +0000"
+        let endOfMonth = month == 12 ? "\(year + 1)-01-01 23:59:59 +0000" : "\(year)-\(String(format: "%02d", month + 1))-01 23:59:59 +0000"
+        
         
         db.collection("users").document(userID).collection("diaries").whereField("dateString", isGreaterThanOrEqualTo: startOfMonth).whereField("dateString", isLessThan: endOfMonth).getDocuments { (querySnapshot, error) in
             if let error = error {
@@ -249,6 +271,9 @@ extension BuildingView {
                     if let diary = try? document.data(as: DiaryEntry.self) {
                         diaries.append(diary)
                     }
+                }
+                DispatchQueue.main.async { // 메인 스레드에서 로그를 출력합니다.
+                    print("Fetched diaries: \(diaries)")
                 }
                 completion(diaries, nil)
             }
