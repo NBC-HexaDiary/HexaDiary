@@ -86,10 +86,10 @@ class DiaryListVC: UIViewController {
             journalCollectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderView.reuseIdentifier)
         loadDiaries()
     }
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         print("monthlyDiaries : \(monthlyDiaries)")
-        journalCollectionView.reloadData()
+        loadDiaries()
     }
 }
 
@@ -121,7 +121,6 @@ extension DiaryListVC {
         diaryManager.fetchDiaries { [weak self] (diaries, error) in
             guard let self = self else { return }
             if let diaries = diaries {
-                print("Fetched diaries : \(diaries)")
                 // 월별로 데이터 분류
                 self.organizeDiariesByMonth(diaries: diaries)
                 DispatchQueue.main.async {
@@ -137,12 +136,15 @@ extension DiaryListVC {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy.MM"
         
-        diaries.forEach { diary in
+        for diary in diaries {
             let month = dateFormatter.string(from: diary.date)
             var diariesForMonth = organizedDiaries[month, default: [] ]
             diariesForMonth.append(diary)
-            // 날짜에 따라 오름차순(<)으로 했는데, 내림차순으로(>)정렬된다.. 무슨일이지..
-            organizedDiaries[month] = diariesForMonth.sorted(by: { $0.date < $1.date })
+            organizedDiaries[month] = diariesForMonth
+        }
+        // 각 월별로 시간 순서대로 정렬
+        for (month, diaries) in organizedDiaries {
+            organizedDiaries[month] = diaries.sorted { $0.date < $1.date }
         }
         self.monthlyDiaries = organizedDiaries
         self.months = organizedDiaries.keys.sorted().reversed() // reversed 내림차순 정렬
