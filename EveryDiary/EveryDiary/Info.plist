@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>어디사냐</string>
+	<string>지역이 어디세요</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>페이스아이디 테스트 입니다.</string>
 	<key>UIAppFonts</key>

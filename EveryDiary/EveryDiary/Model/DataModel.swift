@@ -14,7 +14,7 @@ struct DiaryEntry: Codable {
     var dateString: String
     var emotion: String
     var weather: String
-//    var userID: String
+    var userID: String?
 }
 
 extension DiaryEntry {
