@@ -14,6 +14,7 @@
 		3F0FEFEB2B8D88B9001539AE /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */; };
 		3F0FEFED2B8DFDB2001539AE /* DateSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */; };
 		3F0FEFF82B8E0DF3001539AE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3F0FEFF72B8E0DF2001539AE /* GoogleService-Info.plist */; };
+		3F0FEFFA2B8F2819001539AE /* DateConditionSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */; };
 		6B42613D2B8C579F00F12CE3 /* BuildingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B42613C2B8C579F00F12CE3 /* BuildingView.swift */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
 		6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */; };
@@ -50,6 +51,7 @@
 		3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSelectVC.swift; sourceTree = "<group>"; };
 		3F0FEFF72B8E0DF2001539AE /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateConditionSelectVC.swift; sourceTree = "<group>"; };
 		6B42613C2B8C579F00F12CE3 /* BuildingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingView.swift; sourceTree = "<group>"; };
 		6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProDisplay-Bold.otf"; sourceTree = "<group>"; };
 		6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProRounded-Bold.otf"; sourceTree = "<group>"; };
@@ -215,6 +217,7 @@
 			isa = PBXGroup;
 			children = (
 				6BB3CE3B2B85F606005BC3E1 /* WriteDiaryVC.swift */,
+				3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */,
 				3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */,
 			);
 			path = WriteDiary;
@@ -318,6 +321,7 @@
 				6BB3CE3E2B85F66E005BC3E1 /* SettingVC.swift in Sources */,
 				6BA0115B2B886A9100A26CE0 /* HonorVC.swift in Sources */,
 				1AF880D52B8DB715004076EB /* WeatherModel.swift in Sources */,
+				3F0FEFFA2B8F2819001539AE /* DateConditionSelectVC.swift in Sources */,
 				1AF880D82B8DC135004076EB /* WeatherService.swift in Sources */,
 				6BABC3692B85D107009267B3 /* AppDelegate.swift in Sources */,
 				3F0FEFE92B8D8881001539AE /* JournalCollectionViewCell.swift in Sources */,
