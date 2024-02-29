@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CryptoKit
 
 import SnapKit
 import FirebaseAuth
@@ -14,124 +15,74 @@ import GoogleSignIn
 
 class SettingVC: UIViewController {
     
-    private lazy var backgroundImage : UIImageView = {
-        let image = UIImageView()
-        image.image = UIImage(named: "View.Background2")
-        return image
-    }()
-    
-    private var emailTextField : UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "이메일을 입력하세요"
-        textField.borderStyle = .roundedRect
-        return textField
-    }()
-    private var pwTextFikeld : UITextField = {
-        let pwText = UITextField()
-        pwText.placeholder = "패스워드를 입력하세요"
-        pwText.borderStyle = .roundedRect
-        return pwText
-    }()
+    private let settings: [SettingItem] = [
+        SettingItem(title: "알림", iconName: "notification",number: 1),
+        SettingItem(title: "잠금", iconName: "lock", number: 2)
+    ]
     
     private lazy var loginButton: UIButton = {
         var config = UIButton.Configuration.plain()
         let loginBTN = UIButton(configuration: config)
-        loginBTN.setTitle("로그인", for: .normal)
+        loginBTN.setImage(UIImage(named: "logIn"), for: .normal)
         loginBTN.tintColor = UIColor(named: "mainTheme")
         loginBTN.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         return loginBTN
     }()
     
-    private lazy var signgoogleButton : GIDSignInButton = {
-        let btn = GIDSignInButton()
-        btn.colorScheme = .light
-        btn.style = .wide
-        btn.addTarget(self, action: #selector(handleGIDSignInButton), for: .touchUpInside)
-        return btn
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(SettingCell.self, forCellReuseIdentifier: "SettingCell")
+        tableView.rowHeight = 100
+        tableView.isScrollEnabled = false
+        tableView.backgroundColor = .mainBackground
+        tableView.separatorStyle = .none
+        tableView.separatorColor = .mainTheme
+        return tableView
     }()
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         addSubviewsSettingVC()
         autoLayoutSettingVC()
-        
-        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        tableView.selectRow(at: .none,
+                            animated: true,
+                            scrollPosition: .top)
     }
     
     private func addSubviewsSettingVC() {
-        view.addSubview(backgroundImage)
-        view.sendSubviewToBack(backgroundImage)
-        //        view.addSubview(emailTextField)
-        //        view.addSubview(pwTextFikeld)
-        //        view.addSubview(loginButton)
-        view.addSubview(signgoogleButton)
+        view.backgroundColor = .mainBackground
+        view.addSubview(loginButton)
+        view.addSubview(tableView)
+        setNavigationBar()
     }
     
     private func autoLayoutSettingVC() {
-        //        emailTextField.snp.makeConstraints { make in
-        //            make.centerX.equalTo(view.safeAreaLayoutGuide)
-        //            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-25)
-        //            make.width.equalTo(view.safeAreaLayoutGuide).offset(-10)
-        //        }
-        //        pwTextFikeld.snp.makeConstraints { make in
-        //            make.centerX.equalTo(view.safeAreaLayoutGuide)
-        //            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(25)
-        //            make.width.equalTo(view.safeAreaLayoutGuide).offset(-10)
-        //        }
-        //        loginButton.snp.makeConstraints { make in
-        //            make.centerX.equalTo(view.safeAreaLayoutGuide)
-        //            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(70)
-        //        }
-        backgroundImage.snp.makeConstraints { make in
-            make.edges.equalTo(view).inset(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0))
+        loginButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide)
+            make.left.equalTo(view.safeAreaLayoutGuide)
         }
-        signgoogleButton.snp.makeConstraints { make in
-            make.centerX.equalTo(view)
-            make.centerY.equalTo(view)
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(loginButton).offset(50)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(10)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-10)
+            make.bottom.equalTo(view).offset(-300)
         }
-        
     }
     
     @objc func loginButtonTapped(){
-        Auth.auth().signIn(withEmail: emailTextField.text!, password: pwTextFikeld.text!) { (user, error) in
-            if user != nil {
-                print("로그인 성공")
-                self.navigationController?.popViewController(animated: true)
-            } else {
-                print("로그인 실패")
-            }
-        }
+        let loginVC = LoginVC()
+        loginVC.modalPresentationStyle = .automatic
+        self.present(loginVC, animated: true)
     }
     
-    @objc func handleGIDSignInButton() {
-        // 버튼 클릭 시, 인증
-        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
-        // Create Google Sign In configuration object.
-        let config = GIDConfiguration(clientID: clientID)
-        GIDSignIn.sharedInstance.configuration = config
-        GIDSignIn.sharedInstance.signIn(withPresenting: self) { signInResult, error in
-            guard error == nil else { return }
-            
-            // 인증을 해도 계정 등록 절차가 필요하다
-            // 구글 인증 토큰 받고 -> 사용자 정보 토큰 생성 -> 파이어베이스 인증 등록
-            guard let user = signInResult?.user,
-                  let idToken = user.idToken?.tokenString
-            else { return }
-            
-            let emailAddress = user.profile?.email
-            let fullName = user.profile?.name
-            let profilePicUrl = user.profile?.imageURL(withDimension: 320)
-            
-            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
-            
-            Auth.auth().signIn(with: credential) { result, error in
-                //사용자 등록 후 처리할 코드
-            }
-        }
-    }
-    
-    func signOut() {
+    private func signOut() {
         let firebaseAuth = Auth.auth()
         do {
             try firebaseAuth.signOut()
@@ -140,4 +91,38 @@ class SettingVC: UIViewController {
         }
     }
     
+    private func setNavigationBar() {
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "설정", style: .plain, target: nil, action: nil)
+    }
+}
+
+extension SettingVC : UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return settings.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "SettingCell", for: indexPath) as! SettingCell
+        cell.backgroundColor = .mainBackground
+        
+        let setting = settings[indexPath.row]
+        cell.titleLabel.text = setting.title
+        cell.iconImageView.image = UIImage(named: setting.iconName)
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedItem = settings[indexPath.row]
+        
+        switch selectedItem.number {
+        case 1:
+            let notificationVC = NotificationVC()
+            navigationController?.pushViewController(notificationVC, animated: true)
+        case 2:
+            let lockVC = LockVC()
+            navigationController?.pushViewController(lockVC, animated: true)
+        default:
+            print("error")
+        }
+    }
 }
