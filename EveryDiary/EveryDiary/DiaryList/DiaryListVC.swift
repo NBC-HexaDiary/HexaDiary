@@ -133,19 +133,27 @@ extension DiaryListVC {
     }
     private func organizeDiariesByMonth(diaries: [DiaryEntry]) {
         var organizedDiaries: [String: [DiaryEntry]] = [:]
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy.MM"
-        
-        for diary in diaries {
-            let month = dateFormatter.string(from: diary.date)
-            var diariesForMonth = organizedDiaries[month, default: [] ]
-            diariesForMonth.append(diary)
-            organizedDiaries[month] = diariesForMonth
-        }
-        // 각 월별로 시간 순서대로 정렬
-        for (month, diaries) in organizedDiaries {
-            organizedDiaries[month] = diaries.sorted { $0.date < $1.date }
-        }
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+            dateFormatter.locale = Locale(identifier: "ko_KR")
+
+            for diary in diaries {
+                guard let diaryDate = dateFormatter.date(from: diary.dateString) else { continue }
+                let monthKey = diaryDate.toString(dateFormat: "yyyy.MM") // 월별 키 생성
+                
+                var diariesForMonth = organizedDiaries[monthKey, default: []]
+                diariesForMonth.append(diary)
+                organizedDiaries[monthKey] = diariesForMonth
+            }
+
+            // 각 월별로 시간 순서대로 정렬
+            for (month, diariesInMonth) in organizedDiaries {
+                organizedDiaries[month] = diariesInMonth.sorted(by: {
+                    guard let date1 = dateFormatter.date(from: $0.dateString),
+                          let date2 = dateFormatter.date(from: $1.dateString) else { return false }
+                    return date1 < date2
+                })
+            }
         self.monthlyDiaries = organizedDiaries
         self.months = organizedDiaries.keys.sorted().reversed() // reversed 내림차순 정렬
     }
