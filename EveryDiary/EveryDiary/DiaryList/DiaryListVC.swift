@@ -180,7 +180,7 @@ extension DiaryListVC {
 }
 
 // MARK: CollectionView 관련 extension
-extension DiaryListVC: UICollectionViewDataSource {
+extension DiaryListVC: UICollectionViewDataSource, UICollectionViewDelegate {
     // 섹션 수 반환(월별로 구분)
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         // DiaryEntry 배열을 사용하여 월별로 구분된 섹션의 수를 계산
@@ -252,9 +252,30 @@ extension DiaryListVC: UICollectionViewDataSource {
         
         // 일기 수정 화면으로 전환
         writeDiaryVC.modalPresentationStyle = .automatic
-        self.present(writeDiaryVC, animated: true, completion: nil)
+        // 0.2초 후에 일기 수정 화면으로 전환
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            self.present(writeDiaryVC, animated: true, completion: nil)
+        }
     }
     
+    // 선택 시 cell을 0.98배 작게 만드는 애니메이션
+    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
+        if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
+            let pressedDownTransform = CGAffineTransform(scaleX: 0.98, y: 0.98)
+            UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.4, initialSpringVelocity: 3, options: [.curveEaseInOut], animations: {
+                cell.transform = pressedDownTransform
+            })
+        }
+    }
+    // 선택 해제 시 cell을 다시 1배로 돌리는 애니메이션
+    func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
+        if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
+            let originalTransform = CGAffineTransform(scaleX: 1, y: 1)
+            UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.4, initialSpringVelocity: 3, options: [.curveEaseInOut], animations: {
+                cell.transform = originalTransform
+            })
+        }
+    }
 }
 
 extension DiaryListVC: UICollectionViewDelegateFlowLayout {
