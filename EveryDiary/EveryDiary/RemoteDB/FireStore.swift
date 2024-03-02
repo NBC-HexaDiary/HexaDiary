@@ -62,7 +62,7 @@ class DiaryManager {
     private func getUserID() -> String? {
         return Auth.auth().currentUser?.uid
     }
-    
+        
     // 다이어리 추가
     func addDiary(diary: DiaryEntry, completion: @escaping (Error?) -> Void) {
         // 비로그인 상태에서 로컬에 추가

@@ -14,6 +14,7 @@ struct DiaryEntry: Codable {
     var dateString: String
     var emotion: String
     var weather: String
+    var imageURL: String?
     var userID: String?
 }
 
@@ -24,12 +25,13 @@ extension DiaryEntry {
         return dateFormatter.date(from: dateString) ?? Date()
     }
     
-    init(title: String, content: String, date: Date, emotion: String, weather: String) {
+    init(title: String, content: String, date: Date, emotion: String, weather: String, imageURL: String? = nil) {
         self.title = title
         self.content = content
         self.dateString = "\(date)"
         self.emotion = emotion
         self.weather = weather
+        self.imageURL = imageURL
     }
 }
 
