@@ -151,20 +151,23 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
             guard let nonce = currentNonce else {
                 fatalError("Invalid state: A login callback was received, but no login request was sent.")
             }
+            
+            // get Token
             guard let appleIDToken = appleIDCredential.identityToken else {
                 print("Unable to fetch identity token")
                 return
             }
+            
+            // Token String
             guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
                 print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
                 return
             }
-            let fullName = appleIDCredential.fullName
-            let email = appleIDCredential.email ?? "이메일 없음"
+            
             // Initialize a Firebase credential, including the user's full name.
-            let credential = OAuthProvider.appleCredential(withIDToken: idTokenString,
-                                                           rawNonce: nonce,
-                                                           fullName: appleIDCredential.fullName)
+            let credential = OAuthProvider.credential(withProviderID: "apple.com",
+                                                      idToken: idTokenString,
+                                                      rawNonce: nonce)
             // Sign in with Firebase.
             Auth.auth().signIn(with: credential) { (authResult, error) in
                 if let error = error {
@@ -174,10 +177,35 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                     print(error.localizedDescription)
                     return
                 }
-                print("Firebase 로그인 성공 \(idTokenString),\(String(describing: fullName)),\(email)")
-                self.navigationController?.popViewController(animated: true)
+                print("identityToken: \(idTokenString)")
+                if let email = appleIDCredential.email {
+                    print("Email: \(email)")
+                } else {
+                    print("Email not provided")
+                }
+
+                if let fullName = appleIDCredential.fullName {
+                    let displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
+                    print("Full Name: \(displayName)")
+                } else {
+                    print("Full Name not provided")
+                }
+                
                 // User is signed in to Firebase with Apple.
-                // ...
+            }
+
+            // authorization Code to Unregister! => get user authorizationCode when login.
+            if let authorizationCode = appleIDCredential.authorizationCode, let codeString = String(data: authorizationCode, encoding: .utf8) {
+                let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/getRefreshToken?code=\(codeString)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "https://apple.com")!
+                let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
+                    if let data = data {
+                        let refreshToken = String(data: data, encoding: .utf8) ?? ""
+                        print(refreshToken)
+                        UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
+                        UserDefaults.standard.synchronize()
+                    }
+                }
+                task.resume()
             }
         }
     }
@@ -185,7 +213,7 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
     // 로그인이 제대로 되지 않았을 경우, Error 발생
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         // Handle error.
-        print("Sign in with Apple errored: \(error)")
+        print("로그인 실패 - \(error.localizedDescription)")
     }
     
 }
