@@ -138,30 +138,57 @@ extension SettingVC {
 
     // 사용자에게 Apple ID를 삭제하도록 안내하는 메시지 표시
     func showDeleteAccountMessage() {
-        let alert = UIAlertController(title: "Delete Account", message: "Are you sure you want to delete your account? This action cannot be undone.", preferredStyle: .alert)
+        let alert = UIAlertController(title: "회원 탈퇴", message: "정말로 회원탈퇴하시겠습니까?", preferredStyle: .alert)
         
-        let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { _ in
-            self.deleteUserDataFromFirebase()
+        let deleteAction = UIAlertAction(title: "회원 탈퇴", style: .destructive) { _ in
+            self.deleteUserDataFromApple()
+            let completeAlert = UIAlertController(title: "회원 탈퇴 완료", message: "회원 탈퇴가 완료되었습니다!", preferredStyle: .alert)
+            let okAction = UIAlertAction(title: "확인", style: .default)
+            
+            alert.addAction(okAction)
         }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
         
         alert.addAction(deleteAction)
         alert.addAction(cancelAction)
         
         present(alert, animated: true, completion: nil)
     }
-
-//    // 사용자가 계정을 삭제하기를 확인한 후, Apple ID를 삭제하도록 요청하는 함수
-//    func deleteAccount() {
-//        // Apple ID를 삭제하도록 사용자에게 안내하는 코드 추가
-//        
-//        // 예: 사용자가 Apple ID를 삭제하도록 요청하는 URL을 열도록 요청
-//        if let url = URL(string: "https://privacy.apple.com/") {
-//            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-//        } else {
-//            print("Failed to open Apple ID deletion URL.")
-//        }
-//    }
+    
+    //Apple 계정 탈퇴
+    func deleteUserDataFromApple() {
+      let token = UserDefaults.standard.string(forKey: "refreshToken")
+     
+      if let token = token {
+          let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/revokeToken?refresh_token=\(token)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "https://apple.com")!
+     
+          let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
+              if let error = error {
+                  print("Error:", error.localizedDescription)
+                  return
+              }
+              
+              // HTTP 응답 코드 확인
+              if let httpResponse = response as? HTTPURLResponse {
+                  print("HTTP Status Code:", httpResponse.statusCode)
+              }
+              
+              // 응답 데이터 확인
+              if let data = data, let utf8Text = String(data: data, encoding: .utf8) {
+                  print("Response Data:", utf8Text)
+              }
+          }
+          task.resume()
+      }
+      // Delete other information from the database...
+        deleteUserDataFromFirebase()
+      // Sign out on FirebaseAuth
+        do {
+            try Auth.auth().signOut()
+        } catch let signOutError as NSError {
+            print("Error signing out: %@", signOutError)
+        }
+    }
 }
 
 
@@ -252,3 +279,4 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
         }
     }
 }
+
