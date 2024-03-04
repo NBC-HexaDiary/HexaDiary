@@ -24,7 +24,7 @@ class WriteDiaryVC: UIViewController {
     private lazy var dateString: String = {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "ko_KR")
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z" // 원하는 날짜 및 시간 형식 지정
+        dateFormatter.dateFormat = "yyyy. MM. dd(E)" // 원하는 날짜 및 시간 형식 지정
 
         // Date를 String으로 변환
         let dateString = dateFormatter.string(from: selectedDate)

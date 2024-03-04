@@ -206,7 +206,7 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
                 organizedDiaries[month] = diariesInMonth.sorted(by: {
                     guard let date1 = dateFormatter.date(from: $0.dateString),
                           let date2 = dateFormatter.date(from: $1.dateString) else { return false }
-                    return date1 < date2
+                    return date1 > date2
                 })
             }
         self.monthlyDiaries = organizedDiaries
@@ -312,88 +312,88 @@ extension DiaryListVC: UICollectionViewDataSource {
         }
     }
     
-    // 선택 시 cell을 0.98배 작게 만드는 애니메이션
-    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
-        UIView.animate(withDuration: 0.2, animations: {
-            if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
-                cell.transform = CGAffineTransform(scaleX: 0.95, y: 0.95) // 셀을 약간 축소
-                cell.contentView.backgroundColor = UIColor.gray.withAlphaComponent(0.5) // 배경색 변경 (선택적)
-            }
-        })
-    }
-    // 선택 해제 시 cell을 다시 1배로 돌리는 애니메이션
-    func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
-        UIView.animate(withDuration: 0.2, animations: {
-            if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
-                cell.transform = CGAffineTransform.identity // 셀 크기를 원래대로 복원
-                cell.contentView.backgroundColor = .mainCell // 배경색을 원래대로 복원
-            }
-        })
-    }
+//    // 선택 시 cell을 0.98배 작게 만드는 애니메이션
+//    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
+//        UIView.animate(withDuration: 0.2, animations: {
+//            if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
+//                cell.transform = CGAffineTransform(scaleX: 0.95, y: 0.95) // 셀을 약간 축소
+//                cell.contentView.backgroundColor = UIColor.gray.withAlphaComponent(0.5) // 배경색 변경 (선택적)
+//            }
+//        })
+//    }
+//    // 선택 해제 시 cell을 다시 1배로 돌리는 애니메이션
+//    func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
+//        UIView.animate(withDuration: 0.2, animations: {
+//            if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
+//                cell.transform = CGAffineTransform.identity // 셀 크기를 원래대로 복원
+//                cell.contentView.backgroundColor = .mainCell // 배경색을 원래대로 복원
+//            }
+//        })
+//    }
 }
 
 // 스와이프 구현
-extension DiaryListVC: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, trailingSwipeActionConfigurationForItemAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        print("swipe")
-        // listCell 삭제 액션
-        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") {
-            [weak self] (action, view, completionHandler) in
-            self?.deleteItem(at: indexPath)
-            completionHandler(true)
-        }
-        
-        // 스와이프 액션 구성
-        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
-        return configuration
-    }
-    
-    func deleteItem(at indexPath: IndexPath) {
-        // 아이템 삭제 처리
-        let month = months[indexPath.section]
-        guard let diary = monthlyDiaries[month]?[indexPath.item] else {
-            print("항목을 찾을 수 없습니다.")
-            return
-        }
-        guard let diaryID = diary.id else {
-            print("유효한 DiaryID가 없습니다.")
-            return
-        }
-        
-        // DiaryManager를 통해 항목을 삭제한다.
-        diaryManager.deleteDiary(diaryID: diaryID) {
-            [weak self] error in
-            if error == nil {   // 에러가 없으면 성공
-                print("\(diaryID)가 성공적으로 삭제되었습니다.")
-                
-                // 해당 월에서 항목을 삭제.
-                self?.monthlyDiaries[month]?.remove(at: indexPath.item)
-                
-                // 컬렉션 뷰에서 해당 항목을 삭제.
-                DispatchQueue.main.async {
-                    self?.journalCollectionView.deleteItems(at: [indexPath])
-                }
-            } else {
-                // 에러가 있으면 실패
-                print("\(diaryID) 삭제에 실패했습니다.")
-            }
-        }
-    }
-    
-    // Compositional Layout 생성 메서드
-    private func createCompositionalLayout() -> UICollectionViewCompositionalLayout {
-        // 섹션당 하나의 아이템을 가지는 단순한 레이아웃
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(100))
-        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-        
-        let section = NSCollectionLayoutSection(group: group)
-        let layout = UICollectionViewCompositionalLayout(section: section)
-        return layout
-    }
-}
+//extension DiaryListVC: UICollectionViewDelegate {
+//    func collectionView(_ collectionView: UICollectionView, trailingSwipeActionConfigurationForItemAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+//        print("swipe")
+//        // listCell 삭제 액션
+//        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") {
+//            [weak self] (action, view, completionHandler) in
+//            self?.deleteItem(at: indexPath)
+//            completionHandler(true)
+//        }
+//        
+//        // 스와이프 액션 구성
+//        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+//        return configuration
+//    }
+//    
+//    func deleteItem(at indexPath: IndexPath) {
+//        // 아이템 삭제 처리
+//        let month = months[indexPath.section]
+//        guard let diary = monthlyDiaries[month]?[indexPath.item] else {
+//            print("항목을 찾을 수 없습니다.")
+//            return
+//        }
+//        guard let diaryID = diary.id else {
+//            print("유효한 DiaryID가 없습니다.")
+//            return
+//        }
+//        
+//        // DiaryManager를 통해 항목을 삭제한다.
+//        diaryManager.deleteDiary(diaryID: diaryID) {
+//            [weak self] error in
+//            if error == nil {   // 에러가 없으면 성공
+//                print("\(diaryID)가 성공적으로 삭제되었습니다.")
+//                
+//                // 해당 월에서 항목을 삭제.
+//                self?.monthlyDiaries[month]?.remove(at: indexPath.item)
+//                
+//                // 컬렉션 뷰에서 해당 항목을 삭제.
+//                DispatchQueue.main.async {
+//                    self?.journalCollectionView.deleteItems(at: [indexPath])
+//                }
+//            } else {
+//                // 에러가 있으면 실패
+//                print("\(diaryID) 삭제에 실패했습니다.")
+//            }
+//        }
+//    }
+//    
+//    // Compositional Layout 생성 메서드
+//    private func createCompositionalLayout() -> UICollectionViewCompositionalLayout {
+//        // 섹션당 하나의 아이템을 가지는 단순한 레이아웃
+//        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
+//        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+//        
+//        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(100))
+//        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+//        
+//        let section = NSCollectionLayoutSection(group: group)
+//        let layout = UICollectionViewCompositionalLayout(section: section)
+//        return layout
+//    }
+//}
 
 // longPressEvent(cell 삭제 및 수정 기능)
 extension DiaryListVC: UIGestureRecognizerDelegate {
