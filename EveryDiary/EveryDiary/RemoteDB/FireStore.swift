@@ -193,29 +193,35 @@ class DiaryManager {
     }
     
     // 다이어리 삭제
-    func deleteDiary(diaryID: String, imageURL: String? = nil, completion: @escaping (Error?) -> Void) {
-        // 파이어스토어에서 일기 삭제
-        DiaryManager.shared.deleteDiary(diaryID: diaryID) { error in
+    func deleteDiary(diaryID: String, imageURL: String?, completion: @escaping (Error?) -> Void) {
+        guard let userID = getUserID() else {
+            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            return
+        }
+        
+        // Firebase Firestore에서 일기 삭제
+        db.collection("users").document(userID).collection("diaries").document(diaryID).delete { error in
             if let error = error {
+                print("Error deleting document: \(error)")
                 completion(error)
             } else {
-                // 이미지 주소가 제공되었을 경우에만 이미지 삭제를 시도합니다
-                guard let imageURL = imageURL else {
-                    completion(nil)
-                    return
-                }
-                
-                // 파이어스토리지에서 이미지 삭제
-                FirebaseStorageManager.deleteImage(urlString: imageURL) { error in
-                    if let error = error {
-                        completion(error)
-                    } else {
+                // 일기 삭제에 성공하면 이미지를 Firebase Storage에서 삭제
+                if let imageURL = imageURL {
+                    FirebaseStorageManager.deleteImage(urlString: imageURL) { error in
+                        if let error = error {
+                            print("Error deleting image from Firebase Storage: \(error)")
+                        }
+                        // 이미지 삭제 성공 또는 실패에 관계없이 일기 삭제 완료 메시지를 반환
                         completion(nil)
                     }
+                } else {
+                    // 이미지 URL이 없으면 이미지를 삭제할 필요가 없으므로 완료 메시지를 반환
+                    completion(nil)
                 }
             }
         }
     }
+
     
     func deleteAllDiary() {
         guard let userID = Auth.auth().currentUser?.uid else {
