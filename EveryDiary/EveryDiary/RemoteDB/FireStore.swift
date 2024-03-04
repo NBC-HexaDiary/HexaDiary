@@ -4,7 +4,6 @@
 //
 //  Created by t2023-m0044 on 2/23/24.
 //
-
 import Foundation
 
 import Firebase
@@ -53,7 +52,6 @@ class DiaryManager {
                 print("Error decoding or uploading diary: \(error)")
             }
         }
-        
         // 업로드한 일기를 로컬에서 삭제
         UserDefaults.standard.removeObject(forKey: "LocalDiaries")
     }
@@ -62,7 +60,7 @@ class DiaryManager {
     private func getUserID() -> String? {
         return Auth.auth().currentUser?.uid
     }
-        
+    
     // 다이어리 추가
     func addDiary(diary: DiaryEntry, completion: @escaping (Error?) -> Void) {
         // 비로그인 상태에서 로컬에 추가
@@ -73,7 +71,6 @@ class DiaryManager {
         }
         
         // 로그인된 상태에서는 파이어스토어에 바로 추가
-        // WeatherService 인스턴스 생성
         let weatherService = WeatherService()
         
         // 날씨 정보 가져오기
@@ -196,17 +193,26 @@ class DiaryManager {
     }
     
     // 다이어리 삭제
-    func deleteDiary(diaryID: String, completion: @escaping (Error?) -> Void) {
-        guard let userID = getUserID() else {
-            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
-            return
-        }
-        db.collection("users").document(userID).collection("diaries").document(diaryID).delete { error in
+    func deleteDiary(diaryID: String, imageURL: String? = nil, completion: @escaping (Error?) -> Void) {
+        // 파이어스토어에서 일기 삭제
+        DiaryManager.shared.deleteDiary(diaryID: diaryID) { error in
             if let error = error {
-                print("Error deleting document: \(error)")
                 completion(error)
             } else {
-                completion(nil)
+                // 이미지 주소가 제공되었을 경우에만 이미지 삭제를 시도합니다
+                guard let imageURL = imageURL else {
+                    completion(nil)
+                    return
+                }
+                
+                // 파이어스토리지에서 이미지 삭제
+                FirebaseStorageManager.deleteImage(urlString: imageURL) { error in
+                    if let error = error {
+                        completion(error)
+                    } else {
+                        completion(nil)
+                    }
+                }
             }
         }
     }
