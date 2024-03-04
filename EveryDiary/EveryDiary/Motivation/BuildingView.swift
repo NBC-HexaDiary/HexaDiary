@@ -4,7 +4,6 @@
 //
 //  Created by t2023-m0099 on 2/26/24.
 //
-// 재사용성을 어떻게 높일 수 있을까?
 
 import Foundation
 import UIKit
@@ -19,6 +18,7 @@ import FirebaseAuth
 
 class BuildingView: UIView {
     let db = Firestore.firestore()
+    var diaryDays: [Int] = []
     
     var buildings: [BuildingSize] = []
     let backgroundLayer = CALayer()
@@ -48,9 +48,7 @@ class BuildingView: UIView {
     override func draw(_ rect: CGRect) {
         drawBackBuilding()
         drawBuilding()
-        drawWindowsInBuilding()
-        layoutSubviews()
-        
+        drawWindowInBuilding()
     }
     
     // UIView에 맞춰 동적으로 크기 변경
@@ -63,7 +61,7 @@ class BuildingView: UIView {
         //backBuilding 위치와 크기
         buildings = [
             BuildingSize(position: CGPoint(x: 0, y: backgroundLayer.bounds.height * 0.97),
-                         size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1], [1, 1], [1, 0], [1, 1], [1]])),
+                         size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1], [1, 1], [1], [1, 1], [1]])),
             
             BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.21, y: backgroundLayer.bounds.height * 0.99),
                          size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.31), windowLayout: WindowLayout(columns: [[0, 1, 1], [1, 0, 1],[1, 1], [0, 1]])),
@@ -181,63 +179,86 @@ class BuildingView: UIView {
         buildingLayer.addSublayer(windowLayer)
     }
     
-    func drawWindowsInBuilding() {
-        let currentYear = Calendar.current.component(.year, from: Date())
-        let currentMonth = Calendar.current.component(.month, from: Date())
+    func drawWindowInBuilding() {
+        print("drawWindowInBuilding() called")
+        var windowOrder = 1
         
-        fetchDiariesForCurrentMonth(year: currentYear, month: currentMonth) { (diaries, error) in
-            if let error = error {
-                print("Error fetching diaries: \(error)")
-                return
-            }
-            
-            if let diaries = diaries {
-                let diaryDays = diaries.compactMap { diaryEntry -> Int? in
-                    if let dayString = diaryEntry.dateString.split(separator: "-")[2].split(separator: " ").first, let day = Int(dayString) {
-                        return day
-                    } else {
-                        return nil
-                    }
+        let diaryCount = diaryDays.count
+        
+        if diaryCount <= 7 {
+            handleBuilding(buildings[0], &windowOrder)
+        } else if diaryCount <= 14 {
+            handleBuilding(buildings[0], &windowOrder)
+            handleBuilding(buildings[1], &windowOrder)
+        } else if diaryCount <= 21 {
+            handleBuilding(buildings[0], &windowOrder)
+            handleBuilding(buildings[1], &windowOrder)
+            handleBuilding(buildings[2], &windowOrder)
+        } else if diaryCount <= 28 {
+            handleBuilding(buildings[0], &windowOrder)
+            handleBuilding(buildings[1], &windowOrder)
+            handleBuilding(buildings[2], &windowOrder)
+            handleBuilding(buildings[3], &windowOrder)
+        } else if diaryCount <= 30 {
+            handleBuilding(buildings[0], &windowOrder)
+            handleBuilding(buildings[1], &windowOrder)
+            handleBuilding(buildings[2], &windowOrder)
+            handleBuilding(buildings[3], &windowOrder)
+            handleBuilding(buildings[4], &windowOrder)
+        } else if diaryCount >= 31 {
+            handleBuilding(buildings[0], &windowOrder)
+            handleBuilding(buildings[1], &windowOrder)
+            handleBuilding(buildings[2], &windowOrder)
+            handleBuilding(buildings[3], &windowOrder)
+            handleBuilding(buildings[4], &windowOrder)
+            handleBuilding(buildings[5], &windowOrder)
+        }
+    }
+    
+    func handleBuilding(_ building: BuildingSize, _ windowOrder: inout Int) {
+        //i는 현재 층의 인덱스, row는 현재 층의 창문 배열. 각 층에 대해 창문을 그리기 위해 층의 각 창문을 순회.
+        for (i, row) in building.windowLayout.columns.enumerated() {
+            //각 층의 창문을 순회. j는 현재 창문의 인덱스, columns는 현재 창문의 수
+            for (j, columns) in row.enumerated() {
+                //창문 행렬에서 0은 데이터 비교에서 제외.
+                if columns == 0 { continue }
+                //각 건물의 창문을 그릴 위치를 계산
+                //각 창문의 너비 계산. 모든 창문의 너비는 동일하므로 계산을 통해 각 창문의 x 좌표를 결정
+                let windowWidth = building.size.width / CGFloat(columns)
+                //창문을 그리기 위해서 각 건물의 층의 높이를 계산. 건물의 전체 높이를 층 수로 나눔 = 각 층의 높이. 각 창문의 y 좌표를 결정
+                let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
+                //각 창문의 위치를 계산
+                let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(j), y: building.position.y - windowHeight * CGFloat(i+1))
+                //diaryDays 배열에 창문의 순서가 포함되어 있는지 확인하고 값이 있으면 노란색
+                if diaryDays.contains(windowOrder) {
+                    self.drawWindows(at: windowPosition, color: .yellow)
+                    print("Window \(windowOrder): 데이터 있음")
+                } else {
+                    self.drawWindows(at: windowPosition, color: .darkGray)
+                    print("Window \(windowOrder): 데이터 없음")
                 }
-                
-                DispatchQueue.main.async {
-                    for building in self.buildings {
-                        let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
-                        for (i, row) in building.windowLayout.columns.enumerated() {
-                            for (j, columns) in row.enumerated() {
-                                let windowWidth = building.size.width / CGFloat(columns)
-                                let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(j), y: building.position.y - windowHeight * CGFloat(i+1))
-                                
-                                let day = i * row.count + j + 1
-                                if diaryDays.contains(day) {
-                                    self.drawWindows(at: windowPosition, color: .yellow)
-                                    print("데이터 있음")
-                                } else {
-                                    self.drawWindows(at: windowPosition, color: .darkGray)
-                                    print("데이터 없음")
-                                }
-                            }
-                        }
-                    }
-                }
+                //창문의 순서를 증가시키기. 다음 창문에 대해 새로운 번호 부여. 건물의 층이나 창문 배치에 따라 windowOrder의 값은 1, 2, 3 등으로 순차적으로 증가하지 않을 수 있음.
+                windowOrder += 1
             }
         }
     }
 }
 
+
+//MARK: firebase
 extension BuildingView {
-    
-    private func getUserID() -> String? {
-        return Auth.auth().currentUser?.uid
-    }
-    
     func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+        func getUserID() -> String? {
+            return Auth.auth().currentUser?.uid
+        }
+        
         guard let userID = getUserID() else {
             completion(nil, NSError(domain: "Auth Error", code: 401, userInfo: nil))
             return
         }
-        let startOfMonth = "\(year)-\(String(format: "%02d", month))-01 00:00:00"
-        let endOfMonth = month == 12 ? "\(year + 1)-01-01 00:00:00" : "\(year)-\(String(format: "%02d", month + 1))-01 00:00:00"
+        
+        let startOfMonth = "\(year)-\(String(format: "%02d", month))-01 00:00:00 +0000"
+        let endOfMonth = month == 12 ? "\(year + 1)-01-01 23:59:59 +0000" : "\(year)-\(String(format: "%02d", month + 1))-01 23:59:59 +0000"
         
         db.collection("users").document(userID).collection("diaries").whereField("dateString", isGreaterThanOrEqualTo: startOfMonth).whereField("dateString", isLessThan: endOfMonth).getDocuments { (querySnapshot, error) in
             if let error = error {
@@ -250,7 +271,47 @@ extension BuildingView {
                         diaries.append(diary)
                     }
                 }
+                DispatchQueue.main.async { // 메인 스레드에서 로그를 출력합니다.
+                    print("Fetched diaries: \(diaries)")
+                }
                 completion(diaries, nil)
+            }
+        }
+    }
+    
+    func windowsInBuildingData() {
+        let currentYear = Calendar.current.component(.year, from: Date())
+        let currentMonth = Calendar.current.component(.month, from: Date())
+        
+        fetchDiariesForCurrentMonth(year: currentYear, month: currentMonth) { (diaries, error) in
+            if let error = error {
+                print("Error fetching diaries: \(error)")
+                return
+            }
+            
+            if let diaries = diaries {
+                let diaryDays = diaries.compactMap { diaryEntry -> Int? in
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+                    if let date = dateFormatter.date(from: diaryEntry.dateString) {
+                        let day = Calendar.current.component(.day, from: date)
+                        return day
+                    } else {
+                        return nil
+                    }
+                }
+                DispatchQueue.main.async {
+                    self.diaryDays = diaryDays
+                    self.setNeedsDisplay()
+                }
+                print("Diary days: \(diaryDays)")
+                
+                print("Total Buildings: \(self.buildings.count)")
+                for (index, building) in self.buildings.enumerated() {
+                    print("Building \(index + 1):")
+                    print("Position: \(building.position), Size: \(building.size)")
+                    print("Window Layout: \(building.windowLayout.columns)")
+                }
             }
         }
     }
