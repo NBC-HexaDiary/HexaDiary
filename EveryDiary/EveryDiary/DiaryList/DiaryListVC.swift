@@ -78,6 +78,11 @@ class DiaryListVC: UIViewController {
         return collectionView
     }()
     
+    private lazy var editTableView: UITableView = {
+        let tableView = UITableView()
+        return tableView
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .mainBackground
@@ -97,8 +102,54 @@ class DiaryListVC: UIViewController {
     }
 }
 
+// MARK: Edit Table View(수정 및 삭제 선택지 제공)
+extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
+    private func setupEditTableView() {
+        editTableView.delegate = self
+        editTableView.dataSource = self
+        editTableView.register(UITableViewCell.self, forCellReuseIdentifier: "EditTableViewCell")
+        editTableView.isScrollEnabled = false
+    }
+    private func setLayoutEditTableView(basedOn cellFrame: CGRect) {
+        let cellFrameInSuperview = journalCollectionView.convert(cellFrame, to: view)
+        view.window?.addSubview(editTableView)
+        editTableView.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.width.equalTo(200)
+            make.height.equalTo(100)
+            make.bottom.equalTo(cellFrameInSuperview.minY).offset(-10)
+        }
+        view.layoutIfNeeded()
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 2
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "EditTableViewCell", for: indexPath)
+        switch indexPath.row {
+        case 0: cell.textLabel?.text = "수정"
+        case 1: cell.textLabel?.text = "삭제"
+        default:
+            break
+        }
+        return cell
+    }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.isHidden = true
+        removeBlurEffect()
+//        if indexPath.row == 0 {
+//            modifyItem(at: selectedIndexPath)
+//        } else {
+//            deleteItem(at: selectedIndexPath)
+//        }
+    }
+}
+
 // MARK: Functions in DiaryListVC
-extension DiaryListVC {
+    extension DiaryListVC {
+    
     // searchBar 설정 및 searchButtonTapped 전까지 hidden처리.
     private func setNavigationBar() {
         searchBar.becomeFirstResponder()
@@ -364,6 +415,11 @@ extension DiaryListVC: UIGestureRecognizerDelegate {
             // 블러 효과를 추가.
             addBlurEffect(excludeCell: cell)
             
+            setLayoutEditTableView(basedOn: cell.frame)
+            
+            editTableView.isHidden = false
+            editTableView.reloadData()
+            
             // 애니메이션 추가
 //            UIView.animate(withDuration: 0.2) {
 //                cell.transform = CGAffineTransform(scaleX: 1.03, y: 1.03)
@@ -409,6 +465,7 @@ extension DiaryListVC: UIGestureRecognizerDelegate {
         if let effectView = blurEffectView {
             // 최상위 뷰에 추가하여 navigationBar, tabBar까지 커버한다.
             view.window?.addSubview(effectView)
+            setupEditTableView()
         }
         
         // 0.3초간 투명도를 1로 만들어준다.
