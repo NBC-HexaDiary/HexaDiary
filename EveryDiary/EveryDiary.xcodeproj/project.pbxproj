@@ -25,6 +25,7 @@
 		6B3C4CCF2B8EE80700C53005 /* NotificationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CCE2B8EE80700C53005 /* NotificationVC.swift */; };
 		6B3C4CD12B8EE81300C53005 /* LockVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CD02B8EE81300C53005 /* LockVC.swift */; };
 		6B42613D2B8C579F00F12CE3 /* BuildingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B42613C2B8C579F00F12CE3 /* BuildingView.swift */; };
+		6B88F33F2B9051F60071A6DF /* MedalVCViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B88F33E2B9051F60071A6DF /* MedalVCViewController.swift */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
 		6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */; };
 		6B95C04C2B8C7A5A00DBB175 /* SFProDisplay-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0412B8C7A5900DBB175 /* SFProDisplay-Regular.otf */; };
@@ -81,11 +82,13 @@
 		3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSelectVC.swift; sourceTree = "<group>"; };
 		3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateConditionSelectVC.swift; sourceTree = "<group>"; };
+		3F0FF0002B90B41E001539AE /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		6B3C4CCC2B8EDACD00C53005 /* SettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingCell.swift; sourceTree = "<group>"; };
 		6B3C4CCE2B8EE80700C53005 /* NotificationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationVC.swift; sourceTree = "<group>"; };
 		6B3C4CD02B8EE81300C53005 /* LockVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockVC.swift; sourceTree = "<group>"; };
 		6B42613C2B8C579F00F12CE3 /* BuildingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingView.swift; sourceTree = "<group>"; };
+		6B88F33E2B9051F60071A6DF /* MedalVCViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedalVCViewController.swift; sourceTree = "<group>"; };
 		6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProDisplay-Bold.otf"; sourceTree = "<group>"; };
 		6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProRounded-Bold.otf"; sourceTree = "<group>"; };
 		6B95C0412B8C7A5900DBB175 /* SFProDisplay-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProDisplay-Regular.otf"; sourceTree = "<group>"; };
@@ -216,6 +219,7 @@
 				6BABC36A2B85D107009267B3 /* SceneDelegate.swift */,
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
+				3F0FF0002B90B41E001539AE /* GoogleService-Info.plist */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
 				1AF880D22B8DB5A2004076EB /* Api.plist */,
 			);
