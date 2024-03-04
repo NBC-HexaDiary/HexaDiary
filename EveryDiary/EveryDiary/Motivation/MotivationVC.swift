@@ -20,7 +20,7 @@ class MotivationVC: UIViewController {
         let background = UIImageView(image: UIImage(named: "View.Background"))
         return background
     }()
-
+    
     private lazy var settingButton : UIBarButtonItem = {
         let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
         return button
@@ -33,6 +33,11 @@ class MotivationVC: UIViewController {
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
     }()
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        buildings.windowsInBuildingData()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,7 +64,7 @@ class MotivationVC: UIViewController {
         setNavigationBar()
     }
     
-
+    
     private func autoLayout() {
         background.snp.makeConstraints{ make in
             make.top.bottom.leading.trailing.equalToSuperview()
