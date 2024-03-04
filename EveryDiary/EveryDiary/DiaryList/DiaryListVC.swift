@@ -21,6 +21,9 @@ class DiaryListVC: UIViewController {
     private var months: [String] = []
     private var diaries: [DiaryEntry] = []
     
+    private var currentLongPressedCell: JournalCollectionViewCell?
+    private var blurEffectView: UIVisualEffectView?
+    
     private lazy var themeLabel : UILabel = {
         let label = UILabel()
         label.text = "하루일기"
@@ -63,6 +66,7 @@ class DiaryListVC: UIViewController {
     }()
     
     private lazy var journalCollectionView: UICollectionView = {
+//        let layout = createCompositionalLayout()
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         layout.minimumLineSpacing = 12
@@ -85,6 +89,7 @@ class DiaryListVC: UIViewController {
         journalCollectionView.register(JournalCollectionViewCell.self, forCellWithReuseIdentifier: JournalCollectionViewCell.reuseIdentifier)
             journalCollectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderView.reuseIdentifier)
         loadDiaries()
+        setupLongGestureRecognizerOnCollectionView()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -180,12 +185,10 @@ extension DiaryListVC {
 }
 
 // MARK: CollectionView 관련 extension
-extension DiaryListVC: UICollectionViewDataSource, UICollectionViewDelegate {
+extension DiaryListVC: UICollectionViewDataSource {
     // 섹션 수 반환(월별로 구분)
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         // DiaryEntry 배열을 사용하여 월별로 구분된 섹션의 수를 계산
-        
-        //        let months = Set(diaries.map { $0.date.toString(dateFormat: "yyyyMM") })
         print("numberOfSections : \(months.count)")
         
         return months.count
@@ -253,28 +256,192 @@ extension DiaryListVC: UICollectionViewDataSource, UICollectionViewDelegate {
         // 일기 수정 화면으로 전환
         writeDiaryVC.modalPresentationStyle = .automatic
         // 0.2초 후에 일기 수정 화면으로 전환
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             self.present(writeDiaryVC, animated: true, completion: nil)
         }
     }
     
     // 선택 시 cell을 0.98배 작게 만드는 애니메이션
     func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
-        if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
-            let pressedDownTransform = CGAffineTransform(scaleX: 0.98, y: 0.98)
-            UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.4, initialSpringVelocity: 3, options: [.curveEaseInOut], animations: {
-                cell.transform = pressedDownTransform
-            })
-        }
+        UIView.animate(withDuration: 0.2, animations: {
+            if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
+                cell.transform = CGAffineTransform(scaleX: 0.95, y: 0.95) // 셀을 약간 축소
+                cell.contentView.backgroundColor = UIColor.gray.withAlphaComponent(0.5) // 배경색 변경 (선택적)
+            }
+        })
     }
     // 선택 해제 시 cell을 다시 1배로 돌리는 애니메이션
     func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
-        if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
-            let originalTransform = CGAffineTransform(scaleX: 1, y: 1)
-            UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.4, initialSpringVelocity: 3, options: [.curveEaseInOut], animations: {
-                cell.transform = originalTransform
-            })
+        UIView.animate(withDuration: 0.2, animations: {
+            if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
+                cell.transform = CGAffineTransform.identity // 셀 크기를 원래대로 복원
+                cell.contentView.backgroundColor = .mainCell // 배경색을 원래대로 복원
+            }
+        })
+    }
+}
+
+// 스와이프 구현
+extension DiaryListVC: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, trailingSwipeActionConfigurationForItemAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        print("swipe")
+        // listCell 삭제 액션
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") {
+            [weak self] (action, view, completionHandler) in
+            self?.deleteItem(at: indexPath)
+            completionHandler(true)
         }
+        
+        // 스와이프 액션 구성
+        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+        return configuration
+    }
+    
+    func deleteItem(at indexPath: IndexPath) {
+        // 아이템 삭제 처리
+        let month = months[indexPath.section]
+        guard let diary = monthlyDiaries[month]?[indexPath.item] else {
+            print("항목을 찾을 수 없습니다.")
+            return
+        }
+        guard let diaryID = diary.id else {
+            print("유효한 DiaryID가 없습니다.")
+            return
+        }
+        
+        // DiaryManager를 통해 항목을 삭제한다.
+        diaryManager.deleteDiary(diaryID: diaryID) {
+            [weak self] error in
+            if error == nil {   // 에러가 없으면 성공
+                print("\(diaryID)가 성공적으로 삭제되었습니다.")
+                
+                // 해당 월에서 항목을 삭제.
+                self?.monthlyDiaries[month]?.remove(at: indexPath.item)
+                
+                // 컬렉션 뷰에서 해당 항목을 삭제.
+                DispatchQueue.main.async {
+                    self?.journalCollectionView.deleteItems(at: [indexPath])
+                }
+            } else {
+                // 에러가 있으면 실패
+                print("\(diaryID) 삭제에 실패했습니다.")
+            }
+        }
+    }
+    
+    // Compositional Layout 생성 메서드
+    private func createCompositionalLayout() -> UICollectionViewCompositionalLayout {
+        // 섹션당 하나의 아이템을 가지는 단순한 레이아웃
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(100))
+        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+        
+        let section = NSCollectionLayoutSection(group: group)
+        let layout = UICollectionViewCompositionalLayout(section: section)
+        return layout
+    }
+}
+
+// longPressEvent(cell 삭제 및 수정 기능)
+extension DiaryListVC: UIGestureRecognizerDelegate {
+    // long press 이벤트 부여
+    private func setupLongGestureRecognizerOnCollectionView() {
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+        longPressGesture.delegate = self
+        longPressGesture.minimumPressDuration = 0.2     // 최소단위(초) 설정
+        longPressGesture.delaysTouchesBegan = true      // 기존 터치작업과의 분리
+        journalCollectionView.addGestureRecognizer(longPressGesture)    // 컬렉션뷰에 gesture 추가
+    }
+    @objc func handleLongPress(gestureRecognizer: UILongPressGestureRecognizer) {
+        let location = gestureRecognizer.location(in: journalCollectionView)
+        switch gestureRecognizer.state {
+        case .began:
+            guard let indexPath = journalCollectionView.indexPathForItem(at: location),
+                  let cell = journalCollectionView.cellForItem(at: indexPath) else { return }
+
+            // 블러 효과를 추가.
+            addBlurEffect(excludeCell: cell)
+            
+            // 애니메이션 추가
+//            UIView.animate(withDuration: 0.2) {
+//                cell.transform = CGAffineTransform(scaleX: 1.03, y: 1.03)
+//                cell.layer.shadowOpacity = 0.5
+//                cell.layer.shadowRadius = 10
+//                cell.layer.shadowOffset = CGSize(width: 0, height: 4)
+//                cell.layer.shadowColor = UIColor.black.cgColor
+//            }
+        case .ended, .cancelled:
+            break
+//            guard let indexPath = journalCollectionView.indexPathForItem(at: location),
+//                  let cell = journalCollectionView.cellForItem(at: indexPath) else { return }
+//            // 블러 효과를 제거.
+//            removeBlurEffect()
+//            UIView.animate(withDuration: 0.2) {
+//                cell.transform = CGAffineTransform.identity
+//                cell.layer.shadowOpacity = 0
+//                cell.layer.shadowRadius = 0
+//            }
+        default:
+            break
+        }
+    }
+
+    private func addBlurEffect(excludeCell cell: UICollectionViewCell) {
+        // 전체 화면 크기의 블러 효과 뷰 생성
+        let blurEffect = UIBlurEffect(style: .light)
+        blurEffectView = UIVisualEffectView(effect: blurEffect)
+        
+        // 현재 view와 동일한 크기를 지정
+        blurEffectView?.frame = view.bounds
+        blurEffectView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        blurEffectView?.alpha = 0 // 초기 투명도 0
+        blurEffectView?.tag = 6 // 임의의 태그로 블러 뷰를 식별.
+
+        // 셀 위에 블러 효과를 적용하지 않기 위해 셀의 프레임을 이용하여 블러 뷰에서 셀의 영역을 제외.
+        let cellFrameInCollectionView = cell.convert(cell.bounds, to: view)
+        blurEffectView?.layer.mask = createMaskLayer(excludeFrame: cellFrameInCollectionView, in: view.bounds)
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(blurViewTapped))
+        blurEffectView?.addGestureRecognizer(tapGesture)
+        
+        if let effectView = blurEffectView {
+            // 최상위 뷰에 추가하여 navigationBar, tabBar까지 커버한다.
+            view.window?.addSubview(effectView)
+        }
+        
+        // 0.3초간 투명도를 1로 만들어준다.
+        UIView.animate(withDuration: 0.1) {
+            self.blurEffectView?.alpha = 1
+        }
+    }
+    @objc private func blurViewTapped() {
+        UIView.animate(withDuration: 0.1, animations: {
+            self.blurEffectView?.alpha = 0
+        }) { _ in
+            self.removeBlurEffect()
+        }
+    }
+
+    private func removeBlurEffect() {
+        view.window?.viewWithTag(6)?.removeFromSuperview()
+    }
+
+    private func createMaskLayer(excludeFrame frame: CGRect, in bounds: CGRect) -> CALayer {
+        let maskLayer = CAShapeLayer()
+        let path = UIBezierPath(rect: bounds)
+        
+        // 선택된 셀의 프레임 주위에 cornerRadius를 적용.
+        let excludedRextPath = UIBezierPath(roundedRect: frame, cornerRadius: 20)
+        
+        // 두 개의 경로를 결합하여 "evenOdd" 규칙을 적용.
+        path.append(excludedRextPath)
+        
+        maskLayer.path = path.cgPath
+        maskLayer.fillRule = .evenOdd
+
+        return maskLayer
     }
 }
 

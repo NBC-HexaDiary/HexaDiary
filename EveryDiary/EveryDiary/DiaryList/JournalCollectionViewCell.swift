@@ -35,12 +35,23 @@ class JournalCollectionViewCell: UICollectionViewCell {
         return view
     }()
     
+    private lazy var deleteButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "trash"), for: .normal)
+        button.tintColor = .red
+        button.isHidden = true
+        button.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubView()
         setLayout()
         contentView.backgroundColor = .mainCell
         contentView.layer.cornerRadius = 20
+        
+        initializeSwipeGesture()
     }
     
     required init?(coder: NSCoder) {
@@ -56,6 +67,67 @@ class JournalCollectionViewCell: UICollectionViewCell {
 }
 
 extension JournalCollectionViewCell {
+//    private func makeSwipeActions(for indexPath: IndexPath?) -> UISwipeActionsConfiguration? {
+//        guard let indexPath = indexPath, let id = dataSource.itemIdentifier(for : indexPath) else { return nil }
+//        let deleteActionTitle = NSLocalizedString("Delete", comment: "Delete action title")
+//        let deleteAction = UIContextualAction(style: .destructive, title: deleteActionTitle) { [weak self] _, _, completion in
+//            self?.deleteReminder(with: id)
+//            self.updateSnapshot()
+//            completion(false)
+//        }
+//        return UISwipeActionsConfiguration(actions: [deleteAction])
+//    }
+    
+    
+    
+    
+    
+    
+    
+    @objc private func deleteButtonTapped() {
+        
+    }
+    private func initializeSwipeGesture() {
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
+        self.contentView.addGestureRecognizer(panGesture)
+    }
+    @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
+        switch gesture.state {
+        case .began, .changed:
+            handleSwipeChange(gesture)
+        case .ended:
+            handleSwipeEnd(gesture)
+        default:
+            break
+        }
+    }
+    private func handleSwipeChange(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: self)
+        // 사용자가 왼쪽으로 스와이프 했을 때, contentView를 이동
+        if translation.x < -50 {
+            UIView.animate(withDuration: 0.2, animations: {
+                self.contentView.transform = CGAffineTransform(translationX: -100, y: 0)
+                self.deleteButton.isHidden = false
+            })
+        } else {
+            resetContentViewPosition()
+        }
+    }
+    private func resetContentViewPosition() {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.contentView.transform = .identity
+            self.deleteButton.isHidden = true
+        })
+    }
+    private func handleSwipeEnd(_ gesture: UIPanGestureRecognizer) {
+        // 스와이프가 끝났을 때, 애니메이션으로 원래대로 복귀
+        UIView.animate(withDuration: 0.3, animations: {
+            self.contentView.transform = .identity
+        })
+    }
+}
+
+extension JournalCollectionViewCell {
     private func addSubView() {
         contentView.addSubview(contentTitle)
         contentView.addSubview(contentText)
@@ -63,6 +135,7 @@ extension JournalCollectionViewCell {
         contentView.addSubview(emotionIcon)
         contentView.addSubview(dateOfWriting)
         contentView.addSubview(imageView)
+//        contentView.addSubview(deleteButton)
     }
     private func setLayout() {
         contentTitle.snp.makeConstraints { make in
@@ -79,19 +152,19 @@ extension JournalCollectionViewCell {
         }
         weatherIcon.snp.makeConstraints { make in
             make.bottom.equalTo(contentView.snp.bottom).offset(-17)
-            make.leading.equalTo(contentTitle.snp.leading).offset(0)
+            make.leading.equalTo(emotionIcon.snp.trailing).offset(5)
             make.height.equalTo(15)
             make.width.equalTo(15)
         }
         emotionIcon.snp.makeConstraints { make in
             make.bottom.equalTo(weatherIcon.snp.bottom)
-            make.leading.equalTo(weatherIcon.snp.trailing).offset(10)
+            make.leading.equalTo(dateOfWriting.snp.trailing).offset(5)
             make.height.equalTo(15)
             make.width.equalTo(15)
         }
         dateOfWriting.snp.makeConstraints { make in
             make.bottom.equalTo(weatherIcon.snp.bottom).offset(0)
-            make.leading.equalTo(emotionIcon.snp.trailing).offset(10)
+            make.leading.equalTo(contentTitle.snp.leading).offset(0)
         }
         imageView.snp.makeConstraints { make in
             make.top.equalTo(contentView).offset(11)
@@ -99,5 +172,10 @@ extension JournalCollectionViewCell {
             make.trailing.equalTo(contentView).offset(-11)
             make.width.equalTo(imageView.snp.height)
         }
+//        deleteButton.snp.makeConstraints { make in
+//            make.trailing.equalTo(contentView.snp.trailing).offset(-10)
+//            make.centerY.equalToSuperview()
+//            make.width.height.equalTo(30)
+//        }
     }
 }
