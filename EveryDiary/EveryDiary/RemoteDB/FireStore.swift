@@ -27,12 +27,32 @@ class DiaryManager {
     // 일기 추가 (비로그인)
     func addDiaryLocally(diary: DiaryEntry) {
         var localDiaries = UserDefaults.standard.array(forKey: "LocalDiaries") as? [Data] ?? []
-        do {
-            let data = try JSONEncoder().encode(diary)
-            localDiaries.append(data)
-            UserDefaults.standard.set(localDiaries, forKey: "LocalDiaries")
-        } catch {
-            print("Error encoding diary: \(error)")
+        
+        var mutableDiary = diary // 일기를 변경 가능한 변수로 복사
+        
+        let weatherService = WeatherService()
+        weatherService.getWeather { result in
+            switch result {
+            case .success(let weatherResponse):
+                let weatherDescription = weatherResponse.weather.first?.description ?? "Unknown"
+                mutableDiary.weather = weatherDescription
+                // 일기에 날씨 정보 추가 후 로컬에 저장
+                do {
+                    let data = try JSONEncoder().encode(mutableDiary)
+                    localDiaries.append(data)
+                    UserDefaults.standard.set(localDiaries, forKey: "LocalDiaries")
+                } catch {
+                    print("Error encoding diary: \(error)")
+                }
+            case .failure(let error):
+                print("Error fetching weather: \(error)")
+                // 날씨 정보를 가져오지 못한 경우에도 일기를 로컬에 저장
+                let data = try? JSONEncoder().encode(mutableDiary)
+                if let data = data {
+                    localDiaries.append(data)
+                    UserDefaults.standard.set(localDiaries, forKey: "LocalDiaries")
+                }
+            }
         }
     }
     
@@ -46,8 +66,14 @@ class DiaryManager {
         for data in localDiaries {
             do {
                 let diary = try JSONDecoder().decode(DiaryEntry.self, from: data)
-                let userDiariesCollection = db.collection("users").document(user.uid).collection("diaries")
-                _ = try userDiariesCollection.addDocument(from: diary)
+                
+                // Firestore에 일기 추가
+                let userDiariesCollection = self.db.collection("users").document(user.uid).collection("diaries")
+                let documentRef = userDiariesCollection.document()
+                var diaryWithID = diary // 새로운 변수에 복사하여 변경
+                diaryWithID.id = documentRef.documentID // 문서 ID 할당
+                _ = try? documentRef.setData(from: diaryWithID)
+                
             } catch {
                 print("Error decoding or uploading diary: \(error)")
             }
@@ -193,42 +219,63 @@ class DiaryManager {
     }
     
     // 다이어리 삭제
-    func deleteDiary(diaryID: String, imageURL: String? = nil, completion: @escaping (Error?) -> Void) {
-        // 파이어스토어에서 일기 삭제
-        DiaryManager.shared.deleteDiary(diaryID: diaryID) { error in
+    func deleteDiary(diaryID: String, imageURL: String?, completion: @escaping (Error?) -> Void) {
+        guard let userID = getUserID() else {
+            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            return
+        }
+        
+        // Firebase Firestore에서 일기 삭제
+        db.collection("users").document(userID).collection("diaries").document(diaryID).delete { error in
             if let error = error {
+                print("Error deleting document: \(error)")
                 completion(error)
             } else {
-                // 이미지 주소가 제공되었을 경우에만 이미지 삭제를 시도합니다
-                guard let imageURL = imageURL else {
-                    completion(nil)
-                    return
-                }
-                
-                // 파이어스토리지에서 이미지 삭제
-                FirebaseStorageManager.deleteImage(urlString: imageURL) { error in
-                    if let error = error {
-                        completion(error)
-                    } else {
+                // 일기 삭제에 성공하면 이미지를 Firebase Storage에서 삭제
+                if let imageURL = imageURL {
+                    FirebaseStorageManager.deleteImage(urlString: imageURL) { error in
+                        if let error = error {
+                            print("Error deleting image from Firebase Storage: \(error)")
+                        }
+                        // 이미지 삭제 성공 또는 실패에 관계없이 일기 삭제 완료 메시지를 반환
                         completion(nil)
                     }
+                } else {
+                    // 이미지 URL이 없으면 이미지를 삭제할 필요가 없으므로 완료 메시지를 반환
+                    completion(nil)
                 }
             }
         }
     }
     
-    func deleteAllDiary() {
-        guard let userID = Auth.auth().currentUser?.uid else {
-            print("No user is currently signed in.")
-            return
-        }
-        let userDocRef = db.collection("users").document(userID)
-        
-        userDocRef.delete { error in
+    func deleteUserData(for userID: String) {
+        // 사용자의 일기 삭제
+        db.collection("users").document(userID).collection("diaries").getDocuments { (querySnapshot, error) in
             if let error = error {
-                print("Error deleting user document from Firestore: \(error.localizedDescription)")
+                print("Error deleting user's diaries: \(error)")
             } else {
-                print("User document successfully deleted from Firestore.")
+                for document in querySnapshot!.documents {
+                    let diaryData = document.data()
+                    if let imageURL = diaryData["imageURL"] as? String {
+                        // 이미지 URL이 있다면 이미지 삭제
+                        FirebaseStorageManager.deleteImage(urlString: imageURL) { error in
+                            if let error = error {
+                                print("Error deleting image: \(error.localizedDescription)")
+                            }
+                        }
+                    }
+                    document.reference.delete()
+                }
+                print("User's diaries successfully deleted.")
+            }
+        }
+        
+        // 사용자 문서 삭제
+        db.collection("users").document(userID).delete { error in
+            if let error = error {
+                print("Error deleting user document: \(error)")
+            } else {
+                print("User document successfully deleted.")
             }
         }
     }
