@@ -4,7 +4,6 @@
 //
 //  Created by t2023-m0044 on 2/23/24.
 //
-
 import Foundation
 
 import Firebase
@@ -12,11 +11,49 @@ import FirebaseAuth
 import FirebaseFirestore
 
 class DiaryManager {
+    static let shared = DiaryManager()
     let db = Firestore.firestore()
     private var listener: ListenerRegistration?
     
     deinit {
         listener?.remove()
+    }
+    
+    // 로그인 상태 확인
+    func isUserLoggedIn() -> Bool {
+        return Auth.auth().currentUser != nil
+    }
+    
+    // 일기 추가 (비로그인)
+    func addDiaryLocally(diary: DiaryEntry) {
+        var localDiaries = UserDefaults.standard.array(forKey: "LocalDiaries") as? [Data] ?? []
+        do {
+            let data = try JSONEncoder().encode(diary)
+            localDiaries.append(data)
+            UserDefaults.standard.set(localDiaries, forKey: "LocalDiaries")
+        } catch {
+            print("Error encoding diary: \(error)")
+        }
+    }
+    
+    // 로그인 후 파이어스토어에 일기 추가
+    func addDiariesFromLocalToFirestore() {
+        guard let user = Auth.auth().currentUser else {
+            return
+        }
+        let localDiaries = UserDefaults.standard.array(forKey: "LocalDiaries") as? [Data] ?? []
+        
+        for data in localDiaries {
+            do {
+                let diary = try JSONDecoder().decode(DiaryEntry.self, from: data)
+                let userDiariesCollection = db.collection("users").document(user.uid).collection("diaries")
+                _ = try userDiariesCollection.addDocument(from: diary)
+            } catch {
+                print("Error decoding or uploading diary: \(error)")
+            }
+        }
+        // 업로드한 일기를 로컬에서 삭제
+        UserDefaults.standard.removeObject(forKey: "LocalDiaries")
     }
     
     // 사용자 ID 가져오기
@@ -26,7 +63,14 @@ class DiaryManager {
     
     // 다이어리 추가
     func addDiary(diary: DiaryEntry, completion: @escaping (Error?) -> Void) {
-        // WeatherService 인스턴스 생성
+        // 비로그인 상태에서 로컬에 추가
+        if Auth.auth().currentUser == nil {
+            addDiaryLocally(diary: diary)
+            completion(nil)
+            return
+        }
+        
+        // 로그인된 상태에서는 파이어스토어에 바로 추가
         let weatherService = WeatherService()
         
         // 날씨 정보 가져오기
@@ -44,6 +88,9 @@ class DiaryManager {
                 // 사용자 ID 가져오기
                 guard let userID = self.getUserID() else {
                     completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+                    // 로그인되지 않은 상태에서는 일기를 로컬에만 저장
+                    self.addDiaryLocally(diary: diary)
+                    completion(nil)
                     return
                 }
                 
@@ -66,6 +113,9 @@ class DiaryManager {
                 // 사용자 ID 가져오기
                 guard let userID = self.getUserID() else {
                     completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+                    // 로그인되지 않은 상태에서는 일기를 로컬에만 저장
+                    self.addDiaryLocally(diary: diary)
+                    completion(nil)
                     return
                 }
                 
@@ -86,11 +136,21 @@ class DiaryManager {
         }
     }
     
-    
     // 다이어리 조회
     func fetchDiaries(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
         guard let userID = getUserID() else {
-            completion(nil, NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            // 비로그인 상태에서는 로컬에 저장된 일기를 가져옴
+            let localDiaries = UserDefaults.standard.array(forKey: "LocalDiaries") as? [Data] ?? []
+            var diaries: [DiaryEntry] = []
+            for data in localDiaries {
+                do {
+                    let diary = try JSONDecoder().decode(DiaryEntry.self, from: data)
+                    diaries.append(diary)
+                } catch {
+                    print("Error decoding local diary: \(error)")
+                }
+            }
+            completion(diaries, nil)
             return
         }
         db.collection("users").document(userID).collection("diaries").order(by: "dateString").getDocuments { (querySnapshot, error) in
@@ -133,17 +193,42 @@ class DiaryManager {
     }
     
     // 다이어리 삭제
-    func deleteDiary(diaryID: String, completion: @escaping (Error?) -> Void) {
-        guard let userID = getUserID() else {
-            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
-            return
-        }
-        db.collection("users").document(userID).collection("diaries").document(diaryID).delete { error in
+    func deleteDiary(diaryID: String, imageURL: String? = nil, completion: @escaping (Error?) -> Void) {
+        // 파이어스토어에서 일기 삭제
+        DiaryManager.shared.deleteDiary(diaryID: diaryID) { error in
             if let error = error {
-                print("Error deleting document: \(error)")
                 completion(error)
             } else {
-                completion(nil)
+                // 이미지 주소가 제공되었을 경우에만 이미지 삭제를 시도합니다
+                guard let imageURL = imageURL else {
+                    completion(nil)
+                    return
+                }
+                
+                // 파이어스토리지에서 이미지 삭제
+                FirebaseStorageManager.deleteImage(urlString: imageURL) { error in
+                    if let error = error {
+                        completion(error)
+                    } else {
+                        completion(nil)
+                    }
+                }
+            }
+        }
+    }
+    
+    func deleteAllDiary() {
+        guard let userID = Auth.auth().currentUser?.uid else {
+            print("No user is currently signed in.")
+            return
+        }
+        let userDocRef = db.collection("users").document(userID)
+        
+        userDocRef.delete { error in
+            if let error = error {
+                print("Error deleting user document from Firestore: \(error.localizedDescription)")
+            } else {
+                print("User document successfully deleted from Firestore.")
             }
         }
     }
@@ -176,21 +261,21 @@ class DiaryManager {
 //    func addWeatherToDiary(diary: DiaryEntry, completion: @escaping (DiaryEntry) -> Void) {
 //        // WeatherService 인스턴스 생성
 //        let weatherService = WeatherService()
-//        
+//
 //        // 날씨 정보 가져오기
 //        weatherService.getWeather { result in
 //            switch result {
 //            case .success(let weatherResponse):
 //                // 날씨 정보에서 날씨 설명 가져오기
 //                let weatherDescription = weatherResponse.weather.first?.description ?? "Unknown"
-//                
+//
 //                // 다이어리에 날씨 정보 추가
 //                var diaryWithWeather = diary
 //                diaryWithWeather.weather = weatherDescription
-//                
+//
 //                // 완성된 다이어리 반환
 //                completion(diaryWithWeather)
-//                
+//
 //            case .failure:
 //                // 날씨 정보를 가져오지 못할 경우 기존 다이어리 반환
 //                completion(diary)
