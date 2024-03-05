@@ -8,11 +8,11 @@
 import UIKit
 
 import SnapKit
+import FirebaseAuth
 
 class ProfileCell: UITableViewCell {
     static let id = "ProfileCell"
 
-    weak var delegate: ProfileCellDelegate?
     
     private lazy var profileImageView : UIImageView = {
         let profileImageView = UIImageView()
@@ -36,7 +36,7 @@ class ProfileCell: UITableViewCell {
         return nameLabel
     }()
     
-    private lazy var loginButton : UIButton = {
+    lazy var loginButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let loginButton = UIButton()
         loginButton.layer.borderWidth = 1
@@ -44,7 +44,6 @@ class ProfileCell: UITableViewCell {
         loginButton.layer.cornerRadius = 10
         loginButton.setTitleColor(.mainTheme, for: .normal)
         loginButton.setTitle("로그인", for: .normal)
-        loginButton.addTarget(self, action: #selector(tappedLoginButton), for: .touchUpInside)
         return loginButton
     }()
 
@@ -57,6 +56,7 @@ class ProfileCell: UITableViewCell {
         contentView.layer.borderColor = UIColor(named: "subBackground")?.cgColor
         addSubViewProfileCell()
         autoLayoutProfileCell()
+        controlButton()
     }
     
     required init?(coder: NSCoder) {
@@ -70,8 +70,18 @@ class ProfileCell: UITableViewCell {
         addSubview(loginButton)
     }
     
-    @objc func tappedLoginButton() {
-        delegate?.didTapLoginButton()
+    
+    private func controlButton() {
+        let user = Auth.auth().currentUser
+        
+        if user != nil {
+            loginButton.isEnabled = false
+            loginButton.isHidden = true
+        } else {
+            loginButton.isEnabled = true
+            loginButton.isHidden = false
+        }
+        self.loginButton.setNeedsDisplay()
     }
     
     private func autoLayoutProfileCell() {
@@ -110,8 +120,4 @@ class ProfileCell: UITableViewCell {
         self.nameLabel.text = name
         self.profileImageView.image = UIImage(named: image ?? "profile")
     }
-}
-
-protocol ProfileCellDelegate: AnyObject {
-    func didTapLoginButton()
 }

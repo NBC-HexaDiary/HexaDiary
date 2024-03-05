@@ -16,6 +16,8 @@ import GoogleSignIn
 
 class LoginVC: UIViewController {
     
+    weak var delegate: LoginViewDelegate?
+    
     fileprivate var currentNonce: String?
     
     private lazy var backgroundImage : UIImageView = {
@@ -25,18 +27,28 @@ class LoginVC: UIViewController {
     }()
     
     private lazy var signGoogleButton : UIButton = {
-        let btn = UIButton()
-        btn.setImage(.signInGoogle, for: .normal)
-        btn.addTarget(self, action: #selector(tapGoogleLoginButton), for: .touchUpInside)
-        return btn
+        let signGoogleButton = UIButton()
+        signGoogleButton.setImage(.signInGoogle, for: .normal)
+        signGoogleButton.addTarget(self, action: #selector(tapGoogleLoginButton), for: .touchUpInside)
+        return signGoogleButton
     }()
     
     private lazy var signAppleButton : UIButton = {
-        let button = UIButton()
-        button.setImage(.signinApple, for: .normal)
-        button.addTarget(self, action: #selector(tapAppleLoginButton), for: .touchUpInside)
-        return button
+        let signAppleButton = UIButton()
+        signAppleButton.setImage(.signinApple, for: .normal)
+        signAppleButton.addTarget(self, action: #selector(tapAppleLoginButton), for: .touchUpInside)
+        return signAppleButton
     }()
+    
+    private lazy var closeButton : UIButton = {
+        let closeButton = UIButton()
+        closeButton.setImage(UIImage(systemName:"xmark"), for: .normal)
+        closeButton.sizeToFit()
+        closeButton.tintColor = .mainTheme
+        closeButton.addTarget(self, action: #selector(tapCloseButton), for: .touchUpInside)
+        return closeButton
+    }()
+    
     
     @objc func tapAppleLoginButton() {
         startSignInWithAppleFlow()
@@ -44,6 +56,10 @@ class LoginVC: UIViewController {
     
     @objc func tapGoogleLoginButton() {
         handleGIDSignIn()
+    }
+    
+    @objc func tapCloseButton() {
+        dismiss(animated: true, completion: nil)
     }
     
     //MARK: - Google로 로그인 및 Firebase 인증
@@ -74,7 +90,7 @@ class LoginVC: UIViewController {
                     return
                 }
                 print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
-                self.navigationController?.popViewController(animated: true)
+                self.dismiss(animated: true, completion: nil)
             }
         }
     }
@@ -190,7 +206,7 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                 } else {
                     print("Full Name not provided")
                 }
-                
+                self.dismiss(animated: true, completion: nil)
                 // User is signed in to Firebase with Apple.
             }
 
@@ -228,14 +244,25 @@ extension LoginVC {
         autoLayoutLoginVC()
     }
     
+
     private func addSubViewsLoginVC() {
         view.addSubview(backgroundImage)
         view.sendSubviewToBack(backgroundImage)
         view.addSubview(signGoogleButton)
         view.addSubview(signAppleButton)
+        view.addSubview(closeButton)
     }
     
     private func autoLayoutLoginVC() {
+        closeButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+            make.left.equalTo(view.safeAreaLayoutGuide).offset(16)
+            make.width.height.equalTo(25)
+        }
+        closeButton.imageView?.snp.makeConstraints({ make in
+            make.edges.equalToSuperview()
+        })
+        
         signGoogleButton.snp.makeConstraints { make in
             make.centerX.equalTo(view.safeAreaLayoutGuide)
             make.centerY.equalTo(view.safeAreaLayoutGuide).offset(40)
@@ -253,4 +280,8 @@ extension LoginVC {
         }
     }
     
+}
+
+protocol LoginViewDelegate: AnyObject {
+    func modalViewDismiss()
 }
