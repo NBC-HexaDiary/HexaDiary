@@ -15,9 +15,7 @@ import Firebase
 import GoogleSignIn
 
 class LoginVC: UIViewController {
-    
-    weak var delegate: LoginViewDelegate?
-    
+        
     fileprivate var currentNonce: String?
     
     private lazy var backgroundImage : UIImageView = {
@@ -280,8 +278,4 @@ extension LoginVC {
         }
     }
     
-}
-
-protocol LoginViewDelegate: AnyObject {
-    func modalViewDismiss()
 }
