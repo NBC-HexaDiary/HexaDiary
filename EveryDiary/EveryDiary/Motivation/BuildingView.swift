@@ -18,7 +18,7 @@ import FirebaseAuth
 
 class BuildingView: UIView {
     let db = Firestore.firestore()
-    var diaryDays: [Int] = []
+    var diaryDays: Set<Int> = []
     
     var buildings: [BuildingSize] = []
     let backgroundLayer = CALayer()
@@ -182,9 +182,7 @@ class BuildingView: UIView {
     func drawWindowInBuilding() {
         print("drawWindowInBuilding() called")
         var windowOrder = 1
-        
         let diaryCount = diaryDays.count
-        
         if diaryCount <= 7 {
             handleBuilding(buildings[0], &windowOrder)
         } else if diaryCount <= 14 {
@@ -215,6 +213,7 @@ class BuildingView: UIView {
         }
     }
     
+    //inout 키워드를 사용하면 변수처럼 함수 내부에서 매개변수의 값을 변경할 수 있음
     func handleBuilding(_ building: BuildingSize, _ windowOrder: inout Int) {
         //i는 현재 층의 인덱스, row는 현재 층의 창문 배열. 각 층에 대해 창문을 그리기 위해 층의 각 창문을 순회.
         for (i, row) in building.windowLayout.columns.enumerated() {
@@ -229,16 +228,15 @@ class BuildingView: UIView {
                 let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
                 //각 창문의 위치를 계산
                 let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(j), y: building.position.y - windowHeight * CGFloat(i+1))
-                //diaryDays 배열에 창문의 순서가 포함되어 있는지 확인하고 값이 있으면 노란색
-                if diaryDays.contains(windowOrder) {
+                
+                if windowOrder <= diaryDays.count {
                     self.drawWindows(at: windowPosition, color: .yellow)
                     print("Window \(windowOrder): 데이터 있음")
+                    windowOrder += 1
                 } else {
                     self.drawWindows(at: windowPosition, color: .darkGray)
                     print("Window \(windowOrder): 데이터 없음")
                 }
-                //창문의 순서를 증가시키기. 다음 창문에 대해 새로운 번호 부여. 건물의 층이나 창문 배치에 따라 windowOrder의 값은 1, 2, 3 등으로 순차적으로 증가하지 않을 수 있음.
-                windowOrder += 1
             }
         }
     }
@@ -301,10 +299,10 @@ extension BuildingView {
                     }
                 }
                 DispatchQueue.main.async {
-                    self.diaryDays = diaryDays
+                    self.diaryDays = Set(diaryDays)
                     self.setNeedsDisplay()
+                    print("self.diaryDays: \(self.diaryDays)")
                 }
-                print("Diary days: \(diaryDays)")
                 
                 print("Total Buildings: \(self.buildings.count)")
                 for (index, building) in self.buildings.enumerated() {
