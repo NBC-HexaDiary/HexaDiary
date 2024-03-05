@@ -16,16 +16,12 @@ import FirebaseAuth
     BuildingView()
 }
 
+protocol BuildingViewDelegate: AnyObject {
+    func didUpdateDiaryCount(_ diaryCount: Int)
+}
+
 class BuildingView: UIView {
-    let db = Firestore.firestore()
-    var diaryDays: [Int] = []
-    
-    var buildings: [BuildingSize] = []
-    let backgroundLayer = CALayer()
-    let backBuildingLayer = CAShapeLayer()
-    let buildingLayer = CAShapeLayer()
-    let windowSize = CGSize(width: 10, height: 22)
-    let windowSpacing: CGFloat = 15
+    weak var delegate: BuildingViewDelegate?
     
     struct WindowLayout {
         let columns: [[Int]]
@@ -36,6 +32,17 @@ class BuildingView: UIView {
         let size: CGSize
         let windowLayout: WindowLayout
     }
+    
+    let db = Firestore.firestore()
+    var diaryDays: Set<Int> = []
+    var buildings: [BuildingSize] = []
+    
+    let backgroundLayer = CALayer()
+    let backBuildingLayer = CAShapeLayer()
+    let buildingLayer = CAShapeLayer()
+    
+    let windowSize = CGSize(width: 10, height: 22)
+    let windowSpacing: CGFloat = 15
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -180,11 +187,9 @@ class BuildingView: UIView {
     }
     
     func drawWindowInBuilding() {
-        print("drawWindowInBuilding() called")
+//        print("drawWindowInBuilding() called")
         var windowOrder = 1
-        
         let diaryCount = diaryDays.count
-        
         if diaryCount <= 7 {
             handleBuilding(buildings[0], &windowOrder)
         } else if diaryCount <= 14 {
@@ -215,6 +220,7 @@ class BuildingView: UIView {
         }
     }
     
+    //inout 키워드를 사용하면 변수처럼 함수 내부에서 매개변수의 값을 변경할 수 있음
     func handleBuilding(_ building: BuildingSize, _ windowOrder: inout Int) {
         //i는 현재 층의 인덱스, row는 현재 층의 창문 배열. 각 층에 대해 창문을 그리기 위해 층의 각 창문을 순회.
         for (i, row) in building.windowLayout.columns.enumerated() {
@@ -222,23 +228,18 @@ class BuildingView: UIView {
             for (j, columns) in row.enumerated() {
                 //창문 행렬에서 0은 데이터 비교에서 제외.
                 if columns == 0 { continue }
-                //각 건물의 창문을 그릴 위치를 계산
-                //각 창문의 너비 계산. 모든 창문의 너비는 동일하므로 계산을 통해 각 창문의 x 좌표를 결정
                 let windowWidth = building.size.width / CGFloat(columns)
-                //창문을 그리기 위해서 각 건물의 층의 높이를 계산. 건물의 전체 높이를 층 수로 나눔 = 각 층의 높이. 각 창문의 y 좌표를 결정
                 let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
-                //각 창문의 위치를 계산
                 let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(j), y: building.position.y - windowHeight * CGFloat(i+1))
-                //diaryDays 배열에 창문의 순서가 포함되어 있는지 확인하고 값이 있으면 노란색
-                if diaryDays.contains(windowOrder) {
+                
+                if windowOrder <= diaryDays.count {
                     self.drawWindows(at: windowPosition, color: .yellow)
-                    print("Window \(windowOrder): 데이터 있음")
+//                    print("Window \(windowOrder): 데이터 있음")
+                    windowOrder += 1
                 } else {
                     self.drawWindows(at: windowPosition, color: .darkGray)
-                    print("Window \(windowOrder): 데이터 없음")
+//                    print("Window \(windowOrder): 데이터 없음")
                 }
-                //창문의 순서를 증가시키기. 다음 창문에 대해 새로운 번호 부여. 건물의 층이나 창문 배치에 따라 windowOrder의 값은 1, 2, 3 등으로 순차적으로 증가하지 않을 수 있음.
-                windowOrder += 1
             }
         }
     }
@@ -247,6 +248,8 @@ class BuildingView: UIView {
 
 //MARK: firebase
 extension BuildingView {
+    
+    //특정 월에 대한 일기 데이터를 Firestore 데이터베이스에서 가져오는 함수
     func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
         func getUserID() -> String? {
             return Auth.auth().currentUser?.uid
@@ -259,12 +262,13 @@ extension BuildingView {
         
         let startOfMonth = "\(year)-\(String(format: "%02d", month))-01 00:00:00 +0000"
         let endOfMonth = month == 12 ? "\(year + 1)-01-01 23:59:59 +0000" : "\(year)-\(String(format: "%02d", month + 1))-01 23:59:59 +0000"
-        
+        //dateString에서 현재 월 데이터만 가져오기
         db.collection("users").document(userID).collection("diaries").whereField("dateString", isGreaterThanOrEqualTo: startOfMonth).whereField("dateString", isLessThan: endOfMonth).getDocuments { (querySnapshot, error) in
             if let error = error {
                 print("Error getting documents: \(error)")
                 completion(nil, error)
             } else {
+                //DiaryEntry 형식으로 변환하고 가져온 데이터는 배열에 추가
                 var diaries = [DiaryEntry]()
                 for document in querySnapshot!.documents {
                     if let diary = try? document.data(as: DiaryEntry.self) {
@@ -272,17 +276,19 @@ extension BuildingView {
                     }
                 }
                 DispatchQueue.main.async { // 메인 스레드에서 로그를 출력합니다.
-                    print("Fetched diaries: \(diaries)")
+//                    print("Fetched diaries: \(diaries)")
                 }
                 completion(diaries, nil)
             }
         }
     }
     
+    //현재 월의 일기 데이터를 가져오고 그 데이터를 바탕으로 건물 창문을 업데이트하는 함수
     func windowsInBuildingData() {
+        //현재 년도 + 월 가져오기
         let currentYear = Calendar.current.component(.year, from: Date())
         let currentMonth = Calendar.current.component(.month, from: Date())
-        
+        //현재 월의 일기 데이터를 가져오기
         fetchDiariesForCurrentMonth(year: currentYear, month: currentMonth) { (diaries, error) in
             if let error = error {
                 print("Error fetching diaries: \(error)")
@@ -301,17 +307,18 @@ extension BuildingView {
                     }
                 }
                 DispatchQueue.main.async {
-                    self.diaryDays = diaryDays
+                    self.diaryDays = Set(diaryDays)
                     self.setNeedsDisplay()
+//                    print("self.diaryDays: \(self.diaryDays)")
+                    self.delegate?.didUpdateDiaryCount(self.diaryDays.count)
                 }
-                print("Diary days: \(diaryDays)")
                 
-                print("Total Buildings: \(self.buildings.count)")
-                for (index, building) in self.buildings.enumerated() {
-                    print("Building \(index + 1):")
-                    print("Position: \(building.position), Size: \(building.size)")
-                    print("Window Layout: \(building.windowLayout.columns)")
-                }
+//                print("Total Buildings: \(self.buildings.count)")
+//                for (index, building) in self.buildings.enumerated() {
+//                    print("Building \(index + 1):")
+//                    print("Position: \(building.position), Size: \(building.size)")
+//                    print("Window Layout: \(building.windowLayout.columns)")
+//                }
             }
         }
     }

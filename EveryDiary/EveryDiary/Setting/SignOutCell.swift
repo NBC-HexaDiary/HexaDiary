@@ -78,9 +78,18 @@ class SignOutCell: UITableViewCell {
         contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 16, left: 4, bottom: 16, right: 4))
     }
     
-    func prepare(title: String, iconImage: String) {
-        self.signOutLabel.text = title
-        self.signOutImageView.image = UIImage(named: iconImage)
+    func prepare(title: String, iconImage: String, isLoggedIn: Bool) {
+        if isLoggedIn {
+            self.signOutLabel.isHidden = false
+            self.signOutImageView.isHidden = false
+            self.signOutLabel.text = title
+            self.signOutImageView.image = UIImage(named: iconImage)
+            self.contentView.layer.isHidden = false
+        } else {
+            self.signOutLabel.isHidden = true
+            self.signOutImageView.isHidden = true
+            self.contentView.layer.isHidden = true // 레이어를 숨김
+        }
     }
 
 }
