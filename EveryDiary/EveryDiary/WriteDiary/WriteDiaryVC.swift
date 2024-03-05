@@ -127,16 +127,26 @@ class WriteDiaryVC: UIViewController {
 extension WriteDiaryVC {
     // 완료버튼 호출 메서드
     @objc func completeButtonTapped() {
-        let formattedDateString = formattedDateString(for: selectedDate)
+        // 날짜 형식을 "yyyy-MM-dd HH:mm:ss Z"로 설정하여 dateString 생성
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+        dateFormatter.timeZone = TimeZone.current
+        let formattedDateString = dateFormatter.string(from: selectedDate)
         
         // 사용자가 입력한 정보를 DiaryEntry로 변환
         let newDiaryEntry = DiaryEntry(
             title: titleTextField.text ?? "",
             content: contentTextView.text,
-            date: selectedDate,
+            dateString: formattedDateString,
             emotion: selectedEmotion,
-            weather: selectedWeather
-        )
+            weather: selectedWeather)
+//        (
+//            title: titleTextField.text ?? "",
+//            content: contentTextView.text,
+//            date: formattedDateString,
+//            emotion: selectedEmotion,
+//            weather: selectedWeather
+//        )
         
         // DiaryManager를 사용해 Firestore에 저장
         diaryManager.addDiary(diary: newDiaryEntry) { error in
@@ -152,11 +162,18 @@ extension WriteDiaryVC {
     }
     @objc func updateButtonTapped() {
         guard let diaryID = self.diaryID else { return }
+        
+        // 날짜 형식을 "yyyy-MM-dd HH:mm:ss Z"로 설정하여 dateString 생성
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+        dateFormatter.timeZone = TimeZone.current
+        let formattedDateString = dateFormatter.string(from: selectedDate)
+        
         let updatedDiary = DiaryEntry(
             id: diaryID,
             title: titleTextField.text ?? "",
             content: contentTextView.text,
-            dateString: dateString,
+            dateString: formattedDateString,
             emotion: selectedEmotion,
             weather: selectedWeather
         )

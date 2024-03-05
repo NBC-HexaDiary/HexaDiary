@@ -538,6 +538,7 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = UP9KCDW7ZZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EveryDiary/Info.plist;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "페이스아이디 테스트 입니다.";
@@ -572,6 +573,7 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = UP9KCDW7ZZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EveryDiary/Info.plist;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "페이스아이디 테스트 입니다.";
