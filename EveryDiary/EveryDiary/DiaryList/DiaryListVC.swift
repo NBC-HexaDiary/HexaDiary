@@ -22,6 +22,7 @@ class DiaryListVC: UIViewController {
     private var diaries: [DiaryEntry] = []
     
     private var currentLongPressedCell: JournalCollectionViewCell?
+    private var selectedIndexPath: IndexPath?
     private var blurEffectView: UIVisualEffectView?
     
     private lazy var themeLabel : UILabel = {
@@ -95,6 +96,7 @@ class DiaryListVC: UIViewController {
             journalCollectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderView.reuseIdentifier)
         loadDiaries()
         setupLongGestureRecognizerOnCollectionView()
+        setupEditTableView()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -137,13 +139,51 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let selectedIndexPath = self.selectedIndexPath else { return }
+        let month = months[selectedIndexPath.section]
+        guard let diary = monthlyDiaries[month]?[selectedIndexPath.row] else { return }
         tableView.isHidden = true
         removeBlurEffect()
-//        if indexPath.row == 0 {
-//            modifyItem(at: selectedIndexPath)
-//        } else {
-//            deleteItem(at: selectedIndexPath)
-//        }
+        print("\(indexPath)")
+        print("\(selectedIndexPath)")
+        switch indexPath.row {
+        case 0: // "수정" 선택 시
+            print("Edit")
+            let writeDiaryVC = WriteDiaryVC()
+            writeDiaryVC.activeEditMode(with: diary)
+            writeDiaryVC.modalPresentationStyle = .automatic
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                self.present(writeDiaryVC, animated: true, completion: nil)
+            }
+            
+        case 1: // "삭제" 선택 시
+            print("Delete")
+            let alert = UIAlertController(
+                title: "일기 삭제", message: "이 일기를 삭제하시겠습니까?", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { [weak self] _ in
+                guard let self = self else { return }
+                // diary.id와 diary.imageURL을 올바르게 참조하여 삭제
+                if let diaryID = diary.id {
+                    let imageURL = diary.imageURL
+                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: imageURL) { error in
+                        if let error = error {
+                            print("Error deleting diary: \(error.localizedDescription)")
+                        } else {
+                            // 삭제 후 UI업데이트
+                            self.monthlyDiaries[month]?.remove(at: selectedIndexPath.row)
+                            self.journalCollectionView.deleteItems(at: [selectedIndexPath])
+                            self.loadDiaries()
+                        }
+                    }
+                }
+            }))
+            alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+            present(alert, animated: true, completion: nil)
+        default:
+            break
+        }
+        // 선택 처리 후 변수 초기화
+        self.selectedIndexPath = nil
     }
 }
 
@@ -411,6 +451,9 @@ extension DiaryListVC: UIGestureRecognizerDelegate {
         case .began:
             guard let indexPath = journalCollectionView.indexPathForItem(at: location),
                   let cell = journalCollectionView.cellForItem(at: indexPath) else { return }
+            
+            // longPress한 셀의 indexPath를 저장
+            self.selectedIndexPath = indexPath
 
             // 블러 효과를 추가.
             addBlurEffect(excludeCell: cell)
@@ -430,15 +473,6 @@ extension DiaryListVC: UIGestureRecognizerDelegate {
 //            }
         case .ended, .cancelled:
             break
-//            guard let indexPath = journalCollectionView.indexPathForItem(at: location),
-//                  let cell = journalCollectionView.cellForItem(at: indexPath) else { return }
-//            // 블러 효과를 제거.
-//            removeBlurEffect()
-//            UIView.animate(withDuration: 0.2) {
-//                cell.transform = CGAffineTransform.identity
-//                cell.layer.shadowOpacity = 0
-//                cell.layer.shadowRadius = 0
-//            }
         default:
             break
         }
@@ -465,7 +499,6 @@ extension DiaryListVC: UIGestureRecognizerDelegate {
         if let effectView = blurEffectView {
             // 최상위 뷰에 추가하여 navigationBar, tabBar까지 커버한다.
             view.window?.addSubview(effectView)
-            setupEditTableView()
         }
         
         // 0.3초간 투명도를 1로 만들어준다.
@@ -569,5 +602,9 @@ extension DateFormatter {
     func date(from string: String, withFormat format: String) -> Date? {
         self.dateFormat = format
         return self.date(from: string)
+    }
+    func date(from date: Date, withFormat format: String) -> String? {
+        self.dateFormat = format
+        return self.string(from: date)
     }
 }
