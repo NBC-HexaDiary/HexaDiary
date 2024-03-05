@@ -14,9 +14,9 @@ import FirebaseAuth
 import Firebase
 import GoogleSignIn
 
-class SettingVC: UIViewController , LoginViewDelegate {
+class SettingVC: UIViewController {
         
-    private var isLogedIn: Bool = false
+    private var loginStatus: Bool = false
     private var dataSource = [CellModel]()
     
     private lazy var tableView: UITableView = {
@@ -73,22 +73,18 @@ class SettingVC: UIViewController , LoginViewDelegate {
         }
         tableView.reloadData()
     }
-    
-    func modalViewDismiss() {
-        tableView.reloadData()
-    }
-    
     // Firebase 인증 상태 감지 메서드
      private func observeAuthState() {
          Auth.auth().addStateDidChangeListener { [weak self] (_, user) in
              guard let self = self else { return }
              if user != nil {
-                 // 사용자가 로그인되어 있다면 isLogedin을 true로 설정하고 데이터를 새로고침
-                 self.isLogedIn = true
+                 // 사용자가 로그인되어 있다면 loginStatus을 true로 설정하고 데이터를 새로고침
+                 self.loginStatus = true
                  self.refresh()
+                 
              } else {
-                 // 사용자가 로그인되어 있지 않다면 isLogedin을 false로 설정하고 데이터를 새로고침
-                 self.isLogedIn = false
+                 // 사용자가 로그인되어 있지 않다면 loginStatus을 false로 설정하고 데이터를 새로고침
+                 self.loginStatus = false
                  self.refresh()
              }
          }
@@ -119,6 +115,7 @@ class SettingVC: UIViewController , LoginViewDelegate {
         }
     }
     
+    //사용자 로그아웃 재차 확인
     private func signOutAlert() {
         let alertController = UIAlertController(title: "알림", message: "로그아웃 하시겠습니까?", preferredStyle: .alert)
         let okAction = UIAlertAction(title: "확인", style: .default) { (_) in
@@ -132,6 +129,7 @@ class SettingVC: UIViewController , LoginViewDelegate {
         present(alertController, animated: true, completion: nil)
     }
     
+    //로그아웃 시, 나오는 알림창
     private func signOutConfirmAlert() {
         let okAlert = UIAlertController(title: "확인", message: "로그아웃이 완료되었습니다.", preferredStyle: .alert)
         let okClick = UIAlertAction(title: "확인", style: .default) { _ in
@@ -162,11 +160,12 @@ extension SettingVC {
                 print("Error deleting user from Firebase: \(error.localizedDescription)")
             } else {
                 print("User successfully deleted from Firebase.")
+                DiaryManager.shared.deleteUserData(for: currentUser.uid)
             }
         }
     }
 
-    // 사용자에게 Firebase 회원탈퇴, Apple or Google 소셜아이디 등록 탈퇴하도록 안내하는 메시지 표시
+    //사용자에게 Firebase 회원탈퇴, Apple or Google 소셜아이디 등록 탈퇴하도록 안내하는 메시지 표시
     func showDeleteAccountMessage() {
         let alert = UIAlertController(title: "회원 탈퇴하시겠습니까?", message: "일기에 저장된 모든 내용이 삭제되며  복구가 불가능해집니다. \n 그래도 진행하시겠습니까?", preferredStyle: .actionSheet)
         
@@ -182,7 +181,7 @@ extension SettingVC {
         present(alert, animated: true, completion: nil)
     }
     
-    
+    //회원 탈퇴 시, 나오는 알림 창
     func showDeleteAccountConfirmAlert() {
         let confirmAlert = UIAlertController(title: "회원 탈퇴", message: "회원 탈퇴가 완료되었습니다.", preferredStyle: .alert)
         let confirmAction = UIAlertAction(title: "확인", style: .default)
@@ -271,7 +270,7 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
             
         case let .signOutItem(title, iconImage, _, _):
             let cell = tableView.dequeueReusableCell(withIdentifier: SignOutCell.id, for: indexPath) as! SignOutCell
-            cell.prepare(title: title, iconImage: iconImage, isLoggedIn: isLogedIn)
+            cell.prepare(title: title, iconImage: iconImage, isLoggedIn: loginStatus)
             cell.backgroundColor = .mainBackground
             
             

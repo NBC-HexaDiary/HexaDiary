@@ -13,14 +13,12 @@ import FirebaseAuth
 class ProfileCell: UITableViewCell {
     static let id = "ProfileCell"
 
-    
     private lazy var profileImageView : UIImageView = {
         let profileImageView = UIImageView()
         profileImageView.contentMode = .scaleAspectFit
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
         return profileImageView
     }()
-    
     
     private lazy var emailLabel : UILabel = {
         let emailLabel = UILabel()
@@ -46,8 +44,7 @@ class ProfileCell: UITableViewCell {
         loginButton.setTitle("로그인", for: .normal)
         return loginButton
     }()
-
-
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: ProfileCell.id)
         self.selectionStyle = .none
