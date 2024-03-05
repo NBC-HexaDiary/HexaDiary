@@ -12,7 +12,8 @@ import SnapKit
     MotivationVC()
 }
 
-class MotivationVC: UIViewController {
+class MotivationVC: UIViewController, BuildingViewDelegate {
+    //diaryCount 값이 변경될 때마다 호출
     
     let buildings = BuildingView()
     
@@ -34,6 +35,27 @@ class MotivationVC: UIViewController {
         return button
     }()
     
+    private lazy var monthLabel: UILabel = {
+        let monthLabel = UILabel()
+        let currentMonth = Calendar.current.component(.month, from: Date())
+        monthLabel.text = "\(currentMonth)월"
+        monthLabel.font = UIFont(name: "SFProDisplay-Bold", size: 25)
+        monthLabel.textColor = UIColor(named: "mainText")
+        return monthLabel
+    }()
+    
+    private lazy var countLabel: UILabel = {
+        let countLabel = UILabel()
+        countLabel.font = UIFont(name: "SFProDisplay-Regular", size: 16)
+        countLabel.textColor = UIColor(named: "mainText")
+        return countLabel
+    }()
+    
+    private func updateCountLabel() {
+        let diaryCount = buildings.diaryDays.count
+        countLabel.text = "\(diaryCount)개 작성"
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         buildings.windowsInBuildingData()
@@ -41,9 +63,14 @@ class MotivationVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        buildings.delegate = self
+        updateCountLabel()
         addSubview()
         autoLayout()
+    }
+    
+    func didUpdateDiaryCount(_ diaryCount: Int) {
+        updateCountLabel()
     }
     
     @objc private func tabSettingBTN() {
@@ -51,6 +78,7 @@ class MotivationVC: UIViewController {
         settingVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(settingVC, animated: true)
     }
+    
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
         writeDiaryVC.modalPresentationStyle = .automatic
@@ -61,9 +89,10 @@ class MotivationVC: UIViewController {
         view.addSubview(background)
         view.addSubview(buildings)
         view.addSubview(writeDiaryButton)
+        view.addSubview(monthLabel)
+        view.addSubview(countLabel)
         setNavigationBar()
     }
-    
     
     private func autoLayout() {
         background.snp.makeConstraints{ make in
@@ -75,6 +104,14 @@ class MotivationVC: UIViewController {
         }
         buildings.snp.makeConstraints { make in
             make.top.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+        }
+        monthLabel.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+            make.centerX.equalToSuperview()
+        }
+        countLabel.snp.makeConstraints { make in
+            make.top.equalTo(monthLabel.snp.bottom).offset(8)
+            make.centerX.equalToSuperview()
         }
     }
     
