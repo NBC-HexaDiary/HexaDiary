@@ -14,8 +14,8 @@ class WriteDiaryVC: UIViewController {
     
     private var diaryManager = DiaryManager()
     
-    private var selectedEmotion = ""
-    private var selectedWeather = ""
+    private var selectedEmotion = "happy"
+    private var selectedWeather = "Vector"
     private var selectedDate = Date()
     
     // 수정할 일기의 ID를 저장하는 변수

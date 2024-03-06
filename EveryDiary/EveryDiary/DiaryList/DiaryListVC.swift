@@ -95,7 +95,10 @@ class DiaryListVC: UIViewController {
         journalCollectionView.register(JournalCollectionViewCell.self, forCellWithReuseIdentifier: JournalCollectionViewCell.reuseIdentifier)
             journalCollectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderView.reuseIdentifier)
         loadDiaries()
-        setupLongGestureRecognizerOnCollectionView()
+        
+        // 삭제필요 : UILongPressGestureRecognizer 관련 메서드
+//        setupLongGestureRecognizerOnCollectionView()
+        
         setupEditTableView()
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -143,7 +146,10 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
         let month = months[selectedIndexPath.section]
         guard let diary = monthlyDiaries[month]?[selectedIndexPath.row] else { return }
         tableView.isHidden = true
-        removeBlurEffect()
+        
+        // 삭제필요 : UILongPressGestureRecognizer 관련 메서드
+//        removeBlurEffect()
+        
         print("\(indexPath)")
         print("\(selectedIndexPath)")
         switch indexPath.row {
@@ -436,103 +442,109 @@ extension DiaryListVC: UICollectionViewDataSource {
 //}
 
 // longPressEvent(cell 삭제 및 수정 기능)
-extension DiaryListVC: UIGestureRecognizerDelegate {
-    // long press 이벤트 부여
-    private func setupLongGestureRecognizerOnCollectionView() {
-        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
-        longPressGesture.delegate = self
-        longPressGesture.minimumPressDuration = 0.2     // 최소단위(초) 설정
-        longPressGesture.delaysTouchesBegan = true      // 기존 터치작업과의 분리
-        journalCollectionView.addGestureRecognizer(longPressGesture)    // 컬렉션뷰에 gesture 추가
-    }
-    @objc func handleLongPress(gestureRecognizer: UILongPressGestureRecognizer) {
-        let location = gestureRecognizer.location(in: journalCollectionView)
-        switch gestureRecognizer.state {
-        case .began:
-            guard let indexPath = journalCollectionView.indexPathForItem(at: location),
-                  let cell = journalCollectionView.cellForItem(at: indexPath) else { return }
-            
-            // longPress한 셀의 indexPath를 저장
-            self.selectedIndexPath = indexPath
+//extension DiaryListVC: UIGestureRecognizerDelegate {
+//    // long press 이벤트 부여
+//    private func setupLongGestureRecognizerOnCollectionView() {
+//        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+//        longPressGesture.delegate = self
+//        longPressGesture.minimumPressDuration = 0.2     // 최소단위(초) 설정
+//        longPressGesture.delaysTouchesBegan = true      // 기존 터치작업과의 분리
+//        journalCollectionView.addGestureRecognizer(longPressGesture)    // 컬렉션뷰에 gesture 추가
+//    }
+//    @objc func handleLongPress(gestureRecognizer: UILongPressGestureRecognizer) {
+//        let location = gestureRecognizer.location(in: journalCollectionView)
+//        switch gestureRecognizer.state {
+//        case .began:
+//            guard let indexPath = journalCollectionView.indexPathForItem(at: location),
+//                  let cell = journalCollectionView.cellForItem(at: indexPath) else { return }
+//            
+//            // longPress한 셀의 indexPath를 저장
+//            self.selectedIndexPath = indexPath
+//
+//            // 블러 효과를 추가.
+//            addBlurEffect(excludeCell: cell)
+//            
+//            setLayoutEditTableView(basedOn: cell.frame)
+//            
+//            editTableView.isHidden = false
+//            editTableView.reloadData()
+//            
+//            // 애니메이션 추가
+////            UIView.animate(withDuration: 0.2) {
+////                cell.transform = CGAffineTransform(scaleX: 1.03, y: 1.03)
+////                cell.layer.shadowOpacity = 0.5
+////                cell.layer.shadowRadius = 10
+////                cell.layer.shadowOffset = CGSize(width: 0, height: 4)
+////                cell.layer.shadowColor = UIColor.black.cgColor
+////            }
+//        case .ended, .cancelled:
+//            break
+//        default:
+//            break
+//        }
+//    }
+//
+//    private func addBlurEffect(excludeCell cell: UICollectionViewCell) {
+//        // 전체 화면 크기의 블러 효과 뷰 생성
+//        let blurEffect = UIBlurEffect(style: .light)
+//        blurEffectView = UIVisualEffectView(effect: blurEffect)
+//        
+//        // 현재 view와 동일한 크기를 지정
+//        blurEffectView?.frame = view.bounds
+//        blurEffectView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+//        blurEffectView?.alpha = 0 // 초기 투명도 0
+//        blurEffectView?.tag = 6 // 임의의 태그로 블러 뷰를 식별.
+//
+//        // 셀 위에 블러 효과를 적용하지 않기 위해 셀의 프레임을 이용하여 블러 뷰에서 셀의 영역을 제외.
+//        let cellFrameInCollectionView = cell.convert(cell.bounds, to: view)
+//        blurEffectView?.layer.mask = createMaskLayer(excludeFrame: cellFrameInCollectionView, in: view.bounds)
+//        
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(blurViewTapped))
+//        blurEffectView?.addGestureRecognizer(tapGesture)
+//        
+//        if let effectView = blurEffectView {
+//            // 최상위 뷰에 추가하여 navigationBar, tabBar까지 커버한다.
+//            view.window?.addSubview(effectView)
+//        }
+//        
+//        // 0.3초간 투명도를 1로 만들어준다.
+//        UIView.animate(withDuration: 0.2) {
+//            self.blurEffectView?.alpha = 1
+//        }
+//    }
+//    @objc private func blurViewTapped() {
+//        UIView.animate(withDuration: 0.2, animations: {
+//            self.blurEffectView?.alpha = 0
+//        }) { _ in
+//            self.removeBlurEffect()
+//        }
+//    }
+//
+//    private func removeBlurEffect() {
+//        view.window?.viewWithTag(6)?.removeFromSuperview()
+//        editTableView.removeFromSuperview()
+//    }
+//
+//    private func createMaskLayer(excludeFrame frame: CGRect, in bounds: CGRect) -> CALayer {
+//        let maskLayer = CAShapeLayer()
+//        let path = UIBezierPath(rect: bounds)
+//        
+//        // 선택된 셀의 프레임 주위에 cornerRadius를 적용.
+//        let excludedRextPath = UIBezierPath(roundedRect: frame, cornerRadius: 20)
+//        
+//        // 두 개의 경로를 결합하여 "evenOdd" 규칙을 적용.
+//        path.append(excludedRextPath)
+//        
+//        maskLayer.path = path.cgPath
+//        maskLayer.fillRule = .evenOdd
+//
+//        return maskLayer
+//    }
+//}
 
-            // 블러 효과를 추가.
-            addBlurEffect(excludeCell: cell)
-            
-            setLayoutEditTableView(basedOn: cell.frame)
-            
-            editTableView.isHidden = false
-            editTableView.reloadData()
-            
-            // 애니메이션 추가
-//            UIView.animate(withDuration: 0.2) {
-//                cell.transform = CGAffineTransform(scaleX: 1.03, y: 1.03)
-//                cell.layer.shadowOpacity = 0.5
-//                cell.layer.shadowRadius = 10
-//                cell.layer.shadowOffset = CGSize(width: 0, height: 4)
-//                cell.layer.shadowColor = UIColor.black.cgColor
-//            }
-        case .ended, .cancelled:
-            break
-        default:
-            break
-        }
-    }
-
-    private func addBlurEffect(excludeCell cell: UICollectionViewCell) {
-        // 전체 화면 크기의 블러 효과 뷰 생성
-        let blurEffect = UIBlurEffect(style: .light)
-        blurEffectView = UIVisualEffectView(effect: blurEffect)
-        
-        // 현재 view와 동일한 크기를 지정
-        blurEffectView?.frame = view.bounds
-        blurEffectView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        blurEffectView?.alpha = 0 // 초기 투명도 0
-        blurEffectView?.tag = 6 // 임의의 태그로 블러 뷰를 식별.
-
-        // 셀 위에 블러 효과를 적용하지 않기 위해 셀의 프레임을 이용하여 블러 뷰에서 셀의 영역을 제외.
-        let cellFrameInCollectionView = cell.convert(cell.bounds, to: view)
-        blurEffectView?.layer.mask = createMaskLayer(excludeFrame: cellFrameInCollectionView, in: view.bounds)
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(blurViewTapped))
-        blurEffectView?.addGestureRecognizer(tapGesture)
-        
-        if let effectView = blurEffectView {
-            // 최상위 뷰에 추가하여 navigationBar, tabBar까지 커버한다.
-            view.window?.addSubview(effectView)
-        }
-        
-        // 0.3초간 투명도를 1로 만들어준다.
-        UIView.animate(withDuration: 0.2) {
-            self.blurEffectView?.alpha = 1
-        }
-    }
-    @objc private func blurViewTapped() {
-        UIView.animate(withDuration: 0.2, animations: {
-            self.blurEffectView?.alpha = 0
-        }) { _ in
-            self.removeBlurEffect()
-        }
-    }
-
-    private func removeBlurEffect() {
-        view.window?.viewWithTag(6)?.removeFromSuperview()
-        editTableView.removeFromSuperview()
-    }
-
-    private func createMaskLayer(excludeFrame frame: CGRect, in bounds: CGRect) -> CALayer {
-        let maskLayer = CAShapeLayer()
-        let path = UIBezierPath(rect: bounds)
-        
-        // 선택된 셀의 프레임 주위에 cornerRadius를 적용.
-        let excludedRextPath = UIBezierPath(roundedRect: frame, cornerRadius: 20)
-        
-        // 두 개의 경로를 결합하여 "evenOdd" 규칙을 적용.
-        path.append(excludedRextPath)
-        
-        maskLayer.path = path.cgPath
-        maskLayer.fillRule = .evenOdd
-
-        return maskLayer
+extension DiaryListVC {
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
+        <#code#>
     }
 }
 
