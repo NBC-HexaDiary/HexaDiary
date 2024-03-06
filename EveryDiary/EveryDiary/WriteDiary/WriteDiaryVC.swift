@@ -21,6 +21,9 @@ class WriteDiaryVC: UIViewController {
     // 수정할 일기의 ID를 저장하는 변수
     var diaryID: String?
     
+    // 기존 이미지 URL 저장할 변수
+    private var existingImageUrl: String?
+    
     private lazy var dateString: String = {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "ko_KR")
@@ -194,28 +197,57 @@ extension WriteDiaryVC {
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
         dateFormatter.timeZone = TimeZone.current
         let formattedDateString = dateFormatter.string(from: selectedDate)
-        
-        let updatedDiary = DiaryEntry(
+                
+        let fetchedDiary = DiaryEntry(
             id: diaryID,
             title: titleTextField.text ?? "",
             content: contentTextView.text,
             dateString: formattedDateString,
             emotion: selectedEmotion,
-            weather: selectedWeather
+            weather: selectedWeather,
+            imageURL: self.existingImageUrl
         )
         
-        // DiaryManager를 사용해 Firestore에 저장
-        diaryManager.updateDiary(diaryID: diaryID, newDiary: updatedDiary) { [weak self] error in
+        // 새 이미지가 있고 기존 이미지 URL과 다른 경우에만 업데이트 진행
+        if let newImage = newImage {
+            // 기존 이미지가 있다면 삭제
+            if let existingImageUrl = self.existingImageUrl {
+                FirebaseStorageManager.deleteImage(urlString: existingImageUrl) { error in
+                    if let error = error {
+                        print("Error deleting existing image: \(error)")
+                    }
+                }
+            }
+            
+            // 새로운 이미지 업로드
+            FirebaseStorageManager.uploadImage(image: newImage, pathRoot: "diary_images") { [weak self] imageUrl in
+                guard let imageUrl = imageUrl else {
+                    print("Image upload failed")
+                    return
+                }
+                // 업로드가 성공하면 imageURL을 업데이트하여 Firestore에 저장
+                var updatedDiaryEntry = fetchedDiary
+                updatedDiaryEntry.imageURL = imageUrl.absoluteString
+                
+                // Firestore에 업데이트
+                self?.updateDiaryInFirestore(diaryID: diaryID, diaryEntry: updatedDiaryEntry)
+            }
+        } else {
+            // 이미지가 선택되지 않았다면 기존 imageURL 사용
+            updateDiaryInFirestore(diaryID: diaryID, diaryEntry: fetchedDiary)
+        }
+    }
+    
+    private func updateDiaryInFirestore(diaryID: String, diaryEntry: DiaryEntry) {
+        // Firestore 문서 업데이트
+        DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: diaryEntry) { error in
             if let error = error {
-                // 에러 처리
                 print("Error updating diary: \(error.localizedDescription)")
             } else {
-                // 에러가 없다면, 화면 닫기
-                print("Diary successfully updated.")
-                self?.dismiss(animated: true, completion: nil)
+                print("Dairy updated successfully")
+                self.dismiss(animated: true, completion: nil)
             }
         }
-        self.dismiss(animated: true)
     }
     
     func activeEditMode(with diary: DiaryEntry) {
@@ -223,9 +255,9 @@ extension WriteDiaryVC {
         self.diaryID = diary.id
         self.titleTextField.text = diary.title
         self.contentTextView.text = diary.content
-//        self.selectedDate = diary.date
         self.selectedEmotion = diary.emotion
         self.selectedWeather = diary.weather
+        self.existingImageUrl = diary.imageURL
         
         // 날짜 형식 업데이트
         let dateFormatter = DateFormatter()
@@ -238,13 +270,26 @@ extension WriteDiaryVC {
             self.datePickingButton.setTitle(dateString, for: .normal)
         }
         
-        // 이미지 업데이트
+        // 이모티콘과 날씨 업데이트
         self.emotionButton.setImage(UIImage(named: diary.emotion)?.withRenderingMode(.alwaysOriginal), for: .normal)
         self.weatherButton.setImage(UIImage(named: diary.weather)?.withRenderingMode(.alwaysOriginal), for: .normal)
         
         // 완료 -> 수정 버튼 교체
         self.completeButton.isHidden = true
         self.updateButton.isHidden = false
+        
+        // 이미지 URL이 있을 경우, 이미지를 다운로드하여 imageView에 설정
+        if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
+            // FirebaseStorageManager를 사용해 이미지 다운로드
+            FirebaseStorageManager.downloadImage(urlString: imageUrlString) { [weak self] downloadedImage in
+                DispatchQueue.main.async {
+                    if let image = downloadedImage {
+                        self?.imageView.image = image
+                        self?.updateImageViewHeight(with: image)
+                    }
+                }
+            }
+        }
     }
     func formattedDateString(for date: Date) -> String {
         let dateFormatter = DateFormatter()
