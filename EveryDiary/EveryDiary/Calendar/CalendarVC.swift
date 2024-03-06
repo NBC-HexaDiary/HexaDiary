@@ -12,36 +12,36 @@ import SnapKit
 class CalendarVC: UIViewController {
     
     private lazy var settingButton : UIBarButtonItem = {
-        let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
-        return button
+        let settingButton = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
+        return settingButton
     }()
     
     private lazy var calendarLabel : UILabel = {
-        let label = UILabel()
-        label.text = "캘린더"
-        label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
-        label.textColor = UIColor(named: "mainTheme")
-        return label
+        let calendarLabel = UILabel()
+        calendarLabel.text = "캘린더"
+        calendarLabel.font = UIFont(name: "SFProDisplay-Bold", size: 33)
+        calendarLabel.textColor = UIColor(named: "mainTheme")
+        return calendarLabel
     }()
     
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
-        let button = UIButton(configuration: config)
-        button.setImage(UIImage(named: "write"), for: .normal)
-        button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
-        return button
+        let writeDiaryButton = UIButton(configuration: config)
+        writeDiaryButton.setImage(UIImage(named: "write"), for: .normal)
+        writeDiaryButton.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
+        return writeDiaryButton
     }()
     
     private lazy var calendarView : UICalendarView = {
-        var view = UICalendarView()
-        view.wantsDateDecorations = true
-        return view
+        var calendarView = UICalendarView()
+        calendarView.wantsDateDecorations = true
+        return calendarView
     }()
     
     private let safeArea: UIView = {
-        let vc = UIView()
-        vc.backgroundColor = .black
-        return vc
+        let safeAreaView = UIView()
+        safeAreaView.backgroundColor = .black
+        return safeAreaView
     }()
     
     
@@ -58,6 +58,7 @@ class CalendarVC: UIViewController {
         settingVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(settingVC, animated: true)
     }
+    
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
         writeDiaryVC.modalPresentationStyle = .automatic
@@ -67,6 +68,7 @@ class CalendarVC: UIViewController {
     private func setNavigationBar() {
         navigationItem.rightBarButtonItem = settingButton
         navigationController?.navigationBar.tintColor = UIColor(named: "mainTheme")
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "캘린더", style: .plain, target: nil, action: nil)
     }
     
     private func addSubviewsCalendarVC() {

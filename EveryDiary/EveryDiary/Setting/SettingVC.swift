@@ -17,6 +17,7 @@ import GoogleSignIn
 class SettingVC: UIViewController {
         
     private var loginStatus: Bool = false
+    
     private var dataSource = [CellModel]()
     
     private lazy var tableView: UITableView = {
@@ -26,13 +27,11 @@ class SettingVC: UIViewController {
         tableView.register(SettingCell.self, forCellReuseIdentifier: SettingCell.id)
         tableView.register(ProfileCell.self, forCellReuseIdentifier: ProfileCell.id)
         tableView.register(SignOutCell.self, forCellReuseIdentifier: SignOutCell.id)
-        tableView.rowHeight = 100
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .mainBackground
         tableView.separatorStyle = .none
         return tableView
     }()
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,8 +41,6 @@ class SettingVC: UIViewController {
         observeAuthState()
         }
     
-    
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
@@ -52,11 +49,44 @@ class SettingVC: UIViewController {
                             scrollPosition: .top)
     }
     
+    private func addSubviewsSettingVC() {
+        view.backgroundColor = .mainBackground
+        view.addSubview(tableView)
+        setNavigationBar()
+    }
     
+    private func autoLayoutSettingVC() {
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(10)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(10)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-10)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(10)
+        }
+    }
+    
+    @objc func didTapLoginButton() {
+        let loginVC = LoginVC()
+        loginVC.modalPresentationStyle = .automatic
+        self.present(loginVC, animated: true)
+    }
+    
+    @objc func tapLogoutButton() {
+        signOutAlert()
+    }
+        
+    private func setNavigationBar() {
+        navigationItem.title = "설정"
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "설정", style: .plain, target: nil, action: nil)
+    }
+}
+
+// MARK: - 사용자의 로그인 상태 유무 감지 & 로그아웃 기능
+extension SettingVC {
+    // 로그인 상태 별 TableView의 구성
     private func refresh() {
         if let currentUser = Auth.auth().currentUser {
             self.dataSource = [
-                .profileItem(email: currentUser.email ?? "", name: currentUser.displayName ?? "", image: "profile"),
+                .profileItem(email: currentUser.email ?? "", name: currentUser.displayName ?? "", image: "profile", isLoggedIn: true),
                 .settingItem(title: "알림", iconImage: "notification", number: 1),
                 .settingItem(title: "잠금", iconImage: "lock", number: 2),
                 .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: true),
@@ -64,7 +94,7 @@ class SettingVC: UIViewController {
             ]
         } else {
             self.dataSource = [
-                .profileItem(email: "일기를 저장하려면 로그인해주세요", name: "Guest", image: "profile"),
+                .profileItem(email: "일기를 저장하려면 로그인해주세요", name: "Guest", image: "profile", isLoggedIn: false),
                 .settingItem(title: "알림", iconImage: "notification", number: 1),
                 .settingItem(title: "잠금", iconImage: "lock", number: 2),
                 .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: false),
@@ -73,6 +103,7 @@ class SettingVC: UIViewController {
         }
         tableView.reloadData()
     }
+    
     // Firebase 인증 상태 감지 메서드
      private func observeAuthState() {
          Auth.auth().addStateDidChangeListener { [weak self] (_, user) in
@@ -90,17 +121,7 @@ class SettingVC: UIViewController {
          }
      }
     
-    @objc func didTapLoginButton() {
-        let loginVC = LoginVC()
-        loginVC.modalPresentationStyle = .automatic
-        self.present(loginVC, animated: true)
-    }
-    
-    @objc func tapLogoutButton() {
-        signOutAlert()
-    }
-        
-    //사용자 로그아웃 기능
+    // 사용자 로그아웃 기능
     private func signOut() {
         let firebaseAuth = Auth.auth()
         do {
@@ -115,7 +136,7 @@ class SettingVC: UIViewController {
         }
     }
     
-    //사용자 로그아웃 재차 확인
+    // 사용자 로그아웃 재차 확인
     private func signOutAlert() {
         let alertController = UIAlertController(title: "알림", message: "로그아웃 하시겠습니까?", preferredStyle: .alert)
         let okAction = UIAlertAction(title: "확인", style: .default) { (_) in
@@ -129,7 +150,7 @@ class SettingVC: UIViewController {
         present(alertController, animated: true, completion: nil)
     }
     
-    //로그아웃 시, 나오는 알림창
+    // 로그아웃 시, 나오는 알림창
     private func signOutConfirmAlert() {
         let okAlert = UIAlertController(title: "확인", message: "로그아웃이 완료되었습니다.", preferredStyle: .alert)
         let okClick = UIAlertAction(title: "확인", style: .default) { _ in
@@ -138,14 +159,9 @@ class SettingVC: UIViewController {
             
         self.present(okAlert, animated: true, completion: nil)
     }
-    
-    
-    private func setNavigationBar() {
-        navigationItem.backBarButtonItem = UIBarButtonItem(title: "설정", style: .plain, target: nil, action: nil)
-    }
 }
 
-//MARK: - Firebase 사용자 회원탈퇴 & Apple 탈퇴
+// MARK: - Firebase 사용자 회원탈퇴 & Apple 탈퇴
 extension SettingVC {
     // Firebase에서 사용자 데이터 삭제
     func deleteUserDataFromFirebase() {
@@ -155,17 +171,19 @@ extension SettingVC {
             return
         }
         
+        // 사용자 계정 삭제
         currentUser.delete { error in
             if let error = error {
                 print("Error deleting user from Firebase: \(error.localizedDescription)")
             } else {
                 print("User successfully deleted from Firebase.")
+                // 사용자 계정에 저장되있던 모든 데이터 삭제
                 DiaryManager.shared.deleteUserData(for: currentUser.uid)
             }
         }
     }
 
-    //사용자에게 Firebase 회원탈퇴, Apple or Google 소셜아이디 등록 탈퇴하도록 안내하는 메시지 표시
+    // 사용자에게 Firebase 회원탈퇴, Apple or Google 소셜아이디 등록 탈퇴하도록 안내하는 메시지 표시
     func showDeleteAccountMessage() {
         let alert = UIAlertController(title: "회원 탈퇴하시겠습니까?", message: "일기에 저장된 모든 내용이 삭제되며  복구가 불가능해집니다. \n 그래도 진행하시겠습니까?", preferredStyle: .actionSheet)
         
@@ -181,7 +199,7 @@ extension SettingVC {
         present(alert, animated: true, completion: nil)
     }
     
-    //회원 탈퇴 시, 나오는 알림 창
+    // 회원 탈퇴 시, 나오는 알림 창
     func showDeleteAccountConfirmAlert() {
         let confirmAlert = UIAlertController(title: "회원 탈퇴", message: "회원 탈퇴가 완료되었습니다.", preferredStyle: .alert)
         let confirmAction = UIAlertAction(title: "확인", style: .default)
@@ -191,7 +209,7 @@ extension SettingVC {
         present(confirmAlert, animated: true, completion: nil)
     }
     
-    //Apple 계정 탈퇴
+    // Apple 계정 탈퇴
     func deleteUserDataFromApple() {
       let token = UserDefaults.standard.string(forKey: "refreshToken")
      
@@ -216,9 +234,9 @@ extension SettingVC {
           }
           task.resume()
       }
-      // Delete other information from the database...
+        // Firebase 회원 탈퇴
         deleteUserDataFromFirebase()
-      // Sign out on FirebaseAuth
+      // 마지막으로 Firebase 로그아웃
         do {
             try Auth.auth().signOut()
         } catch let signOutError as NSError {
@@ -227,37 +245,20 @@ extension SettingVC {
     }
 }
 
-
-// MARK: subView & autolayout 구성
-extension SettingVC {
-    private func addSubviewsSettingVC() {
-        view.backgroundColor = .mainBackground
-        view.addSubview(tableView)
-        setNavigationBar()
-    }
-    
-    private func autoLayoutSettingVC() {
-        tableView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(10)
-            make.leading.equalTo(view.safeAreaLayoutGuide).offset(10)
-            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-10)
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(10)
-        }
-    }
-}
-
 // MARK: - TableView 구성
 extension SettingVC : UITableViewDelegate, UITableViewDataSource {
+    // TableView의 Cell 갯수는 datasource의 조건에 따라 달라진다
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
     }
     
+    // 각 cell 별 커스텀
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch self.dataSource[indexPath.row] {
             
-        case let .profileItem(email, name, image):
+        case let .profileItem(email, name, image, _):
             let cell = tableView.dequeueReusableCell(withIdentifier: ProfileCell.id, for: indexPath) as! ProfileCell
-            cell.prapare(email: email, name: name, image: image)
+            cell.prapare(email: email, name: name, image: image, isLoggedIn: loginStatus)
             cell.backgroundColor = .mainBackground
             cell.loginButton.addTarget(self, action: #selector(didTapLoginButton), for: .touchUpInside)
             return cell
@@ -272,21 +273,14 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(withIdentifier: SignOutCell.id, for: indexPath) as! SignOutCell
             cell.prepare(title: title, iconImage: iconImage, isLoggedIn: loginStatus)
             cell.backgroundColor = .mainBackground
-            
-            
             return cell
-            
-            
         }
-
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedItem = dataSource[indexPath.row]
         
         switch selectedItem {
-        case .profileItem(_, _, _):
-                print("아무일도 일어나지 않음")
         case .settingItem(_, _, let number):
             switch number {
             case 1:
@@ -309,18 +303,23 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
             default:
                 print("Error")
             }
+        default:
+            print("No Any Action")
         }
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let item = dataSource[indexPath.row]
             switch item {
+            case .profileItem(_, _, _, _):
+                return 133
+            case .settingItem(_, _, _):
+                return 100
             case .signOutItem(_, _, _, isLoggedIn: false):
                 return 0
             default:
                 return 100
             }
-        
     }
 }
 

@@ -35,7 +35,7 @@ extension DiaryEntry {
 }
 
 enum CellModel {
-    case profileItem(email: String, name: String, image: String?)
+    case profileItem(email: String, name: String, image: String?, isLoggedIn: Bool)
     case settingItem(title: String, iconImage: String, number:Int)
     case signOutItem(title: String, iconImage: String, number:Int, isLoggedIn: Bool)
 }
