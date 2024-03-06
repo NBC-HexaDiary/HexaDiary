@@ -90,6 +90,8 @@ class WriteDiaryVC: UIViewController {
         return textField
     }()
     
+    private var newImage: UIImage?
+    
     private lazy var imageView: UIImageView = {
         let view = UIImageView()
         view.layer.cornerRadius = 10
@@ -133,33 +135,57 @@ extension WriteDiaryVC {
         dateFormatter.timeZone = TimeZone.current
         let formattedDateString = dateFormatter.string(from: selectedDate)
         
-        // 사용자가 입력한 정보를 DiaryEntry로 변환
+        // 이미지가 선택되었을 때 이미지 업로드 과정을 진행
+        if let image = newImage {
+            // FirebaseStorageManager를 사용해 이미지 업로드
+            FirebaseStorageManager.uploadImage(image: image, pathRoot: "diary_images") { [weak self] imageUrl in
+                guard let imageUrl = imageUrl else {
+                    print("Image upload failed")
+                    return
+                }
+                print("Image uploaded successfully. URL: \(imageUrl.absoluteString)")
+                
+                // DiaryEntry 생성 및 업로드
+                self?.createAndUploadDiaryEntry(
+                    with: self?.titleTextField.text ?? "",
+                    content: self?.contentTextView.text ?? "",
+                    dateString: formattedDateString,
+                    imageUrl: imageUrl.absoluteString
+                )
+            }
+        } else {
+            // 이미지가 없다면 바로 DiaryEntry 생성 및 업로드
+            createAndUploadDiaryEntry(
+                with: self.titleTextField.text ?? "",
+                content: self.contentTextView.text ?? "",
+                dateString: formattedDateString
+            )
+            print("No image selected, creating entry without an image.")
+        }
+    }
+    
+    func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, imageUrl: String? = nil) {
         let newDiaryEntry = DiaryEntry(
-            title: titleTextField.text ?? "",
-            content: contentTextView.text,
-            dateString: formattedDateString,
+            title: title,
+            content: content,
+            dateString: dateString,
             emotion: selectedEmotion,
-            weather: selectedWeather)
-//        (
-//            title: titleTextField.text ?? "",
-//            content: contentTextView.text,
-//            date: formattedDateString,
-//            emotion: selectedEmotion,
-//            weather: selectedWeather
-//        )
+            weather: selectedWeather,
+            imageURL: imageUrl
+        )
         
-        // DiaryManager를 사용해 Firestore에 저장
+        // DiaryManager를 사용해 FireStore에 저장
         diaryManager.addDiary(diary: newDiaryEntry) { error in
             if let error = error {
-                // 에러 처리
+                // 에러처리
                 print("Error saving diary to Firestore: \(error.localizedDescription)")
             } else {
                 // 에러가 없다면, 화면 닫기
                 self.dismiss(animated: true, completion: nil)
             }
         }
-        self.dismiss(animated: true)
     }
+    
     @objc func updateButtonTapped() {
         guard let diaryID = self.diaryID else { return }
         
@@ -192,21 +218,6 @@ extension WriteDiaryVC {
         self.dismiss(animated: true)
     }
     
-//    func configureWithDiary(diary: DiaryEntry) {
-//            // UI 컴포넌트에 일기 내용 반영
-//            titleTextField.text = diary.title
-//            contentTextView.text = diary.content
-//            
-//            // 날짜 형식 설정
-//            let dateFormatter = DateFormatter()
-//            dateFormatter.locale = Locale(identifier: "ko_KR")
-//            dateFormatter.dateFormat = "yyyy. MM. dd(E)"
-//            let dateString = dateFormatter.string(from: diary.date)
-//            datePickingButton.setTitle(dateString, for: .normal)
-//            
-//            emotionButton.setImage(UIImage(named: diary.emotion)?.withRenderingMode(.alwaysOriginal), for: .normal)
-//            weatherButton.setImage(UIImage(named: diary.weather)?.withRenderingMode(.alwaysOriginal), for: .normal)
-//        }
     func activeEditMode(with diary: DiaryEntry) {
         // UI 내 일기 내용 반영
         self.diaryID = diary.id
@@ -254,15 +265,17 @@ extension WriteDiaryVC: UIImagePickerControllerDelegate, UINavigationControllerD
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        var newImage: UIImage? = nil
         
         if let selectedImage = info[UIImagePickerController.InfoKey.editedImage] {
             newImage = selectedImage as? UIImage
         } else if let selectedImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             newImage = selectedImage
         }
+        // 선택한 이미지를 newImage 변수에 할당하고, 이미지 뷰의 높이를 업데이트
         self.imageView.image = newImage
         updateImageViewHeight(with: newImage)
+        
+        // 이미지 선택기 컨트롤러 닫기
         dismiss(animated: true, completion: nil)
     }
     

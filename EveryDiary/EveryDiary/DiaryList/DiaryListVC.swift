@@ -169,10 +169,10 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
                         if let error = error {
                             print("Error deleting diary: \(error.localizedDescription)")
                         } else {
-                            // 삭제 후 UI업데이트
-                            self.monthlyDiaries[month]?.remove(at: selectedIndexPath.row)
-                            self.journalCollectionView.deleteItems(at: [selectedIndexPath])
-                            self.loadDiaries()
+                            // 삭제 후 UI업데이트 -> diaryManager에서 처리되고 있음
+//                            self.monthlyDiaries[month]?.remove(at: selectedIndexPath.row)
+//                            self.journalCollectionView.deleteItems(at: [selectedIndexPath])
+//                            self.loadDiaries()
                         }
                     }
                 }
@@ -502,12 +502,12 @@ extension DiaryListVC: UIGestureRecognizerDelegate {
         }
         
         // 0.3초간 투명도를 1로 만들어준다.
-        UIView.animate(withDuration: 0.1) {
+        UIView.animate(withDuration: 0.2) {
             self.blurEffectView?.alpha = 1
         }
     }
     @objc private func blurViewTapped() {
-        UIView.animate(withDuration: 0.1, animations: {
+        UIView.animate(withDuration: 0.2, animations: {
             self.blurEffectView?.alpha = 0
         }) { _ in
             self.removeBlurEffect()
@@ -516,6 +516,7 @@ extension DiaryListVC: UIGestureRecognizerDelegate {
 
     private func removeBlurEffect() {
         view.window?.viewWithTag(6)?.removeFromSuperview()
+        editTableView.removeFromSuperview()
     }
 
     private func createMaskLayer(excludeFrame frame: CGRect, in bounds: CGRect) -> CALayer {
