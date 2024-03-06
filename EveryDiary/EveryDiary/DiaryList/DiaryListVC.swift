@@ -98,8 +98,9 @@ class DiaryListVC: UIViewController {
         
         // 삭제필요 : UILongPressGestureRecognizer 관련 메서드
 //        setupLongGestureRecognizerOnCollectionView()
+//        setupEditTableView()
         
-        setupEditTableView()
+        searchBar.delegate = self
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -263,6 +264,7 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
         themeLabel.isHidden = true
         self.navigationItem.leftBarButtonItem?.isHidden = false
         navigationItem.rightBarButtonItems = [settingButton, cancelButton]
+        searchBar.becomeFirstResponder()
     }
     @objc private func tabSettingBTN() {
         let settingVC = SettingVC()
@@ -273,6 +275,9 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
         themeLabel.isHidden = false
         self.navigationItem.leftBarButtonItem?.isHidden = true
         navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
+        searchBar.text = ""
+        searchBar.resignFirstResponder() // 키보드 숨김
+        loadDiaries() // 원래의 일기목록 로드
     }
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
@@ -542,10 +547,11 @@ extension DiaryListVC: UICollectionViewDataSource {
 //    }
 //}
 
+// Context Menu 관련
 extension DiaryListVC {
-    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
-        <#code#>
-    }
+//    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
+//        <#code#>
+//    }
 }
 
 extension DiaryListVC: UICollectionViewDelegateFlowLayout {
@@ -558,6 +564,37 @@ extension DiaryListVC: UICollectionViewDelegateFlowLayout {
         let width = journalCollectionView.bounds.width
         let height = journalCollectionView.bounds.height / 4.2
         return CGSize(width: width, height: height)
+    }
+}
+
+//MARK: SearchBar 관련 메서드
+extension DiaryListVC: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            loadDiaries()
+        } else {
+            var filteredDiaries: [String: [DiaryEntry]] = [:]
+            
+            for (month, diaries) in monthlyDiaries {
+                filteredDiaries[month] = diaries.filter { diary in
+                    let matchedTitle = diary.title.range(of: searchText, options: .caseInsensitive) != nil
+                    let matchedContent = diary.content.range(of: searchText, options: .caseInsensitive) != nil
+                    return matchedTitle || matchedContent
+                }
+            }
+            monthlyDiaries = filteredDiaries
+            months = monthlyDiaries.keys.sorted().reversed()
+            journalCollectionView.reloadData()
+        }
+    }
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()    // 키보드 숨김
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchBar.resignFirstResponder() // 키보드 숨김
+        loadDiaries() // 원래의 일기목록 로드
     }
 }
 
