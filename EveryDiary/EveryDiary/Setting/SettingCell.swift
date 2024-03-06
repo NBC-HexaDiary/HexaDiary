@@ -16,7 +16,6 @@ class SettingCell: UITableViewCell {
     private lazy var iconImageView : UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
@@ -24,7 +23,6 @@ class SettingCell: UITableViewCell {
         let label = UILabel()
         label.font = UIFont(name: "SFProRounded-Regular", size: 20)
         label.textColor = .mainTheme
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
@@ -86,7 +84,7 @@ class SettingCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 16, left: 4, bottom: 16, right: 4))
+        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 10, left: 4, bottom: 10, right: 4))
     }
     
     func prepare(title: String, iconImage: String) {
