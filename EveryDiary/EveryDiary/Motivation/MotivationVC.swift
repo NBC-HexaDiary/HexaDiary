@@ -13,8 +13,6 @@ import SnapKit
 }
 
 class MotivationVC: UIViewController, BuildingViewDelegate {
-    //diaryCount 값이 변경될 때마다 호출
-    
     let buildings = BuildingView()
     
     private lazy var background : UIImageView = {
@@ -35,25 +33,37 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
         return button
     }()
     
+    private lazy var honorVCButton : UIBarButtonItem = {
+        let honorVCButton = UIBarButtonItem(title: "", image: UIImage(named: "honor"), target: self, action: #selector(honorVCBTN))
+        return honorVCButton
+    }()
+    
     private lazy var monthLabel: UILabel = {
         let monthLabel = UILabel()
         let currentMonth = Calendar.current.component(.month, from: Date())
         monthLabel.text = "\(currentMonth)월"
         monthLabel.font = UIFont(name: "SFProDisplay-Bold", size: 25)
-        monthLabel.textColor = UIColor(named: "mainText")
+        monthLabel.textColor = .white
         return monthLabel
     }()
     
     private lazy var countLabel: UILabel = {
         let countLabel = UILabel()
         countLabel.font = UIFont(name: "SFProDisplay-Regular", size: 16)
-        countLabel.textColor = UIColor(named: "mainText")
+        countLabel.textColor = .white
         return countLabel
     }()
     
     private func updateCountLabel() {
         let diaryCount = buildings.diaryDays.count
-        countLabel.text = "\(diaryCount)개 작성"
+        let date = Date()
+        let calendar = Calendar.current
+        let range = calendar.range(of: .day, in: .month, for: date)
+        if let numberOfDays = range?.count {
+            countLabel.text = "\(numberOfDays)일 중 \(diaryCount)개 작성했어요."
+        } else {
+            print("error: diaryCount error")
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -85,6 +95,12 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
         self.present(writeDiaryVC, animated: true)
     }
     
+    @objc private func honorVCBTN() {
+        let honorVC = HonorVC()
+        honorVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(honorVC, animated: true)
+    }
+    
     private func addSubview() {
         view.addSubview(background)
         view.addSubview(buildings)
@@ -110,13 +126,14 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
             make.centerX.equalToSuperview()
         }
         countLabel.snp.makeConstraints { make in
-            make.top.equalTo(monthLabel.snp.bottom).offset(8)
+            make.top.equalTo(monthLabel.snp.bottom).offset(16)
             make.centerX.equalToSuperview()
         }
     }
     
     private func setNavigationBar() {
         navigationItem.rightBarButtonItem = settingButton
-        navigationController?.navigationBar.tintColor = UIColor(named: "main")
+        navigationItem.leftBarButtonItem = honorVCButton
+        navigationController?.navigationBar.tintColor = .white
     }
 }

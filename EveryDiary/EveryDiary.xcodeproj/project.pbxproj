@@ -240,8 +240,8 @@
 		6BB3CE372B85F07C005BC3E1 /* Motivation */ = {
 			isa = PBXGroup;
 			children = (
-				6B42613C2B8C579F00F12CE3 /* BuildingView.swift */,
 				6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */,
+				6B42613C2B8C579F00F12CE3 /* BuildingView.swift */,
 				6BA0115A2B886A9100A26CE0 /* HonorVC.swift */,
 			);
 			path = Motivation;
