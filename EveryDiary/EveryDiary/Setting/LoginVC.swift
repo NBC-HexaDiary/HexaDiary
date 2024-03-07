@@ -15,9 +15,7 @@ import Firebase
 import GoogleSignIn
 
 class LoginVC: UIViewController {
-    
-    weak var delegate: LoginViewDelegate?
-    
+        
     fileprivate var currentNonce: String?
     
     private lazy var backgroundImage : UIImageView = {
@@ -48,7 +46,6 @@ class LoginVC: UIViewController {
         closeButton.addTarget(self, action: #selector(tapCloseButton), for: .touchUpInside)
         return closeButton
     }()
-    
     
     @objc func tapAppleLoginButton() {
         startSignInWithAppleFlow()
@@ -96,6 +93,50 @@ class LoginVC: UIViewController {
     }
 }
 
+// MARK: - Views & Layouts
+extension LoginVC {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        addSubViewsLoginVC()
+        autoLayoutLoginVC()
+    }
+    
+    private func addSubViewsLoginVC() {
+        view.addSubview(backgroundImage)
+        view.sendSubviewToBack(backgroundImage)
+        view.addSubview(signGoogleButton)
+        view.addSubview(signAppleButton)
+        view.addSubview(closeButton)
+    }
+    
+    private func autoLayoutLoginVC() {
+        closeButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+            make.right.equalTo(view.safeAreaLayoutGuide).inset(16)
+            make.width.height.equalTo(25)
+        }
+        closeButton.imageView?.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        signGoogleButton.snp.makeConstraints { make in
+            make.centerX.equalTo(view.safeAreaLayoutGuide)
+            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(40)
+            make.width.equalTo(view.safeAreaLayoutGuide).offset(-32)
+            make.height.equalTo(60)
+        }
+        backgroundImage.snp.makeConstraints { make in
+            make.edges.equalTo(view).inset(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0))
+        }
+        signAppleButton.snp.makeConstraints { make in
+            make.centerX.equalTo(view.safeAreaLayoutGuide)
+            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-40)
+            make.width.equalTo(view.safeAreaLayoutGuide).offset(-32)
+            make.height.equalTo(60)
+        }
+    }
+}
+
 // MARK: - Apple로 로그인 및 Firebase 인증
 extension LoginVC {
     // 로그인 요청마다 임의의 문자열 'nonce' 생성
@@ -110,7 +151,6 @@ extension LoginVC {
                 "Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)"
             )
         }
-        
         let charset: [Character] =
         Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
         
@@ -118,7 +158,6 @@ extension LoginVC {
             // Pick a random character from the set, wrapping around if needed.
             charset[Int(byte) % charset.count]
         }
-        
         return String(nonce)
     }
     
@@ -131,7 +170,6 @@ extension LoginVC {
         let hashString = hashedData.compactMap {
             String(format: "%02x", $0)
         }.joined()
-        
         return hashString
     }
     
@@ -145,7 +183,6 @@ extension LoginVC {
         request.requestedScopes = [.fullName, .email]
         request.nonce = sha256(nonce)
         
-        
         let authorizationController = ASAuthorizationController(authorizationRequests: [request])
         authorizationController.delegate = self
         authorizationController.presentationContextProvider = self
@@ -153,6 +190,7 @@ extension LoginVC {
     }
 }
 
+// MARK: - Delegate 패턴을 이용한 Apple 로그인 처리
 // delegate를 구현하여 Apple의 응답을 처리.
 // 로그인에 성공했으면 해시되지 않는 nonce가 포함된 Apple의 응답에서 ID 토큰을 이용하여 Firebase에 인증
 @available(iOS 13.0, *)
@@ -161,30 +199,29 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
         return self.view.window!
     }
     
-    
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
             guard let nonce = currentNonce else {
                 fatalError("Invalid state: A login callback was received, but no login request was sent.")
             }
             
-            // get Token
+            // identityToken 가져오기
             guard let appleIDToken = appleIDCredential.identityToken else {
                 print("Unable to fetch identity token")
                 return
             }
             
-            // Token String
+            // 가져온 identityToken, String 타입 변환
             guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
                 print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
                 return
             }
             
-            // Initialize a Firebase credential, including the user's full name.
+            // 변환한 identityToken을 Firebase 로그인 인증에 맞게 할당
             let credential = OAuthProvider.credential(withProviderID: "apple.com",
                                                       idToken: idTokenString,
                                                       rawNonce: nonce)
-            // Sign in with Firebase.
+            // Firebase에 로그인
             Auth.auth().signIn(with: credential) { (authResult, error) in
                 if let error = error {
                     // Error. If error.code == .MissingOrInvalidNonce, make sure
@@ -207,10 +244,10 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                     print("Full Name not provided")
                 }
                 self.dismiss(animated: true, completion: nil)
-                // User is signed in to Firebase with Apple.
+                // Apple 로그인을 통한 Firebase 로그인 성공 & SettingVC로 자동 전환
             }
 
-            // authorization Code to Unregister! => get user authorizationCode when login.
+            // 사용자의 authorizationCode를 로그인 시 미리 가져온다. 회원 탈퇴 시, 필요하기 때문이다.
             if let authorizationCode = appleIDCredential.authorizationCode, let codeString = String(data: authorizationCode, encoding: .utf8) {
                 let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/getRefreshToken?code=\(codeString)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "https://apple.com")!
                 let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
@@ -232,56 +269,4 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
         print("로그인 실패 - \(error.localizedDescription)")
     }
     
-}
-
-
-//MARK: - Views & Layouts
-extension LoginVC {
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        addSubViewsLoginVC()
-        autoLayoutLoginVC()
-    }
-    
-
-    private func addSubViewsLoginVC() {
-        view.addSubview(backgroundImage)
-        view.sendSubviewToBack(backgroundImage)
-        view.addSubview(signGoogleButton)
-        view.addSubview(signAppleButton)
-        view.addSubview(closeButton)
-    }
-    
-    private func autoLayoutLoginVC() {
-        closeButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-            make.left.equalTo(view.safeAreaLayoutGuide).offset(16)
-            make.width.height.equalTo(25)
-        }
-        closeButton.imageView?.snp.makeConstraints({ make in
-            make.edges.equalToSuperview()
-        })
-        
-        signGoogleButton.snp.makeConstraints { make in
-            make.centerX.equalTo(view.safeAreaLayoutGuide)
-            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(40)
-            make.width.equalTo(view.safeAreaLayoutGuide).offset(-32)
-            make.height.equalTo(60)
-        }
-        backgroundImage.snp.makeConstraints { make in
-            make.edges.equalTo(view).inset(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0))
-        }
-        signAppleButton.snp.makeConstraints { make in
-            make.centerX.equalTo(view.safeAreaLayoutGuide)
-            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-40)
-            make.width.equalTo(view.safeAreaLayoutGuide).offset(-32)
-            make.height.equalTo(60)
-        }
-    }
-    
-}
-
-protocol LoginViewDelegate: AnyObject {
-    func modalViewDismiss()
 }

@@ -27,7 +27,7 @@ class TabBarController: UITabBarController {
         self.viewControllers = [firstVC,secondVC,thirdVC]
         
         firstVC.tabBarItem = UITabBarItem(title: "나의 일기",image: UIImage(named: "diary"), tag: 1)
-        secondVC.tabBarItem = UITabBarItem(title: "불 켜기",image: UIImage(named: "light"), tag: 2)
+        secondVC.tabBarItem = UITabBarItem(title: "여정",image: UIImage(named: "building"), tag: 2)
         thirdVC.tabBarItem = UITabBarItem(title: "캘린더",image: UIImage(named: "calendar"), tag: 3)
     }
     
@@ -35,6 +35,6 @@ class TabBarController: UITabBarController {
         let tabBar: UITabBar = self.tabBar
         tabBar.tintColor = .mainTheme
         tabBar.unselectedItemTintColor = .subText
-        tabBar.backgroundColor = .subTheme
+        tabBar.backgroundColor = .mainCell
     }
 }

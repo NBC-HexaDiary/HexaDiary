@@ -176,10 +176,6 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
                         if let error = error {
                             print("Error deleting diary: \(error.localizedDescription)")
                         } else {
-                            // 삭제 후 UI업데이트 -> diaryManager에서 처리되고 있음
-//                            self.monthlyDiaries[month]?.remove(at: selectedIndexPath.row)
-//                            self.journalCollectionView.deleteItems(at: [selectedIndexPath])
-//                            self.loadDiaries()
                         }
                     }
                 }

@@ -11,37 +11,39 @@ import SnapKit
 
 class CalendarVC: UIViewController {
     
+    private var diaries: [DiaryEntry] = []
+    
     private lazy var settingButton : UIBarButtonItem = {
-        let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
-        return button
+        let settingButton = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
+        return settingButton
     }()
     
     private lazy var calendarLabel : UILabel = {
-        let label = UILabel()
-        label.text = "캘린더"
-        label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
-        label.textColor = UIColor(named: "mainTheme")
-        return label
+        let calendarLabel = UILabel()
+        calendarLabel.text = "캘린더"
+        calendarLabel.font = UIFont(name: "SFProDisplay-Bold", size: 33)
+        calendarLabel.textColor = UIColor(named: "mainTheme")
+        return calendarLabel
     }()
     
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
-        let button = UIButton(configuration: config)
-        button.setImage(UIImage(named: "write"), for: .normal)
-        button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
-        return button
+        let writeDiaryButton = UIButton(configuration: config)
+        writeDiaryButton.setImage(UIImage(named: "write"), for: .normal)
+        writeDiaryButton.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
+        return writeDiaryButton
     }()
     
     private lazy var calendarView : UICalendarView = {
-        var view = UICalendarView()
-        view.wantsDateDecorations = true
-        return view
+        var calendarView = UICalendarView()
+        calendarView.wantsDateDecorations = true
+        return calendarView
     }()
     
     private let safeArea: UIView = {
-        let vc = UIView()
-        vc.backgroundColor = .black
-        return vc
+        let safeAreaView = UIView()
+        safeAreaView.backgroundColor = .black
+        return safeAreaView
     }()
     
     
@@ -53,11 +55,19 @@ class CalendarVC: UIViewController {
         configurateViews()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        dateSelectCalendar()
+        loadDiaries()
+    }
+    
     @objc private func tabSettingBTN() {
         let settingVC = SettingVC()
         settingVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(settingVC, animated: true)
     }
+    
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
         writeDiaryVC.modalPresentationStyle = .automatic
@@ -67,6 +77,7 @@ class CalendarVC: UIViewController {
     private func setNavigationBar() {
         navigationItem.rightBarButtonItem = settingButton
         navigationController?.navigationBar.tintColor = UIColor(named: "mainTheme")
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "캘린더", style: .plain, target: nil, action: nil)
     }
     
     private func addSubviewsCalendarVC() {
@@ -92,6 +103,36 @@ class CalendarVC: UIViewController {
         }
     }
     
+    private func loadDiaries() {
+        DiaryManager.shared.fetchDiaries { [weak self] (diaries, error) in
+            guard let self = self, let diaries = diaries, error == nil else {
+                print("일기데이터 로드 실패: \(String(describing: error))")
+                return
+            }
+            
+            // 로드된 일기 데이터의 개수를 출력
+            print("로드된 일기 개수: \(diaries.count)")
+            
+            // 로드된 각 일기의 상세 정보를 출력
+            diaries.forEach { diary in
+                print("제목: \(diary.title), 날짜: \(diary.dateString), 내용: \(diary.content), 나알짜: \(diary.date)")
+            }
+
+            self.diaries = diaries
+            let updateDateComponents = Set(diaries.compactMap { diary -> DateComponents? in
+                // dateString을 Date 객체로 변환합니다.
+                guard let diaryDate = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) else {
+                    return nil
+                }
+                
+                // 변환된 Date 객체로부터 DateComponents를 추출합니다.
+                let calendar = Calendar.current
+                return calendar.dateComponents([.year, .month, .day], from: diaryDate)
+            })
+            self.calendarView.reloadDecorations(forDateComponents: Array(updateDateComponents), animated: true)
+        }
+    }
+    
     private func configurateViews() {
         customCalendar()
         setDateComponents()
@@ -102,8 +143,9 @@ class CalendarVC: UIViewController {
     private func customCalendar() {
         calendarView.tintColor = .mainTheme
         calendarView.backgroundColor = .mainCell
-        calendarView.calendar = Calendar(identifier: .gregorian)
-        calendarView.locale = Locale(identifier: "ko-KR")
+        calendarView.calendar = .current
+        calendarView.locale = .current
+        calendarView.timeZone = TimeZone(abbreviation: "UTC")
         calendarView.fontDesign = .rounded
         calendarView.layer.cornerRadius = 10
         calendarView.delegate = self
@@ -130,30 +172,47 @@ class CalendarVC: UIViewController {
 }
 
 extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDelegate {
-    func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
-        let vc = CalendarListVC()
-        vc.hidesBottomBarWhenPushed = true
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    
+   
     func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
-        guard let day = dateComponents.day else {
+        guard let date = Calendar.current.date(from: dateComponents) else {
             return nil
         }
-        if day.isMultiple(of: 2) {
-            return .default(color: .subBackground, size: .medium)
-        } else {
-            return .default(color: .mainTheme, size: .medium)
+        let hasDiary = diaries.contains { diary in
+            guard let diaryDate = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) else { return false }
+            let isSameDay = Calendar.current.isDate(diaryDate, inSameDayAs: date)
+            return isSameDay
+        }
+        return hasDiary ? .default(color: .mainTheme, size: .medium) : nil
+    }
+    
+    func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
+        guard let dateComponents = dateComponents,
+              let date = Calendar.current.date(from: dateComponents) else {
+            return
         }
         
-    }
-    func dateSelection(_ selection: UICalendarSelectionSingleDate, canSelectDate dateComponents: DateComponents?) -> Bool {
-        guard let day = dateComponents?.day else { return false }
-        if day % 2 == 0 {
-            return false
-        } else {
-            return true
+        // 선택된 날짜에 해당하는 일기들을 필터링합니다.
+        let selectedDiaries = diaries.filter { diary in
+            guard let diaryDate = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) else { return false }
+            return Calendar.current.isDate(diaryDate, inSameDayAs: date)
+        }
+        
+        // CalendarListVC로 이동하고 선택된 일기들을 전달합니다.
+        if !selectedDiaries.isEmpty {
+            let calendarListVC = CalendarListVC()
+            calendarListVC.selectedDiaries = selectedDiaries // CalendarListVC에 selectedDiaries 프로퍼티 추가 필요
+            calendarListVC.hidesBottomBarWhenPushed = true
+            navigationController?.pushViewController(calendarListVC, animated: true)
         }
     }
+
 }
 
+extension DateFormatter {
+    static let yyyyMMddHHmmss: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        return formatter
+    }()
+}

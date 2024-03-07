@@ -41,6 +41,7 @@ class WeatherService: NSObject, CLLocationManagerDelegate {
             guard let data = data, error == nil else {
                 return completion(.failure(.noData))
             }
+            
             do {
                 let weatherResponse = try JSONDecoder().decode(WeatherResponse.self, from: data)
                 completion(.success(weatherResponse))

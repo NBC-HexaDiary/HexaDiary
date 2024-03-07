@@ -17,14 +17,12 @@ class SignOutCell: UITableViewCell {
         let deleteTitleLabel = UILabel()
         deleteTitleLabel.font = UIFont(name: "SFProRounded-Regular", size: 20)
         deleteTitleLabel.textColor = .mainError
-        deleteTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         return deleteTitleLabel
     }()
     
     private lazy var signOutImageView : UIImageView = {
         let signOutImageView = UIImageView()
         signOutImageView.contentMode = .scaleAspectFit
-        signOutImageView.translatesAutoresizingMaskIntoConstraints = false
         return signOutImageView
     }()
     
@@ -75,7 +73,7 @@ class SignOutCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 16, left: 4, bottom: 16, right: 4))
+        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 10, left: 4, bottom: 10, right: 4))
     }
     
     func prepare(title: String, iconImage: String, isLoggedIn: Bool) {
