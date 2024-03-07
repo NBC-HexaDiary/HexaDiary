@@ -87,11 +87,11 @@ class ProfileCell: UITableViewCell {
             make.centerY.equalToSuperview().offset(-15)
             make.leading.equalTo(profileImageView.snp.trailing).offset(16)
             make.trailing.equalTo(loginButton.snp.leading).inset(16)
-            make.bottom.equalTo(emailLabel.snp.top).offset(-6)
+            make.bottom.equalTo(emailLabel.snp.top).offset(-10)
             make.height.equalTo(28)
         }
         emailLabel.snp.makeConstraints { make in
-            make.leading.equalTo(profileImageView.snp.trailing).offset(18)
+            make.leading.equalTo(profileImageView.snp.trailing).offset(16)
             make.trailing.equalTo(loginButton.snp.leading).inset(16)
             make.height.equalTo(20)
         }
