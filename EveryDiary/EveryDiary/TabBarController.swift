@@ -35,6 +35,8 @@ class TabBarController: UITabBarController {
         let tabBar: UITabBar = self.tabBar
         tabBar.tintColor = .mainTheme
         tabBar.unselectedItemTintColor = .subText
-        tabBar.backgroundColor = .mainCell
+        tabBar.backgroundColor = .mainBackground
+        tabBar.layer.borderColor = UIColor(named: "mainTheme")?.cgColor
+        tabBar.layer.borderWidth = 0.2
     }
 }

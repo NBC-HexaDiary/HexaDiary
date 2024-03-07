@@ -29,6 +29,10 @@ class CalendarVC: UIViewController {
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let writeDiaryButton = UIButton(configuration: config)
+        writeDiaryButton.layer.shadowRadius = 3
+        writeDiaryButton.layer.borderColor = UIColor(named: "mainCell")?.cgColor
+        writeDiaryButton.layer.shadowOpacity = 0.3
+        writeDiaryButton.layer.shadowOffset = CGSize(width: 0, height: 0)
         writeDiaryButton.setImage(UIImage(named: "write"), for: .normal)
         writeDiaryButton.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return writeDiaryButton
@@ -93,8 +97,9 @@ class CalendarVC: UIViewController {
         }
         calendarView.snp.makeConstraints { make in
             make.centerX.equalTo(view)
-            make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
-            make.top.equalTo(calendarLabel.snp.bottom).offset(10)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(10)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-10)
+            make.top.equalTo(calendarLabel.snp.bottom).offset(20)
         }
         calendarLabel.snp.makeConstraints { make in
             make.top.equalTo(view).offset(50)
@@ -143,9 +148,13 @@ class CalendarVC: UIViewController {
     private func customCalendar() {
         calendarView.tintColor = .mainTheme
         calendarView.backgroundColor = .mainCell
+        calendarView.layer.shadowRadius = 3
+        calendarView.layer.shadowColor = UIColor(named: "mainTheme")?.cgColor
+        calendarView.layer.shadowOpacity = 0.1
+        calendarView.layer.shadowOffset = CGSize(width: 0, height: 0)
         calendarView.calendar = .current
         calendarView.locale = .current
-        calendarView.timeZone = TimeZone(abbreviation: "UTC")
+        calendarView.timeZone = .current
         calendarView.fontDesign = .rounded
         calendarView.layer.cornerRadius = 10
         calendarView.delegate = self
@@ -205,14 +214,13 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
             navigationController?.pushViewController(calendarListVC, animated: true)
         }
     }
-
 }
 
 extension DateFormatter {
     static let yyyyMMddHHmmss: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        formatter.timeZone = .current
         return formatter
     }()
 }
