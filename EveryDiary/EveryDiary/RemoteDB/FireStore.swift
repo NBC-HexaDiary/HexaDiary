@@ -4,6 +4,7 @@
 //
 //  Created by t2023-m0044 on 2/23/24.
 //
+// 현재 날짜가 아니면 날씨가 안뜨도록 -> 담주
 import Foundation
 
 import Firebase
@@ -286,11 +287,3 @@ class DiaryManager {
         }
     }
 }
-//익명 사용자를 영구 계정으로 전환
-//DiaryManager.shared.convertAnonymousUserToPermanentAccount(idToken: idToken, accessToken: user.accessToken.tokenString) { error in
-//    if let error = error {
-//        print("Error converting anonymous user to permanent account: \(error.localizedDescription)")
-//    } else {
-//        print("Anonymous user converted to permanent account successfully")
-//    }
-//}

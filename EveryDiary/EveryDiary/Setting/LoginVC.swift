@@ -81,12 +81,21 @@ class LoginVC: UIViewController {
             let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
             
             // 사용자 정보 토큰 -> Firebase에 로그인 프로세스
-            Auth.auth().signIn(with: credential) { result, error in
+            Auth.auth().signInAnonymously { authResult, error in
                 if let error = error {
                     print(error.localizedDescription)
                     return
                 }
+                guard let user = authResult?.user else { return }
                 print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
+                //익명 사용자를 영구 계정으로 전환
+                user.link(with: credential) { authResult, error in
+                    if let error = error {
+                        print("Error converting anonymous user to permanent account: \(error.localizedDescription)")
+                    } else {
+                        print("Anonymous user converted to permanent account successfully")
+                    }
+                }
                 self.dismiss(animated: true, completion: nil)
             }
         }
