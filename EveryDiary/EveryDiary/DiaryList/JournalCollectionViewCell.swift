@@ -30,7 +30,7 @@ class JournalCollectionViewCell: UICollectionViewCell {
         label.font = UIFont(name: "SFProDisplay-Regular", size: 12)
         return label
     }()
-    private lazy var imageView: UIImageView = {
+    lazy var imageView: UIImageView = {
         let view = UIImageView()
         return view
     }()
@@ -57,12 +57,15 @@ class JournalCollectionViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    func setJournalCollectionViewCell(title: String, content: String, weather: String, emotion: String, date: String) {
+    func setJournalCollectionViewCell(title: String, content: String, weather: String, emotion: String, date: String, imageName: String? = nil) {
         contentTitle.text = title
         contentText.text = content
         weatherIcon.image = UIImage(named: weather)
         emotionIcon.image = UIImage(named: emotion)
         dateOfWriting.text = date
+        if let imageName = imageName {
+            imageView.image = UIImage(named: imageName)
+        }
     }
 }
 
