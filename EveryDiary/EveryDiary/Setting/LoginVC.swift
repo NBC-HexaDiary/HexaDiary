@@ -90,8 +90,14 @@ class LoginVC: UIViewController {
                 print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
                 //익명 사용자를 영구 계정으로 전환
                 user.link(with: credential) { authResult, error in
-                    if let error = error {
-                        print("Error converting anonymous user to permanent account: \(error.localizedDescription)")
+                    if error != nil {
+                        Auth.auth().signIn(with: credential) { authResult, error in
+                            if let error = error {
+                                print("자격 증명으로 로그인 중 오류 발생: \(error.localizedDescription)")
+                                return
+                            }
+                            self.dismiss(animated: true, completion: nil)
+                        }
                     } else {
                         print("Anonymous user converted to permanent account successfully")
                     }

@@ -89,6 +89,14 @@ class DiaryManager {
                 
                 diaryWithWeather.weather = weatherDescription
                 
+                // 현재 날짜 가져오기
+                let currentDate = Date()
+                
+                // 날짜가 현재 날짜와 다르다면 날씨를 비어 있도록 설정
+                if !Calendar.current.isDate(diary.date, inSameDayAs: currentDate) {
+                    diaryWithWeather.weather = "" // 혹은 "Unknown"으로 설정 가능
+                }
+                
                 // 다이어리 추가
                 var newDiaryWithUserID = diaryWithWeather
                 newDiaryWithUserID.userID = userID
