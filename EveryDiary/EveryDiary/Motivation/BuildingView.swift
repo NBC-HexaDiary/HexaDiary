@@ -187,7 +187,6 @@ class BuildingView: UIView {
     }
     
     func drawWindowInBuilding() {
-//        print("drawWindowInBuilding() called")
         var windowOrder = 1
         let diaryCount = diaryDays.count
         if diaryCount <= 7 {
@@ -248,7 +247,6 @@ class BuildingView: UIView {
 
 //MARK: firebase
 extension BuildingView {
-    
     //특정 월에 대한 일기 데이터를 Firestore 데이터베이스에서 가져오는 함수
     func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
         func getUserID() -> String? {
@@ -256,14 +254,14 @@ extension BuildingView {
         }
         
         guard let userID = getUserID() else {
-            completion(nil, NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            completion([], NSError(domain: "Auth Error", code: 401, userInfo: nil))
             return
         }
         
         let startOfMonth = "\(year)-\(String(format: "%02d", month))-01 00:00:00 +0000"
         let endOfMonth = month == 12 ? "\(year + 1)-01-01 23:59:59 +0000" : "\(year)-\(String(format: "%02d", month + 1))-01 23:59:59 +0000"
         //dateString에서 현재 월 데이터만 가져오기
-        db.collection("users").document(userID).collection("diaries").whereField("dateString", isGreaterThanOrEqualTo: startOfMonth).whereField("dateString", isLessThan: endOfMonth).getDocuments { (querySnapshot, error) in
+        db.collection("users").document(userID).collection("diaries").whereField("dateString", isGreaterThanOrEqualTo: startOfMonth).whereField("dateString", isLessThan: endOfMonth).addSnapshotListener { (querySnapshot, error) in
             if let error = error {
                 print("Error getting documents: \(error)")
                 completion(nil, error)
@@ -276,7 +274,7 @@ extension BuildingView {
                     }
                 }
                 DispatchQueue.main.async { // 메인 스레드에서 로그를 출력합니다.
-//                    print("Fetched diaries: \(diaries)")
+                    print("Fetched diaries: \(diaries)")
                 }
                 completion(diaries, nil)
             }
@@ -309,7 +307,7 @@ extension BuildingView {
                 DispatchQueue.main.async {
                     self.diaryDays = Set(diaryDays)
                     self.setNeedsDisplay()
-//                    print("self.diaryDays: \(self.diaryDays)")
+                    print("self.diaryDays: \(self.diaryDays)")
                     self.delegate?.didUpdateDiaryCount(self.diaryDays.count)
                 }
                 
