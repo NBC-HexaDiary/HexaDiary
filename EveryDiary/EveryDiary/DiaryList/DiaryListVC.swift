@@ -75,7 +75,7 @@ class DiaryListVC: UIViewController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.layer.cornerRadius = 0
         collectionView.backgroundColor = .clear
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         return collectionView
     }()
     
@@ -328,6 +328,26 @@ extension DiaryListVC: UICollectionViewDataSource {
                     emotion: diary.emotion,
                     date: formattedDateString   // 변경된 날짜 형식 사용
                 )
+                
+                // 이미지 URL이 있는 경우 이미지 다운로드 및 설정
+                if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
+                    cell.imageView.isHidden = false
+//                    cell.imageView.image = nil  // cell 재사용 전 초기화
+//                    let cellID = diary.id   // 셀 식별자
+                    
+                    URLSession.shared.dataTask(with: imageUrl) { data, response, error in
+                        guard let data = data, error == nil else { return }
+                        DispatchQueue.main.async {
+                            // 이미지 다운로드 완료 후 셀의 식별자 확인
+//                            if cellID == diary.id {
+                                cell.imageView.image = UIImage(data: data)
+//                            }
+                        }
+                    }.resume()
+                } else {
+                    // 이미지 URL이 없을 경우 imageView를 숨김
+                    cell.imageView.isHidden = true
+                }
             }
         } else {
             fatalError("No diaries found for month : \(month)")
@@ -549,8 +569,7 @@ extension DiaryListVC: UICollectionViewDataSource {
 
 // Context Menu 관련
 extension DiaryListVC {
-//    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
-//        <#code#>
+
 //    }
 }
 
@@ -561,7 +580,7 @@ extension DiaryListVC: UICollectionViewDelegateFlowLayout {
     }
     // 셀의 크기 설정
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = journalCollectionView.bounds.width
+        let width = journalCollectionView.bounds.width - 32.0
         let height = journalCollectionView.bounds.height / 4.2
         return CGSize(width: width, height: height)
     }
@@ -610,8 +629,8 @@ extension DiaryListVC {
         journalCollectionView.snp.makeConstraints { make in
             make.top.equalTo(self.view.safeAreaLayoutGuide).offset(50)
             make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
-            make.leading.equalTo(self.view.safeAreaLayoutGuide).offset(16)
-            make.trailing.equalTo(self.view.safeAreaLayoutGuide).offset(-16)
+            make.leading.equalTo(self.view.safeAreaLayoutGuide).offset(0)
+            make.trailing.equalTo(self.view.safeAreaLayoutGuide).offset(0)
         }
         writeDiaryButton.snp.makeConstraints { make in
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
