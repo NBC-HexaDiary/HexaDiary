@@ -15,7 +15,7 @@ class DiaryManager {
     static let shared = DiaryManager()
     let db = Firestore.firestore()
     var listener: ListenerRegistration?
-    
+
     deinit {
         listener?.remove()
     }
@@ -51,29 +51,6 @@ class DiaryManager {
                     print("익명 인증 성공")
                     completion(nil)
                 }
-            }
-        }
-    }
-    
-    // 익명 사용자를 영구 계정으로 전환
-    func convertAnonymousUserToPermanentAccount(idToken: String, accessToken: String, completion: @escaping (Error?) -> Void) {
-        // 현재 사용자 확인
-        guard let user = Auth.auth().currentUser else {
-            // 사용자가 인증되어 있지 않음
-            let error = NSError(domain: "Auth Error", code: 401, userInfo: [NSLocalizedDescriptionKey: "User is not authenticated."])
-            completion(error)
-            return
-        }
-        
-        // 익명 사용자를 영구 계정으로 전환
-        let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
-        user.link(with: credential) { result, error in
-            if let error = error {
-                // 전환 실패
-                completion(error)
-            } else {
-                // 전환 성공
-                completion(nil)
             }
         }
     }

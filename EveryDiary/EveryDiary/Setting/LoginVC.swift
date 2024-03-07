@@ -231,13 +231,21 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                                                       idToken: idTokenString,
                                                       rawNonce: nonce)
             // Firebase에 로그인
-            Auth.auth().signIn(with: credential) { (authResult, error) in
+            Auth.auth().signInAnonymously { (authResult, error) in
                 if let error = error {
                     // Error. If error.code == .MissingOrInvalidNonce, make sure
                     // you're sending the SHA256-hashed nonce as a hex string with
                     // your request to Apple.
                     print(error.localizedDescription)
                     return
+                }
+                guard let user = authResult?.user else { return }
+                user.link(with: credential) { authResult, error in
+                    if let error = error {
+                        print("Error converting anonymous user to permanent account: \(error.localizedDescription)")
+                    } else {
+                        print("Anonymous user converted to permanent account successfully")
+                    }
                 }
                 print("identityToken: \(idTokenString)")
                 if let email = appleIDCredential.email {
