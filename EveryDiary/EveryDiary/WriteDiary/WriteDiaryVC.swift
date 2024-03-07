@@ -111,16 +111,17 @@ class WriteDiaryVC: UIViewController {
     
     private var imageViewHeightConstraint: NSLayoutConstraint?
     
-    private let contentTextView : UITextView = {
-        let textView = UITextView()
-        textView.backgroundColor = .clear
-        textView.font = UIFont(name: "SFProDisplay-Regular", size: 18)
-        textView.textColor = .black
-        textView.isScrollEnabled = false
-//        textView.text = """
-//Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-//"""
-        return textView
+    private let textViewPlaceHolder = "텍스트를 입력하세요."
+    
+    private lazy var contentTextView : UITextView = {
+        let view = UITextView()
+        view.backgroundColor = .clear
+        view.font = UIFont(name: "SFProDisplay-Regular", size: 18)
+        view.textColor = .lightGray
+        view.isScrollEnabled = false
+        view.text = textViewPlaceHolder
+        view.delegate = self
+        return view
     }()
     
     private lazy var scrollView: UIScrollView = {
@@ -274,6 +275,7 @@ extension WriteDiaryVC {
         self.diaryID = diary.id
         self.titleTextField.text = diary.title
         self.contentTextView.text = diary.content
+        self.contentTextView.textColor = .black
         self.selectedEmotion = diary.emotion
         self.selectedWeather = diary.weather
         self.existingImageUrl = diary.imageURL
@@ -583,6 +585,21 @@ extension WriteDiaryVC {
         UIView.animate(withDuration: 0.3) {
             self.scrollViewBottomConstraint?.update(inset: 0)
             self.view.layoutIfNeeded()
+        }
+    }
+}
+
+extension WriteDiaryVC: UITextViewDelegate {
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if contentTextView.text == textViewPlaceHolder {
+            textView.text = nil
+            textView.textColor = .black
+        }
+    }
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if contentTextView.text.isEmpty {
+            textView.text = textViewPlaceHolder
+            textView.textColor = .lightGray
         }
     }
 }
