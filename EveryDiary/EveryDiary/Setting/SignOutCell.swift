@@ -31,6 +31,11 @@ class SignOutCell: UITableViewCell {
         
         selectionStyle = .none
         contentView.layer.cornerRadius = 10
+        contentView.layer.shadowOpacity = 0.1
+        contentView.layer.shadowColor = UIColor(named: "mainTheme")?.cgColor
+        contentView.layer.shadowRadius = 3
+        contentView.layer.shadowOffset = CGSize(width: 0, height: 0)
+        contentView.layer.backgroundColor = UIColor(named: "mainCell")?.cgColor
         addSubViewSignOutCell()
         autoLayoutSignOutCell()
     }
@@ -58,15 +63,13 @@ class SignOutCell: UITableViewCell {
         }
     }
     
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
+    override func setSelected(_ highlighted: Bool, animated: Bool) {
+        super.setHighlighted(highlighted, animated: animated)
         
-        if selected {
-            contentView.layer.borderWidth = 2
-            contentView.layer.borderColor = UIColor(named: "mainError")?.cgColor
+        if highlighted {
+            contentView.layer.backgroundColor = UIColor(named: "subTheme")?.cgColor
         } else {
-            contentView.layer.borderWidth = 1
-            contentView.layer.borderColor = UIColor(named: "subBackground")?.cgColor
+            contentView.layer.backgroundColor = UIColor(named: "mainCell")?.cgColor
         }
     }
     

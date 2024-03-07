@@ -151,6 +151,7 @@ extension SettingVC {
         } catch let signOutError as NSError {
             print("Error Signing out:  %@", signOutError)
         }
+
     }
     
     // 사용자 로그아웃 재차 확인
@@ -313,10 +314,16 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
             switch number {
             case 1:
                 signOutAlert()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { // 0.5초 후에 실행
+                    tableView.deselectRow(at: indexPath, animated: true)
+                }
                 print("로그아웃")
             case 2:
                 print("회원 탈퇴")
                 showDeleteAccountMessage()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { // 0.5초 후에 실행
+                    tableView.deselectRow(at: indexPath, animated: true)
+                }
             default:
                 print("Error")
             }

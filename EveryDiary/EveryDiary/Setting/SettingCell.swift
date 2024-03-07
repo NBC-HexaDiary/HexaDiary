@@ -38,6 +38,11 @@ class SettingCell: UITableViewCell {
         
         selectionStyle = .none
         contentView.layer.cornerRadius = 10
+        contentView.layer.shadowOpacity = 0.1
+        contentView.layer.shadowColor = UIColor(named: "mainTheme")?.cgColor
+        contentView.layer.shadowRadius = 3
+        contentView.layer.shadowOffset = CGSize(width: 0, height: 0)
+        contentView.layer.backgroundColor = UIColor(named: "mainCell")?.cgColor
         addSubViewSettingCell()
         autoLayoutSettingCell()
     }
@@ -73,11 +78,9 @@ class SettingCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
 
         if selected {
-            contentView.layer.borderWidth = 2
-            contentView.layer.borderColor = UIColor(named: "mainTheme")?.cgColor
+            contentView.layer.backgroundColor = UIColor(named: "subTheme")?.cgColor
         } else {
-            contentView.layer.borderWidth = 1
-            contentView.layer.borderColor = UIColor(named: "subBackground")?.cgColor
+            contentView.layer.backgroundColor = UIColor(named: "mainCell")?.cgColor
         }
     }
     
