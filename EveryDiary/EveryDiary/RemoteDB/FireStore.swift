@@ -55,7 +55,6 @@ class DiaryManager {
     }
     
     // 익명 사용자를 영구 계정으로 전환
-    // 아직 작동안함.
     func convertAnonymousUserToPermanentAccount(idToken: String, accessToken: String, completion: @escaping (Error?) -> Void) {
         // 현재 사용자 확인
         guard let user = Auth.auth().currentUser else {
