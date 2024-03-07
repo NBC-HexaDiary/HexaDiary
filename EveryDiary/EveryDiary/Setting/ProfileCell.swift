@@ -36,10 +36,13 @@ class ProfileCell: UITableViewCell {
     
     lazy var loginButton : UIButton = {
         let loginButton = UIButton()
-        loginButton.layer.borderWidth = 1
-        loginButton.layer.borderColor = UIColor(named: "subBackground")?.cgColor
+        loginButton.layer.backgroundColor = UIColor(named: "mainTheme")?.cgColor
+        loginButton.layer.shadowOpacity = 0.1
+        loginButton.layer.shadowColor = UIColor(named: "mainTheme")?.cgColor
+        loginButton.layer.shadowOffset = CGSize(width: 0, height: 0)
+        loginButton.layer.shadowRadius = 3
         loginButton.layer.cornerRadius = 10
-        loginButton.setTitleColor(.mainTheme, for: .normal)
+        loginButton.setTitleColor(.mainCell, for: .normal)
         loginButton.setTitle("로그인", for: .normal)
         loginButton.addTarget(self, action: #selector(loginButtonTouchDown), for: .touchDown)
         loginButton.addTarget(self, action: #selector(loginButtonTouchOutside), for: .touchUpInside)
@@ -50,8 +53,11 @@ class ProfileCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: ProfileCell.id)
         self.selectionStyle = .none
         contentView.layer.cornerRadius = 10
-        contentView.layer.borderWidth = 1
-        contentView.layer.borderColor = UIColor(named: "subBackground")?.cgColor
+        contentView.layer.shadowOpacity = 0.1
+        contentView.layer.shadowColor = UIColor(named: "mainTheme")?.cgColor
+        contentView.layer.shadowRadius = 3
+        contentView.layer.shadowOffset = CGSize(width: 0, height: 0)
+        contentView.layer.backgroundColor = UIColor(named: "mainCell")?.cgColor
         addSubViewProfileCell()
         autoLayoutProfileCell()
     }
@@ -61,13 +67,11 @@ class ProfileCell: UITableViewCell {
     }
     
     @objc private func loginButtonTouchDown() {
-        loginButton.layer.borderColor = UIColor(named: "mainTheme")?.cgColor
-        loginButton.layer.borderWidth = 2
+        loginButton.layer.backgroundColor = UIColor(named: "subBackground")?.cgColor
     }
     
     @objc private func loginButtonTouchOutside() {
-        loginButton.layer.borderColor = UIColor(named: "subBackground")?.cgColor
-        loginButton.layer.borderWidth = 1
+        loginButton.layer.backgroundColor = UIColor(named: "mainTheme")?.cgColor
     }
     
     private func addSubViewProfileCell() {
@@ -105,7 +109,7 @@ class ProfileCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0))
+        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 10, left: 4, bottom: 10, right: 4))
     }
     
     func prapare(email: String?, name: String?, image: String?, isLoggedIn: Bool) {
