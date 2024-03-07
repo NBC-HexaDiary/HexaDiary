@@ -144,7 +144,7 @@ class DiaryManager {
     func fetchDiaries(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
         // 사용자가 로그인되어 있는지 확인
         guard let userID = getUserID() else {
-            completion([], NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            completion([], nil)
             return
         }
         
