@@ -49,7 +49,10 @@ class JournalCollectionViewCell: UICollectionViewCell {
         addSubView()
         setLayout()
         contentView.backgroundColor = .mainCell
-        contentView.layer.cornerRadius = 20
+//        contentView.layer.cornerRadius = 20
+        
+        self.layer.cornerRadius = 20
+        self.clipsToBounds = true
         
 //        initializeSwipeGesture()
     }

@@ -102,10 +102,10 @@ class DiaryListVC: UIViewController {
         
         searchBar.delegate = self
     }
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        loadDiaries()
-    }
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//        loadDiaries()
+//    }
 }
 
 // MARK: Edit Table View(수정 및 삭제 선택지 제공)
@@ -328,16 +328,16 @@ extension DiaryListVC: UICollectionViewDataSource {
                 // 이미지 URL이 있는 경우 이미지 다운로드 및 설정
                 if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
                     cell.imageView.isHidden = false
-//                    cell.imageView.image = nil  // cell 재사용 전 초기화
-//                    let cellID = diary.id   // 셀 식별자
+                    cell.imageView.image = nil  // cell 재사용 전 초기화
+                    let cellID = diary.id   // 셀 식별자
                     
                     URLSession.shared.dataTask(with: imageUrl) { data, response, error in
                         guard let data = data, error == nil else { return }
                         DispatchQueue.main.async {
                             // 이미지 다운로드 완료 후 셀의 식별자 확인
-//                            if cellID == diary.id {
+                            if cellID == diary.id {
                                 cell.imageView.image = UIImage(data: data)
-//                            }
+                            }
                         }
                     }.resume()
                 } else {
@@ -566,59 +566,8 @@ extension DiaryListVC: UICollectionViewDataSource {
 // Context Menu 관련
 extension DiaryListVC {
     // preview가 없는 메서드
-//    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
-//        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions -> UIMenu? in
-//            // "수정" 액션 생성
-//            let editAction = UIAction(title: "수정", image: UIImage(systemName: "pencil")) { action in
-//                // "수정" 선택 시 실행할 코드
-//                let month = self.months[indexPath.section]
-//                if let diary = self.monthlyDiaries[month]?[indexPath.row] {
-//                    let writeDiaryVC = WriteDiaryVC()
-//                    writeDiaryVC.activeEditMode(with: diary)
-//                    writeDiaryVC.modalPresentationStyle = .automatic
-//                    DispatchQueue.main.async {
-//                        self.present(writeDiaryVC, animated: true, completion: nil)
-//                    }
-//                }
-//            }
-//            // "삭제" 액션 생성
-//            let deleteAction = UIAction(title: "삭제", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-//                // "삭제" 선택 시 실행할 코드
-//                let month = self.months[indexPath.section]
-//                if let diary = self.monthlyDiaries[month]?[indexPath.row], let diaryID = diary.id {
-//                    let alert = UIAlertController(title: "일기 삭제", message: "이 일기를 삭제하시겠습니까?", preferredStyle: .alert)
-//                    alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { _ in
-//                        self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) { error in
-//                            if let error = error {
-//                                print("Error deleting diary: \(error.localizedDescription)")
-//                            } else {
-//                                DispatchQueue.main.async {
-//                                    self.loadDiaries()
-//                                }
-//                            }
-//                        }
-//                    }))
-//                    alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
-//                    self.present(alert, animated: true, completion: nil)
-//                }
-//            }
-//            // "수정"과 "삭제" 액션을 포함하는 메뉴 생성
-//            return UIMenu(title: "", children: [editAction, deleteAction])
-//        }
-//    }
-    
-    // preview가 있는 메서드
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: {
-            // preview로 보여줄 ViewController 설정
-            let month = self.months[indexPath.section]
-            if let diary = self.monthlyDiaries[month]?[indexPath.row] {
-                let writeDiaryVC = WriteDiaryVC()
-                writeDiaryVC.activeEditMode(with: diary)
-                return writeDiaryVC
-            }
-            return nil
-        }) { suggestedActions -> UIMenu? in
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions -> UIMenu? in
             // "수정" 액션 생성
             let editAction = UIAction(title: "수정", image: UIImage(systemName: "pencil")) { action in
                 // "수정" 선택 시 실행할 코드
@@ -657,10 +606,6 @@ extension DiaryListVC {
             return UIMenu(title: "", children: [editAction, deleteAction])
         }
     }
-    
-//    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPath: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
-//
-//    }
 }
 
 extension DiaryListVC: UICollectionViewDelegateFlowLayout {
