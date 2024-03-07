@@ -4,13 +4,6 @@
 //
 //  Created by t2023-m0044 on 2/23/24.
 //
-// 문제점 : 회원탈퇴를 하면 데이터가 남아있다가 익명에서 일기를 쓰면 그때 업데이트됨 이건 뭐지? >>>> 해결 실시간감지로 해결~
-// 익명사용자 계정을 영구계정으로 전환하는게 안되네
-// 앱 실행 -> 일기작성하기 -> 익명인증 -> 익명사용자 생성 -> 익명사용자 다큐먼트에 저장됨 -> 로그인 -> 익명사용자 데이터대신 로그인한 계정의 다큐먼트가 나타남 -> 회원탙퇴 -> 파이어스토어상 데이터는 다 사라짐 -> 앱에서 잔상?이 남음-> 다시 익명사용자로 일기 작성하면 잔상이 사라짐.. -> 지금 이 사이클로 돌면 익명계정이 두개가 된다. 이 부분은 영구계정 전환하면 알아서 해결됨. -> 익명계정도 회원탈퇴가 된다..? -> 이건 막아야할듯 -> 로그인을 안하면 회원탈퇴고 로그아웃이고 안뜨게 해야함.
-
-// 회원탈퇴하고 계속 잔상이 남는건 조회쪽에서 문제가 있는듯. >>>>>>> 해결
-
-//수정해야할거 >  영구계정 전환하기
 import Foundation
 
 import Firebase
@@ -20,14 +13,14 @@ import FirebaseFirestore
 class DiaryManager {
     static let shared = DiaryManager()
     let db = Firestore.firestore()
-    private var listener: ListenerRegistration?
+    var listener: ListenerRegistration?
     
     deinit {
         listener?.remove()
     }
-
+    
     // 사용자 ID 가져오기
-    private func getUserID() -> String? {
+    func getUserID() -> String? {
         if let currentUser = Auth.auth().currentUser {
             // 현재 사용자가 로그인되어 있는 경우
             return currentUser.uid
@@ -40,7 +33,7 @@ class DiaryManager {
             }
         }
     }
-
+    
     // 익명으로 사용자 인증하기
     func authenticateAnonymouslyIfNeeded(completion: @escaping (Error?) -> Void) {
         // 이미 사용자가 로그인되어 있는지 확인
@@ -62,7 +55,6 @@ class DiaryManager {
     }
     
     // 익명 사용자를 영구 계정으로 전환
-    // 아직 작동안함.
     func convertAnonymousUserToPermanentAccount(idToken: String, accessToken: String, completion: @escaping (Error?) -> Void) {
         // 현재 사용자 확인
         guard let user = Auth.auth().currentUser else {
@@ -104,8 +96,8 @@ class DiaryManager {
             
             // 날씨 정보 가져오기
             weatherService.getWeather { result in
-                // 날씨 정보 가져오기에 실패하더라도 일기는 추가됩니다.
                 
+                // 날씨 정보 가져오기에 실패하더라도 일기는 추가됩니다.
                 // 날씨 정보를 가져올 수 없는 경우에 대비하여 기본값을 "Unknown"으로 설정
                 var weatherDescription = "Unknown"
                 
@@ -116,18 +108,29 @@ class DiaryManager {
                 
                 // 다이어리에 날씨 정보 추가
                 var diaryWithWeather = diary
+                
                 diaryWithWeather.weather = weatherDescription
                 
                 // 다이어리 추가
                 var newDiaryWithUserID = diaryWithWeather
                 newDiaryWithUserID.userID = userID
-                
                 let documentReference = DiaryManager.shared.db.collection("users").document(userID).collection("diaries").document()
                 newDiaryWithUserID.id = documentReference.documentID
                 
                 do {
                     try documentReference.setData(from: newDiaryWithUserID) { error in
-                        completion(error)
+                        if let error = error {
+                            print("Error adding document: \(error)")
+                            completion(error)
+                        } else {
+                            // 일기가 추가된 후에는 일기 리스트를 업데이트합니다.
+                            self.fetchDiaries { (diaries, error) in
+                                if let error = error {
+                                    print("Error fetching diaries after adding a new diary: \(error)")
+                                }
+                            }
+                            completion(nil)
+                        }
                     }
                 } catch {
                     print("Error adding document: \(error)")
@@ -144,10 +147,11 @@ class DiaryManager {
             completion([], nil)
             return
         }
+        
         listener = db.collection("users").document(userID).collection("diaries").order(by: "dateString").addSnapshotListener { querySnapshot, error in
             if let error = error {
                 print("Error listening for real-time updates: \(error)")
-                completion(nil, error)
+                completion([], error)
             } else {
                 var diaries = [DiaryEntry]()
                 for document in querySnapshot!.documents {
@@ -159,44 +163,44 @@ class DiaryManager {
             }
         }
         // Firestore에서 일기를 가져오는 코드
-//        db.collection("users").document(userID).collection("diaries").order(by: "dateString").getDocuments { (querySnapshot, error) in
-//            if let error = error {
-//                print("Error getting documents: \(error)")
-//                completion(nil, error)
-//            } else {
-//                var diaries = [DiaryEntry]()
-//                for document in querySnapshot!.documents {
-//                    if let diary = try? document.data(as: DiaryEntry.self) {
-//                        diaries.append(diary)
-//                    }
-//                }
-//                completion(diaries, nil) // 조회된 일기들을 completion handler로 반환
-//            }
-//        }
+        //        db.collection("users").document(userID).collection("diaries").order(by: "dateString").getDocuments { (querySnapshot, error) in
+        //            if let error = error {
+        //                print("Error getting documents: \(error)")
+        //                completion(nil, error)
+        //            } else {
+        //                var diaries = [DiaryEntry]()
+        //                for document in querySnapshot!.documents {
+        //                    if let diary = try? document.data(as: DiaryEntry.self) {
+        //                        diaries.append(diary)
+        //                    }
+        //                }
+        //                completion(diaries, nil) // 조회된 일기들을 completion handler로 반환
+        //            }
+        //        }
     }
-
+    
     // 다이어리 실시간 감지
     // 수정이 필요합니다 -> 사용 안함 -> 조회에서 사용하는걸로..
-//    func observeDiariesRealTime(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
-//        guard let userID = getUserID() else {
-//            completion(nil, NSError(domain: "Auth Error", code: 401, userInfo: nil))
-//            return
-//        }
-//        listener = db.collection("users").document(userID).collection("diaries").order(by: "dateString").addSnapshotListener { querySnapshot, error in
-//            if let error = error {
-//                print("Error listening for real-time updates: \(error)")
-//                completion(nil, error)
-//            } else {
-//                var diaries = [DiaryEntry]()
-//                for document in querySnapshot!.documents {
-//                    if let diary = try? document.data(as: DiaryEntry.self) {
-//                        diaries.append(diary)
-//                    }
-//                }
-//                completion(diaries, nil)
-//            }
-//        }
-//    }
+    //    func observeDiariesRealTime(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+    //        guard let userID = getUserID() else {
+    //            completion(nil, NSError(domain: "Auth Error", code: 401, userInfo: nil))
+    //            return
+    //        }
+    //        listener = db.collection("users").document(userID).collection("diaries").order(by: "dateString").addSnapshotListener { querySnapshot, error in
+    //            if let error = error {
+    //                print("Error listening for real-time updates: \(error)")
+    //                completion(nil, error)
+    //            } else {
+    //                var diaries = [DiaryEntry]()
+    //                for document in querySnapshot!.documents {
+    //                    if let diary = try? document.data(as: DiaryEntry.self) {
+    //                        diaries.append(diary)
+    //                    }
+    //                }
+    //                completion(diaries, nil)
+    //            }
+    //        }
+    //    }
     
     // 다이어리 삭제
     func deleteDiary(diaryID: String, imageURL: String?, completion: @escaping (Error?) -> Void) {
@@ -266,6 +270,7 @@ class DiaryManager {
             completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
             return
         }
+        
         do {
             try db.collection("users").document(userID).collection("diaries").document(diaryID).setData(from: newDiary) { error in
                 if let error = error {
@@ -281,3 +286,11 @@ class DiaryManager {
         }
     }
 }
+//익명 사용자를 영구 계정으로 전환
+//DiaryManager.shared.convertAnonymousUserToPermanentAccount(idToken: idToken, accessToken: user.accessToken.tokenString) { error in
+//    if let error = error {
+//        print("Error converting anonymous user to permanent account: \(error.localizedDescription)")
+//    } else {
+//        print("Anonymous user converted to permanent account successfully")
+//    }
+//}

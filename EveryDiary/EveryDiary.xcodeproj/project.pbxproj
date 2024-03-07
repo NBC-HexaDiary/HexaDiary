@@ -541,8 +541,8 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = UP9KCDW7ZZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EveryDiary/Info.plist;
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "페이스아이디 테스트 입니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "지역이 어디세요";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "당신의 얼굴 인식하다";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "위치정보에 동의하세요";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -576,8 +576,8 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = UP9KCDW7ZZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EveryDiary/Info.plist;
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "페이스아이디 테스트 입니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "지역이 어디세요";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "당신의 얼굴 인식하다";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "위치정보에 동의하세요";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
