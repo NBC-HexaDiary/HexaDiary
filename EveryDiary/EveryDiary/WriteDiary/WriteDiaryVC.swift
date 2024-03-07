@@ -132,6 +132,8 @@ class WriteDiaryVC: UIViewController {
         let view = UIView()
         return view
     }()
+    
+    private var scrollViewBottomConstraint: Constraint?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -139,6 +141,11 @@ class WriteDiaryVC: UIViewController {
         setLayout()
         updateButton.isHidden = diaryID == nil
         view.backgroundColor = .mainBackground
+        registerKeyboardNotifications()
+    }
+    
+    deinit {
+        unregisterKeyboardNotifications()
     }
 }
 extension WriteDiaryVC {
@@ -453,6 +460,7 @@ extension WriteDiaryVC {
     private func setLayout() {
         scrollView.snp.makeConstraints { make in
             make.edges.equalTo(view.safeAreaLayoutGuide)
+            self.scrollViewBottomConstraint = make.bottom.equalTo(view.safeAreaLayoutGuide).constraint
         }
         
         contentView.snp.makeConstraints { make in
@@ -547,5 +555,34 @@ extension WriteDiaryVC {
         button.tintColor = .mainTheme
         
         return button
+    }
+}
+
+// MARK: NotificationCenter(키보드 높이 조절)
+extension WriteDiaryVC {
+    private func registerKeyboardNotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    private func unregisterKeyboardNotifications() {
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            let keyboardHeight = keyboardSize.height
+            UIView.animate(withDuration: 0.3) {
+                self.scrollViewBottomConstraint?.update(inset: keyboardHeight - self.view.safeAreaInsets.bottom)
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+    @objc func keyboardWillHide(notification: NSNotification) {
+        UIView.animate(withDuration: 0.3) {
+            self.scrollViewBottomConstraint?.update(inset: 0)
+            self.view.layoutIfNeeded()
+        }
     }
 }
