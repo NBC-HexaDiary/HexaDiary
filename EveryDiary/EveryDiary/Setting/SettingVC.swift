@@ -85,16 +85,26 @@ extension SettingVC {
     // 로그인 상태 별 TableView의 구성
     private func refresh() {
         if let currentUser = Auth.auth().currentUser {
-            self.dataSource = [
-                .profileItem(email: currentUser.email ?? "", name: currentUser.displayName ?? "", image: "profile", isLoggedIn: true),
-                .settingItem(title: "알림", iconImage: "notification", number: 1),
-                .settingItem(title: "잠금", iconImage: "lock", number: 2),
-                .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: true),
-                .signOutItem(title: "회원 탈퇴", iconImage: "trash", number: 2, isLoggedIn: true)
-            ]
+            if currentUser.isAnonymous {
+                self.dataSource = [
+                    .profileItem(email: "Anonymous Guest", name: "Guest", image: "profile", isLoggedIn: false),
+                    .settingItem(title: "알림", iconImage: "notification", number: 1),
+                    .settingItem(title: "잠금", iconImage: "lock", number: 2),
+                    .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: false),
+                    .signOutItem(title: "회원 탈퇴", iconImage: "trash", number: 2, isLoggedIn: false)
+                ]
+            } else {
+                self.dataSource = [
+                    .profileItem(email: currentUser.email ?? "일기를 저장하려면 로그인해주세요", name: currentUser.displayName ?? "Guest", image: "profile", isLoggedIn: true),
+                    .settingItem(title: "알림", iconImage: "notification", number: 1),
+                    .settingItem(title: "잠금", iconImage: "lock", number: 2),
+                    .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: true),
+                    .signOutItem(title: "회원 탈퇴", iconImage: "trash", number: 2, isLoggedIn: true)
+                ]
+            }
         } else {
             self.dataSource = [
-                .profileItem(email: "일기를 저장하려면 로그인해주세요", name: "Guest", image: "profile", isLoggedIn: false),
+                .profileItem(email: "일기를 저장하려면 로그인해주세요", name: "손님", image: "profile", isLoggedIn: false),
                 .settingItem(title: "알림", iconImage: "notification", number: 1),
                 .settingItem(title: "잠금", iconImage: "lock", number: 2),
                 .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: false),
@@ -108,11 +118,18 @@ extension SettingVC {
      private func observeAuthState() {
          Auth.auth().addStateDidChangeListener { [weak self] (_, user) in
              guard let self = self else { return }
-             if user != nil {
-                 // 사용자가 로그인되어 있다면 loginStatus을 true로 설정하고 데이터를 새로고침
-                 self.loginStatus = true
+             if let user = user {
+                 // 사용자가 로그인되어 있음을 알림
+                 if user.isAnonymous {
+                     // 사용자가 익명 계정으로 로그인 된 경우
+                     // 로그인 버튼을 활성화 후 데이터 새로고침
+                     self.loginStatus = false
+                 } else {
+                     // 사용자가 소셜 계정으로 로그인 된 경우
+                     // 로그인 버튼을 비활성화 후 데이터 새로고침
+                     self.loginStatus = true
+                 }
                  self.refresh()
-                 
              } else {
                  // 사용자가 로그인되어 있지 않다면 loginStatus을 false로 설정하고 데이터를 새로고침
                  self.loginStatus = false

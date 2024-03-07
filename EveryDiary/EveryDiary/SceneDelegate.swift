@@ -20,10 +20,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let navigationController = UINavigationController(rootViewController: mainVC)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
-//        let launchVC = LaunchViewController() // LaunchViewController를 초기 뷰 컨트롤러로 설정합니다. 테스트테스트
-//            let navigationController = UINavigationController(rootViewController: launchVC)
-//            window?.rootViewController = navigationController
-//            window?.makeKeyAndVisible()
+
+        //강제로 다크모드 해제
         window?.overrideUserInterfaceStyle = .light
     }
 
