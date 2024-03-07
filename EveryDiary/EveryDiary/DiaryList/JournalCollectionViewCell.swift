@@ -23,6 +23,18 @@ class JournalCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
+    private lazy var contentTextView: UITextView = {
+        let view = UITextView()
+        view.font = UIFont(name: "SFProDisplay-Regular", size: 16)
+        view.isEditable = false
+        view.backgroundColor = .clear
+        view.isScrollEnabled = false
+        view.isUserInteractionEnabled = false
+        view.textContainerInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        view.contentInset = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 0)
+        return view
+    }()
+    
     private lazy var weatherIcon = UIImageView()
     private lazy var emotionIcon = UIImageView()
     private lazy var dateOfWriting: UILabel = {
@@ -49,7 +61,10 @@ class JournalCollectionViewCell: UICollectionViewCell {
         addSubView()
         setLayout()
         contentView.backgroundColor = .mainCell
-        contentView.layer.cornerRadius = 20
+//        contentView.layer.cornerRadius = 20
+        
+        self.layer.cornerRadius = 20
+        self.clipsToBounds = true
         
 //        initializeSwipeGesture()
     }
@@ -59,7 +74,7 @@ class JournalCollectionViewCell: UICollectionViewCell {
     }
     func setJournalCollectionViewCell(title: String, content: String, weather: String, emotion: String, date: String, imageName: String? = nil) {
         contentTitle.text = title
-        contentText.text = content
+        contentTextView.text = content
         weatherIcon.image = UIImage(named: weather)
         emotionIcon.image = UIImage(named: emotion)
         dateOfWriting.text = date
@@ -122,7 +137,7 @@ extension JournalCollectionViewCell {
         contentView.addSubview(emotionIcon)
         contentView.addSubview(dateOfWriting)
         contentView.addSubview(imageView)
-//        contentView.addSubview(deleteButton)
+        contentView.addSubview(contentTextView)
     }
     private func setLayout() {
         contentTitle.snp.makeConstraints { make in
@@ -132,6 +147,12 @@ extension JournalCollectionViewCell {
             make.trailing.equalTo(imageView.snp.leading).offset(-5)
         }
         contentText.snp.makeConstraints { make in
+            make.top.equalTo(contentTitle.snp.bottom).offset(4)
+            make.bottom.equalTo(weatherIcon.snp.top).offset(-4)
+            make.leading.equalTo(contentTitle.snp.leading).offset(0)
+            make.trailing.equalTo(contentTitle.snp.trailing).offset(0)
+        }
+        contentTextView.snp.makeConstraints { make in
             make.top.equalTo(contentTitle.snp.bottom).offset(4)
             make.bottom.equalTo(weatherIcon.snp.top).offset(-4)
             make.leading.equalTo(contentTitle.snp.leading).offset(0)

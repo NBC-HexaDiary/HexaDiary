@@ -8,6 +8,7 @@
 import UIKit
 
 import Firebase
+import SnapKit
 
 class WriteDiaryVC: UIViewController {
     
@@ -110,16 +111,30 @@ class WriteDiaryVC: UIViewController {
     
     private var imageViewHeightConstraint: NSLayoutConstraint?
     
-    private let contentTextView : UITextView = {
-        let textView = UITextView()
-        textView.backgroundColor = .clear
-        textView.font = UIFont(name: "SFProDisplay-Regular", size: 18)
-        textView.textColor = .black
-//        textView.text = """
-//Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-//"""
-        return textView
+    private let textViewPlaceHolder = "텍스트를 입력하세요."
+    
+    private lazy var contentTextView : UITextView = {
+        let view = UITextView()
+        view.backgroundColor = .clear
+        view.font = UIFont(name: "SFProDisplay-Regular", size: 18)
+        view.textColor = .lightGray
+        view.isScrollEnabled = false
+        view.text = textViewPlaceHolder
+        view.delegate = self
+        return view
     }()
+    
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        return scrollView
+    }()
+    
+    private lazy var contentView: UIView = {
+        let view = UIView()
+        return view
+    }()
+    
+    private var scrollViewBottomConstraint: Constraint?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -127,6 +142,11 @@ class WriteDiaryVC: UIViewController {
         setLayout()
         updateButton.isHidden = diaryID == nil
         view.backgroundColor = .mainBackground
+        registerKeyboardNotifications()
+    }
+    
+    deinit {
+        unregisterKeyboardNotifications()
     }
 }
 extension WriteDiaryVC {
@@ -255,6 +275,7 @@ extension WriteDiaryVC {
         self.diaryID = diary.id
         self.titleTextField.text = diary.title
         self.contentTextView.text = diary.content
+        self.contentTextView.textColor = .black
         self.selectedEmotion = diary.emotion
         self.selectedWeather = diary.weather
         self.existingImageUrl = diary.imageURL
@@ -426,36 +447,51 @@ extension WriteDiaryVC: DateSelectDelegate, UIPopoverPresentationControllerDeleg
 // MARK: addSubViews, AutoLayout
 extension WriteDiaryVC {
     private func addSubView() {
-        self.view.addSubview(datePickingButton)
-        self.view.addSubview(completeButton)
-        self.view.addSubview(updateButton)
-        self.view.addSubview(photoButton)
-        self.view.addSubview(emotionButton)
-        self.view.addSubview(weatherButton)
-        self.view.addSubview(titleTextField)
-        self.view.addSubview(contentTextView)
-        self.view.addSubview(imageView)
+        self.view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubview(datePickingButton)
+        contentView.addSubview(completeButton)
+        contentView.addSubview(updateButton)
+        contentView.addSubview(photoButton)
+        contentView.addSubview(emotionButton)
+        contentView.addSubview(weatherButton)
+        contentView.addSubview(titleTextField)
+        contentView.addSubview(contentTextView)
+        contentView.addSubview(imageView)
     }
     private func setLayout() {
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalTo(view.safeAreaLayoutGuide)
+            self.scrollViewBottomConstraint = make.bottom.equalTo(view.safeAreaLayoutGuide).constraint
+        }
+        
+        contentView.snp.makeConstraints { make in
+            make.top.bottom.equalTo(scrollView)
+            make.leading.trailing.equalTo(scrollView)
+            make.width.equalTo(scrollView)
+            // contentView의 높이는 최소 scrollView의 높이와 같거아 더 크도록 설정
+            make.height.greaterThanOrEqualTo(scrollView).priority(.low)
+        }
+        
         datePickingButton.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).offset(37)
-            make.leading.equalTo(self.view.safeAreaLayoutGuide.snp.leading).offset(16)
+            make.top.equalTo(contentView.snp.top).offset(37)
+            make.leading.equalTo(contentView.snp.leading).offset(16)
         }
         
         completeButton.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).offset(37)
-            make.trailing.equalTo(self.view.safeAreaLayoutGuide.snp.trailing).offset(-16)
+            make.top.equalTo(contentView.snp.top).offset(37)
+            make.trailing.equalTo(contentView.snp.trailing).offset(-16)
         }
         
         updateButton.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).offset(37)
-            make.trailing.equalTo(self.view.safeAreaLayoutGuide.snp.trailing).offset(-16)
+            make.top.equalTo(contentView.snp.top).offset(37)
+            make.trailing.equalTo(contentView.snp.trailing).offset(-16)
         }
         
         titleTextField.snp.makeConstraints { make in
             make.top.equalTo(datePickingButton.snp.bottom).offset(20)
-            make.leading.equalTo(self.view.snp.leading).offset(20)
-            make.trailing.equalTo(self.view.snp.trailing).offset(-20)
+            make.leading.equalTo(contentView.snp.leading).offset(20)
+            make.trailing.equalTo(contentView.snp.trailing).offset(-20)
             make.height.equalTo(50)
         }
         
@@ -486,11 +522,13 @@ extension WriteDiaryVC {
             make.trailing.equalToSuperview().offset(-15)
         }
         
+        // contentTextView의 최소 높이 설정
         contentTextView.snp.makeConstraints { make in
             make.top.equalTo(imageView.snp.bottom).offset(10)
-            make.leading.equalTo(titleTextField.snp.leading)
-            make.trailing.equalTo(titleTextField.snp.trailing)
-            make.bottom.equalTo(self.view.snp.bottom)
+            make.leading.trailing.equalTo(titleTextField)
+            // 최소 높이 제약 조건 추가
+            make.height.greaterThanOrEqualTo(self.view).multipliedBy(0.75).priority(.high)
+            make.bottom.equalTo(contentView.snp.bottom)
         }
         setupImageViewHeightConstraint()
     }
@@ -519,5 +557,49 @@ extension WriteDiaryVC {
         button.tintColor = .mainTheme
         
         return button
+    }
+}
+
+// MARK: NotificationCenter(키보드 높이 조절)
+extension WriteDiaryVC {
+    private func registerKeyboardNotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    private func unregisterKeyboardNotifications() {
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            let keyboardHeight = keyboardSize.height
+            UIView.animate(withDuration: 0.3) {
+                self.scrollViewBottomConstraint?.update(inset: keyboardHeight - self.view.safeAreaInsets.bottom)
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+    @objc func keyboardWillHide(notification: NSNotification) {
+        UIView.animate(withDuration: 0.3) {
+            self.scrollViewBottomConstraint?.update(inset: 0)
+            self.view.layoutIfNeeded()
+        }
+    }
+}
+
+extension WriteDiaryVC: UITextViewDelegate {
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if contentTextView.text == textViewPlaceHolder {
+            textView.text = nil
+            textView.textColor = .black
+        }
+    }
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if contentTextView.text.isEmpty {
+            textView.text = textViewPlaceHolder
+            textView.textColor = .lightGray
+        }
     }
 }
