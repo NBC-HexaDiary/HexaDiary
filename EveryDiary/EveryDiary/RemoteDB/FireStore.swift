@@ -140,45 +140,32 @@ class DiaryManager {
                 completion(diaries, nil)
             }
         }
-        // Firestore에서 일기를 가져오는 코드
-        //        db.collection("users").document(userID).collection("diaries").order(by: "dateString").getDocuments { (querySnapshot, error) in
-        //            if let error = error {
-        //                print("Error getting documents: \(error)")
-        //                completion(nil, error)
-        //            } else {
-        //                var diaries = [DiaryEntry]()
-        //                for document in querySnapshot!.documents {
-        //                    if let diary = try? document.data(as: DiaryEntry.self) {
-        //                        diaries.append(diary)
-        //                    }
-        //                }
-        //                completion(diaries, nil) // 조회된 일기들을 completion handler로 반환
-        //            }
-        //        }
     }
     
-    // 다이어리 실시간 감지
-    // 수정이 필요합니다 -> 사용 안함 -> 조회에서 사용하는걸로..
-    //    func observeDiariesRealTime(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
-    //        guard let userID = getUserID() else {
-    //            completion(nil, NSError(domain: "Auth Error", code: 401, userInfo: nil))
-    //            return
-    //        }
-    //        listener = db.collection("users").document(userID).collection("diaries").order(by: "dateString").addSnapshotListener { querySnapshot, error in
-    //            if let error = error {
-    //                print("Error listening for real-time updates: \(error)")
-    //                completion(nil, error)
-    //            } else {
-    //                var diaries = [DiaryEntry]()
-    //                for document in querySnapshot!.documents {
-    //                    if let diary = try? document.data(as: DiaryEntry.self) {
-    //                        diaries.append(diary)
-    //                    }
-    //                }
-    //                completion(diaries, nil)
-    //            }
-    //        }
-    //    }
+    // 다이어리 데이터 가져오기
+    func getDiary(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+        // 사용자가 로그인되어 있는지 확인
+        guard let userID = getUserID() else {
+            completion([], nil)
+            return
+        }
+        
+        //Firestore에서 일기를 가져오는 코드
+        db.collection("users").document(userID).collection("diaries").order(by: "dateString").getDocuments { (querySnapshot, error) in
+            if let error = error {
+                print("Error getting documents: \(error)")
+                completion(nil, error)
+            } else {
+                var diaries = [DiaryEntry]()
+                for document in querySnapshot!.documents {
+                    if let diary = try? document.data(as: DiaryEntry.self) {
+                        diaries.append(diary)
+                    }
+                }
+                completion(diaries, nil) // 조회된 일기들을 completion handler로 반환
+            }
+        }
+    }
     
     // 다이어리 삭제
     func deleteDiary(diaryID: String, imageURL: String?, completion: @escaping (Error?) -> Void) {
@@ -210,6 +197,7 @@ class DiaryManager {
         }
     }
     
+    // 회원탈퇴시 데이터 삭제
     func deleteUserData(for userID: String) {
         // 사용자의 일기 삭제
         db.collection("users").document(userID).collection("diaries").getDocuments { (querySnapshot, error) in
