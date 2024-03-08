@@ -21,7 +21,13 @@ protocol BuildingViewDelegate: AnyObject {
 }
 
 class BuildingView: UIView {
+    static let shared = BuildingView()
     weak var delegate: BuildingViewDelegate?
+    
+    
+    let db = Firestore.firestore()
+    var listener: ListenerRegistration?
+    var diaryDays: Set<Int> = []
     
     struct WindowLayout {
         let columns: [[Int]]
@@ -33,8 +39,6 @@ class BuildingView: UIView {
         let windowLayout: WindowLayout
     }
     
-    let db = Firestore.firestore()
-    var diaryDays: Set<Int> = []
     var buildings: [BuildingSize] = []
     
     let backgroundLayer = CALayer()
@@ -86,7 +90,7 @@ class BuildingView: UIView {
         ]
     }
     
-    //MARK: 빌딩 그림 UIBezierPath
+    //MARK: - 빌딩 그림 UIBezierPath
     func drawBuilding() {
         let path = UIBezierPath()
         
@@ -177,7 +181,7 @@ class BuildingView: UIView {
         backgroundLayer.addSublayer(backBuildingLayer)
     }
     
-    //MARK: 창문 관련 함수
+    //MARK: - 창문 관련 함수
     func drawWindows(at position: CGPoint, color: UIColor) {
         let windowPath = UIBezierPath(rect: CGRect(origin: position, size: windowSize))
         let windowLayer = CAShapeLayer()
@@ -231,13 +235,13 @@ class BuildingView: UIView {
                 let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
                 let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(j), y: building.position.y - windowHeight * CGFloat(i+1))
                 
-                if windowOrder <= diaryDays.count {
+                if !diaryDays.isEmpty && windowOrder <= diaryDays.count {
                     self.drawWindows(at: windowPosition, color: .yellow)
-//                    print("Window \(windowOrder): 데이터 있음")
+                    print("Window \(windowOrder): 데이터 있음")
                     windowOrder += 1
                 } else {
                     self.drawWindows(at: windowPosition, color: .darkGray)
-//                    print("Window \(windowOrder): 데이터 없음")
+                    print("Window \(windowOrder): 데이터 없음")
                 }
             }
         }
@@ -245,7 +249,7 @@ class BuildingView: UIView {
 }
 
 
-//MARK: firebase
+//MARK: - firebase
 extension BuildingView {
     //특정 월에 대한 일기 데이터를 Firestore 데이터베이스에서 가져오는 함수
     func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
@@ -254,7 +258,7 @@ extension BuildingView {
         }
         
         guard let userID = getUserID() else {
-            completion([], NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            completion([], nil)
             return
         }
         
@@ -304,19 +308,13 @@ extension BuildingView {
                         return nil
                     }
                 }
+                
                 DispatchQueue.main.async {
                     self.diaryDays = Set(diaryDays)
                     self.setNeedsDisplay()
                     print("self.diaryDays: \(self.diaryDays)")
                     self.delegate?.didUpdateDiaryCount(self.diaryDays.count)
                 }
-                
-//                print("Total Buildings: \(self.buildings.count)")
-//                for (index, building) in self.buildings.enumerated() {
-//                    print("Building \(index + 1):")
-//                    print("Position: \(building.position), Size: \(building.size)")
-//                    print("Window Layout: \(building.windowLayout.columns)")
-//                }
             }
         }
     }
