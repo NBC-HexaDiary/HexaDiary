@@ -44,6 +44,8 @@ class JournalCollectionViewCell: UICollectionViewCell {
     }()
     lazy var imageView: UIImageView = {
         let view = UIImageView()
+        view.layer.cornerRadius = 10
+        view.clipsToBounds = true
         return view
     }()
     
@@ -61,10 +63,10 @@ class JournalCollectionViewCell: UICollectionViewCell {
         addSubView()
         setLayout()
         contentView.backgroundColor = .mainCell
-        self.layer.shadowOpacity = 0.1
+        self.layer.shadowOpacity = 1.0
         self.layer.shadowColor = UIColor(named: "mainTheme")?.cgColor
-        self.layer.shadowRadius = 3
-        self.layer.shadowOffset = CGSize(width: 0, height: 0)
+        self.layer.shadowRadius = 1.0
+        self.layer.shadowOffset = CGSize(width: 3, height: 3)
         self.layer.cornerRadius = 20
         self.clipsToBounds = true
         

@@ -12,10 +12,7 @@ import FirebaseFirestore
 import SnapKit
 
 class DiaryListVC: UIViewController {
-//    private lazy var magnifyingButton : UIBarButtonItem = {
-//        let button = UIBarButtonItem(title: "돋보기",image: UIImage(named: "search"), target: self, action: #selector(tabSettingBTN))
-//        return button
-//    }()
+
     private var diaryManager = DiaryManager()
     private var monthlyDiaries: [String: [DiaryEntry]] = [:]
     private var months: [String] = []
@@ -37,7 +34,6 @@ class DiaryListVC: UIViewController {
         let bounds = UIScreen.main.bounds
         let width = bounds.size.width - 130
         let searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: width, height: 0))
-        searchBar.tintColor = .green
         searchBar.placeholder = "찾고싶은 일기를 검색하세요."
         return searchBar
     }()
@@ -61,13 +57,16 @@ class DiaryListVC: UIViewController {
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
+        writeDiaryButton.layer.shadowRadius = 3
+        writeDiaryButton.layer.borderColor = UIColor(named: "mainCell")?.cgColor
+        writeDiaryButton.layer.shadowOpacity = 0.3
+        writeDiaryButton.layer.shadowOffset = CGSize(width: 0, height: 0)
         button.setImage(UIImage(named: "write"), for: .normal)
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
     }()
     
     private lazy var journalCollectionView: UICollectionView = {
-//        let layout = createCompositionalLayout()
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         layout.minimumLineSpacing = 12
@@ -148,7 +147,7 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
         guard let diary = monthlyDiaries[month]?[selectedIndexPath.row] else { return }
         tableView.isHidden = true
         
-        // 삭제필요 : UILongPressGestureRecognizer 관련 메서드
+//         삭제필요 : UILongPressGestureRecognizer 관련 메서드
 //        removeBlurEffect()
         
         print("\(indexPath)")
