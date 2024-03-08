@@ -80,29 +80,39 @@ class LoginVC: UIViewController {
             
             let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
             
-            // 사용자 정보 토큰 -> Firebase에 로그인 프로세스
-            Auth.auth().signInAnonymously { authResult, error in
-                if let error = error {
-                    print(error.localizedDescription)
-                    return
-                }
-                guard let user = authResult?.user else { return }
+            // 익명 사용자인지 확인
+            if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
+                // 익명 사용자를 영구 계정으로 전환
                 print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
-                //익명 사용자를 영구 계정으로 전환
-                user.link(with: credential) { authResult, error in
-                    if error != nil {
-                        Auth.auth().signIn(with: credential) { authResult, error in
-                            if let error = error {
-                                print("자격 증명으로 로그인 중 오류 발생: \(error.localizedDescription)")
-                                return
-                            }
-                            self.dismiss(animated: true, completion: nil)
+
+                currentUser.link(with: credential) { authResult, error in
+                    if let error = error {
+                        print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
+                        return
+                    }
+                    let changeRequest = currentUser.createProfileChangeRequest()
+                    changeRequest.displayName = fullName
+                    changeRequest.commitChanges { error in
+                        if let error = error {
+                            print("Error updating user profile: \(error)")
                         }
-                    } else {
-                        print("Anonymous user converted to permanent account successfully")
+                        guard let user = authResult?.user else { return }
+                        print("익명 사용자를 영구 계정으로 전환 성공")
+                        print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
+                        self.dismiss(animated: true, completion: nil)
                     }
                 }
-                self.dismiss(animated: true, completion: nil)
+            } else {
+                // 익명 사용자가 아닌 경우에는 바로 로그인
+                Auth.auth().signIn(with: credential) { authResult, error in
+                    if let error = error {
+                        print("자격 증명으로 로그인 중 오류 발생: \(error.localizedDescription)")
+                        return
+                    }
+                    guard let user = authResult?.user else { return }
+                    print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
+                    self.dismiss(animated: true, completion: nil)
+                }
             }
         }
     }

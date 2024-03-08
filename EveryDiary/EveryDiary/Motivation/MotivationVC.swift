@@ -13,7 +13,7 @@ import SnapKit
 }
 
 class MotivationVC: UIViewController, BuildingViewDelegate {
-    let buildings = BuildingView()
+    private let buildings = BuildingView.shared
     
     private lazy var background : UIImageView = {
         let background = UIImageView(image: UIImage(named: "View.Background"))
@@ -69,6 +69,7 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         buildings.windowsInBuildingData()
+        setNavigationBar()
     }
     
     override func viewDidLoad() {
@@ -107,7 +108,6 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
         view.addSubview(writeDiaryButton)
         view.addSubview(monthLabel)
         view.addSubview(countLabel)
-        setNavigationBar()
     }
     
     private func autoLayout() {
