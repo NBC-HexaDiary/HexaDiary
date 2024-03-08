@@ -630,10 +630,11 @@ extension DiaryListVC: UISearchBarDelegate {
             var filteredDiaries: [String: [DiaryEntry]] = [:]
             
             for (month, diaries) in monthlyDiaries {
-                filteredDiaries[month] = diaries.filter { diary in
-                    let matchedTitle = diary.title.range(of: searchText, options: .caseInsensitive) != nil
-                    let matchedContent = diary.content.range(of: searchText, options: .caseInsensitive) != nil
-                    return matchedTitle || matchedContent
+                let filtered = diaries.filter { diary in
+                    diary.title.range(of: searchText, options: .caseInsensitive) != nil || diary.content.range(of: searchText, options: .caseInsensitive) != nil
+                }
+                if !filtered.isEmpty {
+                    filteredDiaries[month] = filtered
                 }
             }
             monthlyDiaries = filteredDiaries
