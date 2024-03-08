@@ -12,6 +12,16 @@ import SnapKit
 class DailyListCell: UICollectionViewCell {
     static let id = "DailyListCell"
     
+    override var isSelected: Bool {
+        didSet {
+            if self.isSelected {
+                self.contentView.backgroundColor = .subTheme
+            } else {
+                self.contentView.backgroundColor = .mainCell
+            }
+        }
+    }
+    
     private lazy var contentTitle: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: "SFProDisplay-Bold", size: 20)

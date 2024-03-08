@@ -45,7 +45,7 @@ class CalendarListVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
+        fetchUpdateDiaries()
     }
     
     private func autoLayoutCalendarListVC() {
@@ -68,7 +68,21 @@ class CalendarListVC: UIViewController {
         view.addSubview(dateLabel)
     }
     
-    func updateDateLabel() {
+    private func fetchUpdateDiaries() {
+        // 데이터를 새로 가져오고 컬렉션 뷰를 리로드하는 로직
+        DiaryManager.shared.fetchDiaries { [weak self] (diaries, error) in
+            guard let diaries = diaries, error == nil else {
+                // 에러 처리...
+                return
+            }
+            self?.selectedDiaries = diaries
+            DispatchQueue.main.async {
+                self?.dailyListCollectionView.reloadData()
+            }
+        }
+    }
+    
+    private func updateDateLabel() {
         guard let firstDiary = selectedDiaries.first else {
             dateLabel.text = "No diaries selected"
             return
@@ -122,7 +136,6 @@ extension CalendarListVC : UICollectionViewDataSource,  UICollectionViewDelegate
     // Cell 선택
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let diary = selectedDiaries[indexPath.row]
-        
         let writeDiaryVC = WriteDiaryVC()
         
         // 선택된 일기 정보를 전달하고, 수정 버튼을 활성화
@@ -132,6 +145,9 @@ extension CalendarListVC : UICollectionViewDataSource,  UICollectionViewDelegate
         
         self.present(writeDiaryVC, animated: true, completion: nil)
         
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            collectionView.deselectItem(at: indexPath, animated: true)
+        }
     }
     
     
