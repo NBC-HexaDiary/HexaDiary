@@ -13,7 +13,7 @@ import SnapKit
 }
 
 class MotivationVC: UIViewController, BuildingViewDelegate {
-    let buildings = BuildingView()
+    private let buildings = BuildingView.shared
     
     private lazy var background : UIImageView = {
         let background = UIImageView(image: UIImage(named: "View.Background"))
