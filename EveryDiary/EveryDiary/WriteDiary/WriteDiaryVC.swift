@@ -106,6 +106,7 @@ class WriteDiaryVC: UIViewController {
     private lazy var imagePicker: UIImagePickerController = {
         let picker = UIImagePickerController()
         picker.delegate = self
+        picker.allowsEditing = true
         return picker
     }()
     
@@ -326,21 +327,27 @@ extension WriteDiaryVC: UIImagePickerControllerDelegate, UINavigationControllerD
         self.imagePicker.sourceType = .photoLibrary
         self.present(self.imagePicker, animated: true) {
             // 사진 선택하기 전에 이미지 뷰의 높이를 0으로 설정
-            self.updateImageViewHeight(with: nil)
+//            self.updateImageViewHeight(with: nil)
         }
+    }
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        // cancel시 "imagePickerController를 닫는다"만 명시적으로 수행
+        dismiss(animated: true, completion: nil)
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         
-        if let selectedImage = info[UIImagePickerController.InfoKey.editedImage] {
-            newImage = selectedImage as? UIImage
-        } else if let selectedImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+        if let selectedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
+            // 선택한 이미지를 newImage 변수에 할당하고, 이미지 뷰의 높이를 업데이트
             newImage = selectedImage
+            self.imageView.image = newImage
+            updateImageViewHeight(with: newImage)
+        } else if let selectedImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+            // 선택한 이미지를 newImage 변수에 할당하고, 이미지 뷰의 높이를 업데이트
+            newImage = selectedImage
+            self.imageView.image = newImage
+            updateImageViewHeight(with: newImage)
         }
-        // 선택한 이미지를 newImage 변수에 할당하고, 이미지 뷰의 높이를 업데이트
-        self.imageView.image = newImage
-        updateImageViewHeight(with: newImage)
-        
         // 이미지 선택기 컨트롤러 닫기
         dismiss(animated: true, completion: nil)
     }
@@ -351,9 +358,9 @@ extension WriteDiaryVC: UIImagePickerControllerDelegate, UINavigationControllerD
     }
     private func updateImageViewHeight(with image: UIImage?) {
         // 이미지가 nil이면 높이를 0, 아니면 view의 너비와 동일하게 설정
-        imageViewHeightConstraint?.constant = image == nil ? 0 : view.frame.width
+        imageViewHeightConstraint?.constant = image == nil ? 0 : imageView.frame.width
         
-        view.backgroundColor = .mainBackground
+//        view.backgroundColor = .mainBackground
 
 //        // 변경사항을 애니메이션과 함께 적용
 //        UIView.animate(withDuration: 0.3, delay: 0.3, options: .transitionCurlDown) { [weak self] in
