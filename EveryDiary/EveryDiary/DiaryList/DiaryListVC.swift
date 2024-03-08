@@ -57,10 +57,10 @@ class DiaryListVC: UIViewController {
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
-        writeDiaryButton.layer.shadowRadius = 3
-        writeDiaryButton.layer.borderColor = UIColor(named: "mainCell")?.cgColor
-        writeDiaryButton.layer.shadowOpacity = 0.3
-        writeDiaryButton.layer.shadowOffset = CGSize(width: 0, height: 0)
+        button.layer.shadowRadius = 3
+        button.layer.borderColor = UIColor(named: "mainCell")?.cgColor
+        button.layer.shadowOpacity = 0.3
+        button.layer.shadowOffset = CGSize(width: 0, height: 0)
         button.setImage(UIImage(named: "write"), for: .normal)
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
