@@ -28,7 +28,7 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
-        button.setImage(UIImage(named: "write"), for: .normal)
+        button.setImage(UIImage(named: "writeLight"), for: .normal)
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
     }()
