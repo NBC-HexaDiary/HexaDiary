@@ -69,6 +69,7 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         buildings.windowsInBuildingData()
+        setNavigationBar()
     }
     
     override func viewDidLoad() {
@@ -107,7 +108,6 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
         view.addSubview(writeDiaryButton)
         view.addSubview(monthLabel)
         view.addSubview(countLabel)
-        setNavigationBar()
     }
     
     private func autoLayout() {

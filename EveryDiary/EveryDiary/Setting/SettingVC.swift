@@ -37,13 +37,13 @@ class SettingVC: UIViewController {
         super.viewDidLoad()
         addSubviewsSettingVC()
         autoLayoutSettingVC()
-        refresh()
         observeAuthState()
         }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
+        setNavigationBar()
+        observeAuthState()
         tableView.selectRow(at: .none,
                             animated: true,
                             scrollPosition: .top)
@@ -52,7 +52,6 @@ class SettingVC: UIViewController {
     private func addSubviewsSettingVC() {
         view.backgroundColor = .mainBackground
         view.addSubview(tableView)
-        setNavigationBar()
     }
     
     private func autoLayoutSettingVC() {
@@ -77,25 +76,27 @@ class SettingVC: UIViewController {
     private func setNavigationBar() {
         navigationItem.title = "설정"
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "설정", style: .plain, target: nil, action: nil)
+        navigationController?.navigationBar.tintColor = .mainTheme
     }
 }
 
 // MARK: - 사용자의 로그인 상태 유무 감지 & 로그아웃 기능
 extension SettingVC {
+    
     // 로그인 상태 별 TableView의 구성
     private func refresh() {
         if let currentUser = Auth.auth().currentUser {
-            if currentUser.isAnonymous {
+            if currentUser.isEmailVerified == false {
                 self.dataSource = [
-                    .profileItem(email: "Anonymous Guest", name: "Guest", image: "profile", isLoggedIn: false),
+                    .profileItem(email: "일기를 저장하려면 로그인해주세요", name: "Guest", image: "profile", isLoggedIn: false),
                     .settingItem(title: "알림", iconImage: "notification", number: 1),
                     .settingItem(title: "잠금", iconImage: "lock", number: 2),
                     .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: false),
                     .signOutItem(title: "회원 탈퇴", iconImage: "trash", number: 2, isLoggedIn: false)
                 ]
-            } else {
+            } else if currentUser.isEmailVerified == true {
                 self.dataSource = [
-                    .profileItem(email: currentUser.email ?? "일기를 저장하려면 로그인해주세요", name: currentUser.displayName ?? "Guest", image: "profile", isLoggedIn: true),
+                    .profileItem(email: currentUser.email ?? "일기를 저장하려면 로그인해주세요", name: currentUser.displayName ?? "Error", image: "profile", isLoggedIn: true),
                     .settingItem(title: "알림", iconImage: "notification", number: 1),
                     .settingItem(title: "잠금", iconImage: "lock", number: 2),
                     .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: true),
@@ -120,11 +121,11 @@ extension SettingVC {
              guard let self = self else { return }
              if let user = user {
                  // 사용자가 로그인되어 있음을 알림
-                 if user.isAnonymous {
+                 if user.isEmailVerified == false {
                      // 사용자가 익명 계정으로 로그인 된 경우
                      // 로그인 버튼을 활성화 후 데이터 새로고침
                      self.loginStatus = false
-                 } else {
+                 } else if user.isEmailVerified == true {
                      // 사용자가 소셜 계정으로 로그인 된 경우
                      // 로그인 버튼을 비활성화 후 데이터 새로고침
                      self.loginStatus = true
