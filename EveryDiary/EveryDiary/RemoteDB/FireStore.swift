@@ -87,7 +87,7 @@ class DiaryManager {
                 // 다이어리에 날씨 정보 추가
                 var diaryWithWeather = diary
                 
-                diaryWithWeather.weather = weatherDescription
+                diaryWithWeather.weatherDescription = weatherDescription
                 
 //                // 현재 날짜 가져오기
 //                let currentDate = Date()
