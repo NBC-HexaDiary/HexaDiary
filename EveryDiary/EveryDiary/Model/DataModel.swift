@@ -13,6 +13,7 @@ struct DiaryEntry: Codable {
     var dateString: String
     var emotion: String
     var weather: String
+    var weatherDescription: String?
     var imageURL: String?
     var userID: String?
 }

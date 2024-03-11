@@ -24,7 +24,6 @@ class BuildingView: UIView {
     static let shared = BuildingView()
     weak var delegate: BuildingViewDelegate?
     
-    
     let db = Firestore.firestore()
     var listener: ListenerRegistration?
     var diaryDays: Set<Int> = []
@@ -191,58 +190,35 @@ class BuildingView: UIView {
     }
     
     func drawWindowInBuilding() {
+        guard !buildings.isEmpty else { return }
+        
         var windowOrder = 1
-        let diaryCount = diaryDays.count
-        if diaryCount <= 7 {
-            handleBuilding(buildings[0], &windowOrder)
-        } else if diaryCount <= 14 {
-            handleBuilding(buildings[0], &windowOrder)
-            handleBuilding(buildings[1], &windowOrder)
-        } else if diaryCount <= 21 {
-            handleBuilding(buildings[0], &windowOrder)
-            handleBuilding(buildings[1], &windowOrder)
-            handleBuilding(buildings[2], &windowOrder)
-        } else if diaryCount <= 28 {
-            handleBuilding(buildings[0], &windowOrder)
-            handleBuilding(buildings[1], &windowOrder)
-            handleBuilding(buildings[2], &windowOrder)
-            handleBuilding(buildings[3], &windowOrder)
-        } else if diaryCount <= 30 {
-            handleBuilding(buildings[0], &windowOrder)
-            handleBuilding(buildings[1], &windowOrder)
-            handleBuilding(buildings[2], &windowOrder)
-            handleBuilding(buildings[3], &windowOrder)
-            handleBuilding(buildings[4], &windowOrder)
-        } else if diaryCount >= 31 {
-            handleBuilding(buildings[0], &windowOrder)
-            handleBuilding(buildings[1], &windowOrder)
-            handleBuilding(buildings[2], &windowOrder)
-            handleBuilding(buildings[3], &windowOrder)
-            handleBuilding(buildings[4], &windowOrder)
-            handleBuilding(buildings[5], &windowOrder)
+        for building in buildings {
+            handleBuilding(building, &windowOrder)
         }
     }
     
     //inout 키워드를 사용하면 변수처럼 함수 내부에서 매개변수의 값을 변경할 수 있음
     func handleBuilding(_ building: BuildingSize, _ windowOrder: inout Int) {
-        //i는 현재 층의 인덱스, row는 현재 층의 창문 배열. 각 층에 대해 창문을 그리기 위해 층의 각 창문을 순회.
         for (i, row) in building.windowLayout.columns.enumerated() {
-            //각 층의 창문을 순회. j는 현재 창문의 인덱스, columns는 현재 창문의 수
-            for (j, columns) in row.enumerated() {
-                //창문 행렬에서 0은 데이터 비교에서 제외.
-                if columns == 0 { continue }
-                let windowWidth = building.size.width / CGFloat(columns)
-                let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
-                let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(j), y: building.position.y - windowHeight * CGFloat(i+1))
-                
-                if !diaryDays.isEmpty && windowOrder <= diaryDays.count {
-                    self.drawWindows(at: windowPosition, color: .yellow)
-                    print("Window \(windowOrder): 데이터 있음")
-                    windowOrder += 1
-                } else {
-                    self.drawWindows(at: windowPosition, color: .darkGray)
-                    print("Window \(windowOrder): 데이터 없음")
-                }
+            handleFloor(i, row, building, &windowOrder)
+        }
+    }
+
+    func handleFloor(_ floorIndex: Int, _ floorWindows: [Int], _ building: BuildingSize, _ windowOrder: inout Int) {
+        for (windowIndex, windowColumns) in floorWindows.enumerated() {
+            if windowColumns == 0 { continue }
+            let windowWidth = building.size.width / CGFloat(windowColumns)
+            let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
+            let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(windowIndex), y: building.position.y - windowHeight * CGFloat(floorIndex+1))
+            
+            if !diaryDays.isEmpty && windowOrder <= diaryDays.count {
+                self.drawWindows(at: windowPosition, color: .yellow)
+                print("Window \(windowOrder): 데이터 있음")
+                windowOrder += 1
+            } else {
+                self.drawWindows(at: windowPosition, color: .darkGray)
+                print("Window \(windowOrder): 데이터 없음")
             }
         }
     }
@@ -253,11 +229,8 @@ class BuildingView: UIView {
 extension BuildingView {
     //특정 월에 대한 일기 데이터를 Firestore 데이터베이스에서 가져오는 함수
     func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
-        func getUserID() -> String? {
-            return Auth.auth().currentUser?.uid
-        }
         
-        guard let userID = getUserID() else {
+        guard let userID = DiaryManager.shared.getUserID() else {
             completion([], nil)
             return
         }

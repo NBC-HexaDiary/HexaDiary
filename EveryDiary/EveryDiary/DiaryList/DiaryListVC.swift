@@ -374,6 +374,9 @@ extension DiaryListVC: UICollectionViewDataSource {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             self.present(writeDiaryVC, animated: true, completion: nil)
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            collectionView.deselectItem(at: indexPath, animated: true)
+        }
     }
     
     //    // 선택 시 cell을 0.98배 작게 만드는 애니메이션
