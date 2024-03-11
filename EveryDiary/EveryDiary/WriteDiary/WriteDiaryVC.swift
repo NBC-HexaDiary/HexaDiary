@@ -613,7 +613,8 @@ extension WriteDiaryVC {
     }
 }
 
-// MARK: NotificationCenter(키보드 높이 조절) & 키보드 return 기능
+
+// MARK: NotificationCenter(키보드 높이 조절)
 extension WriteDiaryVC: UITextFieldDelegate {
     private func registerKeyboardNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
