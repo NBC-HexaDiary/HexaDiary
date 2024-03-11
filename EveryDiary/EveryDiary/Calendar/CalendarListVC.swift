@@ -139,7 +139,7 @@ extension CalendarListVC : UICollectionViewDataSource,  UICollectionViewDelegate
         let writeDiaryVC = WriteDiaryVC()
         
         // 선택된 일기 정보를 전달하고, 수정 버튼을 활성화
-        writeDiaryVC.activeEditMode(with: diary)
+        writeDiaryVC.showsDiary(with: diary)
         // 일기 수정 화면으로 전환
         writeDiaryVC.modalPresentationStyle = .automatic
         

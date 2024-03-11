@@ -29,7 +29,7 @@ class WriteDiaryVC: UIViewController {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "ko_KR")
         dateFormatter.dateFormat = "yyyy. MM. dd(E)" // 원하는 날짜 및 시간 형식 지정
-
+        
         // Date를 String으로 변환
         let dateString = dateFormatter.string(from: selectedDate)
         return dateString
@@ -41,23 +41,35 @@ class WriteDiaryVC: UIViewController {
         textFont: "SFProDisplay-Bold",
         fontSize: 20,
         buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(datePickingButtonTapped)
+        for: #selector(datePickingButtonTapped),
+        hidden: false
     )
     private lazy var completeButton = setButton(
         imageNamed: "",
         titleText: "완료",
         textFont: "SFProDisplay-Bold",
-        fontSize: 20, 
+        fontSize: 20,
         buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(completeButtonTapped)
+        for: #selector(completeButtonTapped),
+        hidden: false
     )
     private lazy var updateButton = setButton(
+        imageNamed: "",
+        titleText: "저장",
+        textFont: "SFProDisplay-Bold",
+        fontSize: 20,
+        buttonSize: CGSize(width: 15, height: 15),
+        for: #selector(updateButtonTapped),
+        hidden: true
+    )
+    private lazy var allowEditButton = setButton(
         imageNamed: "",
         titleText: "수정",
         textFont: "SFProDisplay-Bold",
         fontSize: 20,
         buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(updateButtonTapped)
+        for: #selector(allowEditButtonTapped),
+        hidden: true
     )
     private lazy var photoButton = setButton(
         imageNamed: "image",
@@ -65,7 +77,8 @@ class WriteDiaryVC: UIViewController {
         textFont: "SFProDisplay-Regular",
         fontSize: 0,
         buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(photoButtonTapped)
+        for: #selector(photoButtonTapped),
+        hidden: false
     )
     private lazy var emotionButton = setButton(
         imageNamed: "happy",
@@ -73,16 +86,18 @@ class WriteDiaryVC: UIViewController {
         textFont: "SFProDisplay-Regular",
         fontSize: 0,
         buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(emotionButtonTapped)
+        for: #selector(emotionButtonTapped),
+        hidden: false
     )
     private lazy var weatherButton = setButton(
-            imageNamed: "Vector",
-            titleText: "날씨",
-            textFont: "SFProDisplay-Regular",
-            fontSize: 0,
-            buttonSize: CGSize(width: 15, height: 15),
-            for: #selector(weatherButtonTapped)
-        )
+        imageNamed: "Vector",
+        titleText: "날씨",
+        textFont: "SFProDisplay-Regular",
+        fontSize: 0,
+        buttonSize: CGSize(width: 15, height: 15),
+        for: #selector(weatherButtonTapped),
+        hidden: false
+    )
     
     private let titleTextField : UITextField = {
         let textField = UITextField()
@@ -100,6 +115,8 @@ class WriteDiaryVC: UIViewController {
         let view = UIImageView()
         view.layer.cornerRadius = 10
         view.backgroundColor = .red
+        view.contentMode = .scaleAspectFill
+        view.clipsToBounds = true
         return view
     }()
     
@@ -136,13 +153,12 @@ class WriteDiaryVC: UIViewController {
     }()
     
     private var scrollViewBottomConstraint: Constraint?
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .mainBackground
         addSubView()
         setLayout()
-        updateButton.isHidden = diaryID == nil
-        view.backgroundColor = .mainBackground
         registerKeyboardNotifications()
     }
     
@@ -150,6 +166,8 @@ class WriteDiaryVC: UIViewController {
         unregisterKeyboardNotifications()
     }
 }
+
+
 extension WriteDiaryVC {
     // 완료버튼 호출 메서드
     @objc func completeButtonTapped() {
@@ -218,7 +236,7 @@ extension WriteDiaryVC {
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
         dateFormatter.timeZone = TimeZone.current
         let formattedDateString = dateFormatter.string(from: selectedDate)
-                
+        
         let fetchedDiary = DiaryEntry(
             id: diaryID,
             title: titleTextField.text ?? "",
@@ -258,6 +276,17 @@ extension WriteDiaryVC {
             updateDiaryInFirestore(diaryID: diaryID, diaryEntry: fetchedDiary)
         }
     }
+    @objc func allowEditButtonTapped() {
+        self.updateButton.isHidden = false
+        self.allowEditButton.isHidden = true
+        
+        self.datePickingButton.isEnabled = true
+        self.titleTextField.isEnabled = true
+        self.contentTextView.isEditable = true
+        self.photoButton.isEnabled = true
+        self.emotionButton.isEnabled = true
+        self.weatherButton.isEnabled = true
+    }
     
     private func updateDiaryInFirestore(diaryID: String, diaryEntry: DiaryEntry) {
         // Firestore 문서 업데이트
@@ -271,7 +300,7 @@ extension WriteDiaryVC {
         }
     }
     
-    func activeEditMode(with diary: DiaryEntry) {
+    func showsDiary(with diary: DiaryEntry) {
         // UI 내 일기 내용 반영
         self.diaryID = diary.id
         self.titleTextField.text = diary.title
@@ -280,6 +309,13 @@ extension WriteDiaryVC {
         self.selectedEmotion = diary.emotion
         self.selectedWeather = diary.weather
         self.existingImageUrl = diary.imageURL
+        
+        self.datePickingButton.isEnabled = false
+        self.titleTextField.isEnabled = false
+        self.contentTextView.isEditable = false
+        self.photoButton.isEnabled = false
+        self.emotionButton.isEnabled = false
+        self.weatherButton.isEnabled = false
         
         // 날짜 형식 업데이트
         let dateFormatter = DateFormatter()
@@ -296,9 +332,10 @@ extension WriteDiaryVC {
         self.emotionButton.setImage(UIImage(named: diary.emotion)?.withRenderingMode(.alwaysOriginal), for: .normal)
         self.weatherButton.setImage(UIImage(named: diary.weather)?.withRenderingMode(.alwaysOriginal), for: .normal)
         
-        // 완료 -> 수정 버튼 교체
+        // 완료, 저장 버튼 숨김, 수정 버튼 등장
         self.completeButton.isHidden = true
-        self.updateButton.isHidden = false
+        self.updateButton.isHidden = true
+        self.allowEditButton.isHidden = false
         
         // 이미지 URL이 있을 경우, 이미지를 다운로드하여 imageView에 설정
         if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
@@ -326,8 +363,6 @@ extension WriteDiaryVC: UIImagePickerControllerDelegate, UINavigationControllerD
     @objc func photoButtonTapped() {
         self.imagePicker.sourceType = .photoLibrary
         self.present(self.imagePicker, animated: true) {
-            // 사진 선택하기 전에 이미지 뷰의 높이를 0으로 설정
-//            self.updateImageViewHeight(with: nil)
         }
     }
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
@@ -359,26 +394,17 @@ extension WriteDiaryVC: UIImagePickerControllerDelegate, UINavigationControllerD
     private func updateImageViewHeight(with image: UIImage?) {
         // 이미지가 nil이면 높이를 0, 아니면 view의 너비와 동일하게 설정
         imageViewHeightConstraint?.constant = image == nil ? 0 : imageView.frame.width
-        
-//        view.backgroundColor = .mainBackground
-
-//        // 변경사항을 애니메이션과 함께 적용
-//        UIView.animate(withDuration: 0.3, delay: 0.3, options: .transitionCurlDown) { [weak self] in
-//            self?.view.layoutIfNeeded()
-//        }
-
     }
 }
 
-// MARK: Date Condition(emotion, weather) Select (감정, 날씨 선택)
+// MARK: Date Condition(감정, 날씨 선택)
 extension WriteDiaryVC: DateConditionSelectDelegate {
     @objc func emotionButtonTapped() {
         // 감정 선택 로직
         presentControllerSelect(with: .emotion)
-        
     }
     @objc func weatherButtonTapped() {
-        // 감정 선택 로직
+        // 날씨 선택 로직
         presentControllerSelect(with: .weather)
     }
     
@@ -451,7 +477,7 @@ extension WriteDiaryVC: DateSelectDelegate, UIPopoverPresentationControllerDeleg
     }
 }
 
-// MARK: addSubViews, AutoLayout
+// MARK: addSubViews, setLayout, setButton메서드
 extension WriteDiaryVC {
     private func addSubView() {
         self.view.addSubview(scrollView)
@@ -459,6 +485,7 @@ extension WriteDiaryVC {
         contentView.addSubview(datePickingButton)
         contentView.addSubview(completeButton)
         contentView.addSubview(updateButton)
+        contentView.addSubview(allowEditButton)
         contentView.addSubview(photoButton)
         contentView.addSubview(emotionButton)
         contentView.addSubview(weatherButton)
@@ -491,6 +518,11 @@ extension WriteDiaryVC {
         }
         
         updateButton.snp.makeConstraints { make in
+            make.top.equalTo(contentView.snp.top).offset(37)
+            make.trailing.equalTo(contentView.snp.trailing).offset(-16)
+        }
+        
+        allowEditButton.snp.makeConstraints { make in
             make.top.equalTo(contentView.snp.top).offset(37)
             make.trailing.equalTo(contentView.snp.trailing).offset(-16)
         }
@@ -541,7 +573,7 @@ extension WriteDiaryVC {
     }
     
     // 버튼 이미지, 타이틀 설정 메서드
-    private func setButton(imageNamed: String, titleText: String, textFont: String, fontSize: CGFloat, buttonSize: CGSize, for action: Selector) -> UIButton {
+    private func setButton(imageNamed: String, titleText: String, textFont: String, fontSize: CGFloat, buttonSize: CGSize, for action: Selector, hidden: Bool) -> UIButton {
         let button = UIButton(type: .system)
         button.frame = CGRect(origin: .zero, size: buttonSize) // 버튼 크기 설정
         
@@ -562,6 +594,9 @@ extension WriteDiaryVC {
         button.setTitleColor(.mainTheme, for: .normal)
         button.backgroundColor = .clear
         button.tintColor = .mainTheme
+        
+        // isHidden 초기값
+        button.isHidden = hidden
         
         return button
     }
@@ -596,6 +631,7 @@ extension WriteDiaryVC {
     }
 }
 
+// MARK: textView placeHolder 생성
 extension WriteDiaryVC: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
         if contentTextView.text == textViewPlaceHolder {

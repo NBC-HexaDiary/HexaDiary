@@ -12,16 +12,17 @@ import FirebaseFirestore
 import SnapKit
 
 class DiaryListVC: UIViewController {
-
+    // fetchDiaries 관련 변수
     private var diaryManager = DiaryManager()
     private var monthlyDiaries: [String: [DiaryEntry]] = [:]
     private var months: [String] = []
     private var diaries: [DiaryEntry] = []
     
+    // contextMenu 관련 변수
     private var currentLongPressedCell: JournalCollectionViewCell?
     private var selectedIndexPath: IndexPath?
-    private var blurEffectView: UIVisualEffectView?
     
+    // 화면 구성 요소
     private lazy var themeLabel : UILabel = {
         let label = UILabel()
         label.text = "하루일기"
@@ -35,6 +36,7 @@ class DiaryListVC: UIViewController {
         let width = bounds.size.width - 130
         let searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: width, height: 0))
         searchBar.placeholder = "찾고싶은 일기를 검색하세요."
+        searchBar.delegate = self
         return searchBar
     }()
     
@@ -75,9 +77,16 @@ class DiaryListVC: UIViewController {
         collectionView.layer.cornerRadius = 0
         collectionView.backgroundColor = .clear
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(JournalCollectionViewCell.self, forCellWithReuseIdentifier: JournalCollectionViewCell.reuseIdentifier)
+        collectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderView.reuseIdentifier)
         return collectionView
     }()
     
+    
+    // FIXME: 삭제예정(blurEffectView, editTableView)
+    private var blurEffectView: UIVisualEffectView?
     private lazy var editTableView: UITableView = {
         let tableView = UITableView()
         return tableView
@@ -86,28 +95,17 @@ class DiaryListVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .mainBackground
-        addSubviewsDiaryListVC()
-        autoLayoutDiaryListVC()
+        addSubviews()
+        setLayout()
         setNavigationBar()
-        journalCollectionView.dataSource = self
-        journalCollectionView.delegate = self
-        journalCollectionView.register(JournalCollectionViewCell.self, forCellWithReuseIdentifier: JournalCollectionViewCell.reuseIdentifier)
-            journalCollectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderView.reuseIdentifier)
-        loadDiaries()
-        
-        // 삭제필요 : UILongPressGestureRecognizer 관련 메서드
-//        setupLongGestureRecognizerOnCollectionView()
-//        setupEditTableView()
-        
-        searchBar.delegate = self
     }
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//        loadDiaries()
-//    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadDiaries()
+    }
 }
 
-// MARK: Edit Table View(수정 및 삭제 선택지 제공)
+// FIXME: 삭제예정 - Edit Table View(일기수정 및 일기삭제 선택지 제공)
 extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
     private func setupEditTableView() {
         editTableView.delegate = self
@@ -147,8 +145,8 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
         guard let diary = monthlyDiaries[month]?[selectedIndexPath.row] else { return }
         tableView.isHidden = true
         
-//         삭제필요 : UILongPressGestureRecognizer 관련 메서드
-//        removeBlurEffect()
+        //         삭제필요 : UILongPressGestureRecognizer 관련 메서드
+        //        removeBlurEffect()
         
         print("\(indexPath)")
         print("\(selectedIndexPath)")
@@ -156,7 +154,7 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
         case 0: // "수정" 선택 시
             print("Edit")
             let writeDiaryVC = WriteDiaryVC()
-            writeDiaryVC.activeEditMode(with: diary)
+            writeDiaryVC.showsDiary(with: diary)
             writeDiaryVC.modalPresentationStyle = .automatic
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 self.present(writeDiaryVC, animated: true, completion: nil)
@@ -189,8 +187,8 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-// MARK: Functions in DiaryListVC
-    extension DiaryListVC {
+// MARK: loadDiaries메서드, navigation관련
+extension DiaryListVC {
     
     // searchBar 설정 및 searchButtonTapped 전까지 hidden처리.
     private func setNavigationBar() {
@@ -230,27 +228,27 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
     }
     private func organizeDiariesByMonth(diaries: [DiaryEntry]) {
         var organizedDiaries: [String: [DiaryEntry]] = [:]
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-            dateFormatter.locale = Locale(identifier: "ko_KR")
-
-            for diary in diaries {
-                guard let diaryDate = dateFormatter.date(from: diary.dateString) else { continue }
-                let monthKey = diaryDate.toString(dateFormat: "yyyy.MM") // 월별 키 생성
-                
-                var diariesForMonth = organizedDiaries[monthKey, default: []]
-                diariesForMonth.append(diary)
-                organizedDiaries[monthKey] = diariesForMonth
-            }
-
-            // 각 월별로 시간 순서대로 정렬
-            for (month, diariesInMonth) in organizedDiaries {
-                organizedDiaries[month] = diariesInMonth.sorted(by: {
-                    guard let date1 = dateFormatter.date(from: $0.dateString),
-                          let date2 = dateFormatter.date(from: $1.dateString) else { return false }
-                    return date1 > date2
-                })
-            }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+        dateFormatter.locale = Locale(identifier: "ko_KR")
+        
+        for diary in diaries {
+            guard let diaryDate = dateFormatter.date(from: diary.dateString) else { continue }
+            let monthKey = diaryDate.toString(dateFormat: "yyyy.MM") // 월별 키 생성
+            
+            var diariesForMonth = organizedDiaries[monthKey, default: []]
+            diariesForMonth.append(diary)
+            organizedDiaries[monthKey] = diariesForMonth
+        }
+        
+        // 각 월별로 시간 순서대로 정렬
+        for (month, diariesInMonth) in organizedDiaries {
+            organizedDiaries[month] = diariesInMonth.sorted(by: {
+                guard let date1 = dateFormatter.date(from: $0.dateString),
+                      let date2 = dateFormatter.date(from: $1.dateString) else { return false }
+                return date1 > date2
+            })
+        }
         self.monthlyDiaries = organizedDiaries
         self.months = organizedDiaries.keys.sorted().reversed() // reversed 내림차순 정렬
     }
@@ -368,7 +366,7 @@ extension DiaryListVC: UICollectionViewDataSource {
         let writeDiaryVC = WriteDiaryVC()
         
         // 선택된 일기 정보를 전달하고, 수정 버튼을 활성화
-        writeDiaryVC.activeEditMode(with: diary)
+        writeDiaryVC.showsDiary(with: diary)
         
         // 일기 수정 화면으로 전환
         writeDiaryVC.modalPresentationStyle = .automatic
@@ -378,24 +376,24 @@ extension DiaryListVC: UICollectionViewDataSource {
         }
     }
     
-//    // 선택 시 cell을 0.98배 작게 만드는 애니메이션
-//    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
-//        UIView.animate(withDuration: 0.2, animations: {
-//            if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
-//                cell.transform = CGAffineTransform(scaleX: 0.95, y: 0.95) // 셀을 약간 축소
-//                cell.contentView.backgroundColor = UIColor.gray.withAlphaComponent(0.5) // 배경색 변경 (선택적)
-//            }
-//        })
-//    }
-//    // 선택 해제 시 cell을 다시 1배로 돌리는 애니메이션
-//    func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
-//        UIView.animate(withDuration: 0.2, animations: {
-//            if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
-//                cell.transform = CGAffineTransform.identity // 셀 크기를 원래대로 복원
-//                cell.contentView.backgroundColor = .mainCell // 배경색을 원래대로 복원
-//            }
-//        })
-//    }
+    //    // 선택 시 cell을 0.98배 작게 만드는 애니메이션
+    //    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
+    //        UIView.animate(withDuration: 0.2, animations: {
+    //            if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
+    //                cell.transform = CGAffineTransform(scaleX: 0.95, y: 0.95) // 셀을 약간 축소
+    //                cell.contentView.backgroundColor = UIColor.gray.withAlphaComponent(0.5) // 배경색 변경 (선택적)
+    //            }
+    //        })
+    //    }
+    //    // 선택 해제 시 cell을 다시 1배로 돌리는 애니메이션
+    //    func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
+    //        UIView.animate(withDuration: 0.2, animations: {
+    //            if let cell = collectionView.cellForItem(at: indexPath) as? JournalCollectionViewCell {
+    //                cell.transform = CGAffineTransform.identity // 셀 크기를 원래대로 복원
+    //                cell.contentView.backgroundColor = .mainCell // 배경색을 원래대로 복원
+    //            }
+    //        })
+    //    }
 }
 
 // 스와이프 구현
@@ -408,12 +406,12 @@ extension DiaryListVC: UICollectionViewDataSource {
 //            self?.deleteItem(at: indexPath)
 //            completionHandler(true)
 //        }
-//        
+//
 //        // 스와이프 액션 구성
 //        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
 //        return configuration
 //    }
-//    
+//
 //    func deleteItem(at indexPath: IndexPath) {
 //        // 아이템 삭제 처리
 //        let month = months[indexPath.section]
@@ -425,16 +423,16 @@ extension DiaryListVC: UICollectionViewDataSource {
 //            print("유효한 DiaryID가 없습니다.")
 //            return
 //        }
-//        
+//
 //        // DiaryManager를 통해 항목을 삭제한다.
 //        diaryManager.deleteDiary(diaryID: diaryID) {
 //            [weak self] error in
 //            if error == nil {   // 에러가 없으면 성공
 //                print("\(diaryID)가 성공적으로 삭제되었습니다.")
-//                
+//
 //                // 해당 월에서 항목을 삭제.
 //                self?.monthlyDiaries[month]?.remove(at: indexPath.item)
-//                
+//
 //                // 컬렉션 뷰에서 해당 항목을 삭제.
 //                DispatchQueue.main.async {
 //                    self?.journalCollectionView.deleteItems(at: [indexPath])
@@ -445,16 +443,16 @@ extension DiaryListVC: UICollectionViewDataSource {
 //            }
 //        }
 //    }
-//    
+//
 //    // Compositional Layout 생성 메서드
 //    private func createCompositionalLayout() -> UICollectionViewCompositionalLayout {
 //        // 섹션당 하나의 아이템을 가지는 단순한 레이아웃
 //        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
 //        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-//        
+//
 //        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(100))
 //        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-//        
+//
 //        let section = NSCollectionLayoutSection(group: group)
 //        let layout = UICollectionViewCompositionalLayout(section: section)
 //        return layout
@@ -477,18 +475,18 @@ extension DiaryListVC: UICollectionViewDataSource {
 //        case .began:
 //            guard let indexPath = journalCollectionView.indexPathForItem(at: location),
 //                  let cell = journalCollectionView.cellForItem(at: indexPath) else { return }
-//            
+//
 //            // longPress한 셀의 indexPath를 저장
 //            self.selectedIndexPath = indexPath
 //
 //            // 블러 효과를 추가.
 //            addBlurEffect(excludeCell: cell)
-//            
+//
 //            setLayoutEditTableView(basedOn: cell.frame)
-//            
+//
 //            editTableView.isHidden = false
 //            editTableView.reloadData()
-//            
+//
 //            // 애니메이션 추가
 ////            UIView.animate(withDuration: 0.2) {
 ////                cell.transform = CGAffineTransform(scaleX: 1.03, y: 1.03)
@@ -508,7 +506,7 @@ extension DiaryListVC: UICollectionViewDataSource {
 //        // 전체 화면 크기의 블러 효과 뷰 생성
 //        let blurEffect = UIBlurEffect(style: .light)
 //        blurEffectView = UIVisualEffectView(effect: blurEffect)
-//        
+//
 //        // 현재 view와 동일한 크기를 지정
 //        blurEffectView?.frame = view.bounds
 //        blurEffectView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -518,15 +516,15 @@ extension DiaryListVC: UICollectionViewDataSource {
 //        // 셀 위에 블러 효과를 적용하지 않기 위해 셀의 프레임을 이용하여 블러 뷰에서 셀의 영역을 제외.
 //        let cellFrameInCollectionView = cell.convert(cell.bounds, to: view)
 //        blurEffectView?.layer.mask = createMaskLayer(excludeFrame: cellFrameInCollectionView, in: view.bounds)
-//        
+//
 //        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(blurViewTapped))
 //        blurEffectView?.addGestureRecognizer(tapGesture)
-//        
+//
 //        if let effectView = blurEffectView {
 //            // 최상위 뷰에 추가하여 navigationBar, tabBar까지 커버한다.
 //            view.window?.addSubview(effectView)
 //        }
-//        
+//
 //        // 0.3초간 투명도를 1로 만들어준다.
 //        UIView.animate(withDuration: 0.2) {
 //            self.blurEffectView?.alpha = 1
@@ -548,13 +546,13 @@ extension DiaryListVC: UICollectionViewDataSource {
 //    private func createMaskLayer(excludeFrame frame: CGRect, in bounds: CGRect) -> CALayer {
 //        let maskLayer = CAShapeLayer()
 //        let path = UIBezierPath(rect: bounds)
-//        
+//
 //        // 선택된 셀의 프레임 주위에 cornerRadius를 적용.
 //        let excludedRextPath = UIBezierPath(roundedRect: frame, cornerRadius: 20)
-//        
+//
 //        // 두 개의 경로를 결합하여 "evenOdd" 규칙을 적용.
 //        path.append(excludedRextPath)
-//        
+//
 //        maskLayer.path = path.cgPath
 //        maskLayer.fillRule = .evenOdd
 //
@@ -562,7 +560,7 @@ extension DiaryListVC: UICollectionViewDataSource {
 //    }
 //}
 
-// Context Menu 관련
+// MARK: Context Menu 관련
 extension DiaryListVC {
     // preview가 없는 메서드
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
@@ -573,7 +571,7 @@ extension DiaryListVC {
                 let month = self.months[indexPath.section]
                 if let diary = self.monthlyDiaries[month]?[indexPath.row] {
                     let writeDiaryVC = WriteDiaryVC()
-                    writeDiaryVC.activeEditMode(with: diary)
+                    writeDiaryVC.showsDiary(with: diary)
                     writeDiaryVC.modalPresentationStyle = .automatic
                     DispatchQueue.main.async {
                         self.present(writeDiaryVC, animated: true, completion: nil)
@@ -654,13 +652,13 @@ extension DiaryListVC: UISearchBarDelegate {
 
 // MARK: addSubViews, autoLayout
 extension DiaryListVC {
-    private func addSubviewsDiaryListVC() {
+    private func addSubviews() {
         view.addSubview(themeLabel)
         view.addSubview(journalCollectionView)
         view.addSubview(writeDiaryButton)
     }
     
-    private func autoLayoutDiaryListVC() {
+    private func setLayout() {
         journalCollectionView.snp.makeConstraints { make in
             make.top.equalTo(self.view.safeAreaLayoutGuide).offset(50)
             make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
