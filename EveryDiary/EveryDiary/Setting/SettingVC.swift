@@ -37,7 +37,6 @@ class SettingVC: UIViewController {
         super.viewDidLoad()
         addSubviewsSettingVC()
         autoLayoutSettingVC()
-        observeAuthState()
         }
     
     override func viewWillAppear(_ animated: Bool) {

@@ -45,7 +45,7 @@ class CalendarListVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        fetchUpdateDiaries()
+//        fetchUpdateDiaries()
     }
     
     private func autoLayoutCalendarListVC() {
@@ -69,13 +69,30 @@ class CalendarListVC: UIViewController {
     }
     
     private func fetchUpdateDiaries() {
-        // 데이터를 새로 가져오고 컬렉션 뷰를 리로드하는 로직
         DiaryManager.shared.fetchDiaries { [weak self] (diaries, error) in
             guard let diaries = diaries, error == nil else {
                 // 에러 처리...
                 return
             }
-            self?.selectedDiaries = diaries
+            
+            // DateFormatter를 설정하여 선택된 날짜를 String으로 변환합니다.
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd" // DiaryEntry의 dateString과 일치하는 형식으로 설정
+            guard let selectedDate = self?.selectedDate else {
+                // 선택된 날짜가 없다면, 모든 일기를 로드합니다.
+                self?.selectedDiaries = diaries
+                DispatchQueue.main.async {
+                    self?.dailyListCollectionView.reloadData()
+                }
+                return
+            }
+            let selectedDateString = dateFormatter.string(from: selectedDate)
+            
+            // 선택된 날짜와 일치하는 일기만 필터링합니다.
+            self?.selectedDiaries = diaries.filter { diary in
+                return diary.dateString == selectedDateString
+            }
+            
             DispatchQueue.main.async {
                 self?.dailyListCollectionView.reloadData()
             }

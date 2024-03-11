@@ -96,7 +96,6 @@ class LoginVC: UIViewController {
                         if let error = error {
                             print("Error updating user profile: \(error)")
                         }
-                        guard let user = authResult?.user else { return }
                         print("익명 사용자를 영구 계정으로 전환 성공")
                         print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
                         self.dismiss(animated: true, completion: nil)
@@ -109,7 +108,6 @@ class LoginVC: UIViewController {
                         print("자격 증명으로 로그인 중 오류 발생: \(error.localizedDescription)")
                         return
                     }
-                    guard let user = authResult?.user else { return }
                     print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
                     self.dismiss(animated: true, completion: nil)
                 }

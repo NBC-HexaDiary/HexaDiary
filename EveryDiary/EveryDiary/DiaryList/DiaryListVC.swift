@@ -101,10 +101,10 @@ class DiaryListVC: UIViewController {
         
         searchBar.delegate = self
     }
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//        loadDiaries()
-//    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadDiaries()
+    }
 }
 
 // MARK: Edit Table View(수정 및 삭제 선택지 제공)
@@ -375,6 +375,9 @@ extension DiaryListVC: UICollectionViewDataSource {
         // 0.2초 후에 일기 수정 화면으로 전환
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             self.present(writeDiaryVC, animated: true, completion: nil)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            collectionView.deselectItem(at: indexPath, animated: true)
         }
     }
     
