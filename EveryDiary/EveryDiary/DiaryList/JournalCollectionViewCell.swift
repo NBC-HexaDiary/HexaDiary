@@ -12,6 +12,16 @@ import SnapKit
 class JournalCollectionViewCell: UICollectionViewCell {
     static let reuseIdentifier = "JournalCollectionView"
     
+    override var isSelected: Bool {
+        didSet {
+            if self.isSelected {
+                self.contentView.backgroundColor = .subTheme
+            } else {
+                self.contentView.backgroundColor = .mainCell
+            }
+        }
+    }
+    
     private lazy var contentTitle: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: "SFProDisplay-Bold", size: 20)
@@ -63,10 +73,7 @@ class JournalCollectionViewCell: UICollectionViewCell {
         addSubView()
         setLayout()
         contentView.backgroundColor = .mainCell
-        self.layer.shadowOpacity = 1.0
-        self.layer.shadowColor = UIColor(named: "mainTheme")?.cgColor
-        self.layer.shadowRadius = 1.0
-        self.layer.shadowOffset = CGSize(width: 3, height: 3)
+
         self.layer.cornerRadius = 20
         self.clipsToBounds = true
         
