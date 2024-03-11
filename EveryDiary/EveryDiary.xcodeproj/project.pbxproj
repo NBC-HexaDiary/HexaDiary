@@ -408,6 +408,7 @@
 				6BA0115F2B8878F600A26CE0 /* DataModel.swift in Sources */,
 				3F3DE3042B9EFC0900BC2038 /* ImageCacheManager.swift in Sources */,
 				D2094B2C2B9FE9BB00508230 /* DiaryDataDelegate.swift in Sources */,
+				3F3DE3042B9EFC0900BC2038 /* ImageCacheManager.swift in Sources */,
 				6B3C4CCA2B8ECF3F00C53005 /* LoginVC.swift in Sources */,
 				1AF880E22B8EC021004076EB /* EveryDiary++Bundle.swift in Sources */,
 				6BB3CE3E2B85F66E005BC3E1 /* SettingVC.swift in Sources */,
