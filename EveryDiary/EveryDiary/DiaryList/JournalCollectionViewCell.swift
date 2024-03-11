@@ -83,6 +83,19 @@ class JournalCollectionViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        // UI 컴포넌트를 초기 상태로 리셋(cell 재사용시 다른 cell의 요소가 삽입되지 않도록)
+        imageView.image = nil
+        contentTitle.text = ""
+        contentTextView.text = ""
+        weatherIcon.image = nil
+        emotionIcon.image = nil
+        dateOfWriting.text = ""
+    }
+    
     func setJournalCollectionViewCell(title: String, content: String, weather: String, emotion: String, date: String, imageName: String? = nil) {
         contentTitle.text = title
         contentTextView.text = content
