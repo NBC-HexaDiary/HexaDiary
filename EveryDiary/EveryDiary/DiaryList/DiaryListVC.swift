@@ -326,17 +326,27 @@ extension DiaryListVC: UICollectionViewDataSource {
                 if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
                     cell.imageView.isHidden = false
                     cell.imageView.image = nil  // cell 재사용 전 초기화
-                    let cellID = diary.id   // 셀 식별자
+//                    let cellID = diary.id   // 셀 식별자
+//                    
+//                    URLSession.shared.dataTask(with: imageUrl) { data, response, error in
+//                        guard let data = data, error == nil else { return }
+//                        DispatchQueue.main.async {
+//                            // 이미지 다운로드 완료 후 셀의 식별자 확인
+//                            if cellID == diary.id {
+//                                cell.imageView.image = UIImage(data: data)
+//                            }
+//                        }
+//                    }.resume()
                     
-                    URLSession.shared.dataTask(with: imageUrl) { data, response, error in
-                        guard let data = data, error == nil else { return }
+                    // ImageCacheManager를 사용하여 이미지 로드
+                    ImageCacheManager.shared.loadImage(from: imageUrl) { image in
                         DispatchQueue.main.async {
-                            // 이미지 다운로드 완료 후 셀의 식별자 확인
-                            if cellID == diary.id {
-                                cell.imageView.image = UIImage(data: data)
+                            // 셀이 재사용되며 이미지가 다른 항목에 들어갈 수 있으므로 다운로드가 완료된 시점의 indexPath가 동일한지 다시 확인.
+                            if let currntIndexPath = collectionView.indexPath(for: cell), currntIndexPath == indexPath {
+                                cell.imageView.image = image
                             }
                         }
-                    }.resume()
+                    }
                 } else {
                     // 이미지 URL이 없을 경우 imageView를 숨김
                     cell.imageView.isHidden = true
