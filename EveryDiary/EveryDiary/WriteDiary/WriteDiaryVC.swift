@@ -99,13 +99,14 @@ class WriteDiaryVC: UIViewController {
         hidden: false
     )
     
-    private let titleTextField : UITextField = {
+    private lazy var titleTextField : UITextField = {
         let textField = UITextField()
         textField.backgroundColor = .clear
         textField.placeholder = "제목을 입력하세요."
         textField.tintColor = .green
         textField.font = UIFont(name: "SFProDisplay-Bold", size: 26)
         textField.textColor = .black
+        textField.delegate = self
         return textField
     }()
     
@@ -603,7 +604,7 @@ extension WriteDiaryVC {
 }
 
 // MARK: NotificationCenter(키보드 높이 조절)
-extension WriteDiaryVC {
+extension WriteDiaryVC: UITextFieldDelegate {
     private func registerKeyboardNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -628,6 +629,12 @@ extension WriteDiaryVC {
             self.scrollViewBottomConstraint?.update(inset: 0)
             self.view.layoutIfNeeded()
         }
+    }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == self.titleTextField {
+            self.contentTextView.becomeFirstResponder()
+        }
+        return true
     }
 }
 
