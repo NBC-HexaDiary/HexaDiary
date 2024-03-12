@@ -145,15 +145,6 @@
       }
     },
     {
-      "identity" : "richtextkit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/danielsaidi/RichTextKit.git",
-      "state" : {
-        "revision" : "e08e31b9d48f2f390f2909f5364109e93b11dede",
-        "version" : "0.9.9"
-      }
-    },
-    {
       "identity" : "snapkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SnapKit/SnapKit.git",
