@@ -135,6 +135,12 @@ class MotivationVC: UIViewController {
     }
 }
 
+extension MotivationVC : BuildingViewDelegate {
+    func didUpdateDiaryCount(_ diaryCount: Int) {
+        updateCountLabel()
+    }
+}
+
 extension MotivationVC : DiaryUpdateDelegate {
     func diaryDidUpdate() {
         buildings.windowsInBuildingData()
