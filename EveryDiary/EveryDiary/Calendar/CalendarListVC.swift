@@ -11,7 +11,7 @@ import SnapKit
 
 class CalendarListVC: UIViewController {
     var selectedDiaries: [DiaryEntry] = [] // 선택된 일기들을 저장하는 프로퍼티
-    var selectedDate: Date?
+    var selectedDateString: String? // 선택된 날짜를 문자열로 저장할 프로퍼티
     
     private lazy var dateLabel: UILabel = {
         let dateLabel = UILabel()
@@ -45,7 +45,8 @@ class CalendarListVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-//        fetchUpdateDiaries()
+        print("\(String(describing: selectedDateString))")
+        print("\(fetchUpdateDiaries())")
     }
     
     private func autoLayoutCalendarListVC() {
@@ -70,31 +71,37 @@ class CalendarListVC: UIViewController {
     
     private func fetchUpdateDiaries() {
         DiaryManager.shared.fetchDiaries { [weak self] (diaries, error) in
-            guard let diaries = diaries, error == nil else {
+            guard let self = self, let diaries = diaries, error == nil else {
                 // 에러 처리...
                 return
             }
-            
-            // DateFormatter를 설정하여 선택된 날짜를 String으로 변환합니다.
+
             let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd" // DiaryEntry의 dateString과 일치하는 형식으로 설정
-            guard let selectedDate = self?.selectedDate else {
-                // 선택된 날짜가 없다면, 모든 일기를 로드합니다.
-                self?.selectedDiaries = diaries
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z" // 원본 날짜 형식
+
+            let targetFormatter = DateFormatter()
+            targetFormatter.dateFormat = "yyyy-MM-dd" // 목표 날짜 형식
+
+            // 선택된 날짜 문자열이 설정되어 있지 않다면, 모든 일기를 로드합니다.
+            guard let selectedDateString = self.selectedDateString else {
+                self.selectedDiaries = diaries
                 DispatchQueue.main.async {
-                    self?.dailyListCollectionView.reloadData()
+                    self.dailyListCollectionView.reloadData()
                 }
                 return
             }
-            let selectedDateString = dateFormatter.string(from: selectedDate)
-            
-            // 선택된 날짜와 일치하는 일기만 필터링합니다.
-            self?.selectedDiaries = diaries.filter { diary in
-                return diary.dateString == selectedDateString
+
+            // 선택된 날짜 문자열과 일치하는 일기만 필터링합니다.
+            self.selectedDiaries = diaries.filter { diary in
+                guard let diaryDate = dateFormatter.date(from: diary.dateString) else {
+                    return false
+                }
+                let formattedDiaryDateString = targetFormatter.string(from: diaryDate)
+                return formattedDiaryDateString == selectedDateString
             }
-            
+
             DispatchQueue.main.async {
-                self?.dailyListCollectionView.reloadData()
+                self.dailyListCollectionView.reloadData()
             }
         }
     }
@@ -157,6 +164,7 @@ extension CalendarListVC : UICollectionViewDataSource,  UICollectionViewDelegate
         
         // 선택된 일기 정보를 전달하고, 수정 버튼을 활성화
         writeDiaryVC.showsDiary(with: diary)
+        writeDiaryVC.delegate = self
         // 일기 수정 화면으로 전환
         writeDiaryVC.modalPresentationStyle = .automatic
         
@@ -180,5 +188,11 @@ extension CalendarListVC : UICollectionViewDataSource,  UICollectionViewDelegate
         let width = dailyListCollectionView.bounds.width - 32.0
         let height = dailyListCollectionView.bounds.height / 4.2
         return CGSize(width: width, height: height)
+    }
+}
+
+extension CalendarListVC : DiaryUpdateDelegate {
+    func diaryDidUpdate() {
+        fetchUpdateDiaries()
     }
 }
