@@ -12,14 +12,14 @@ import SnapKit
     MotivationVC()
 }
 
-class MotivationVC: UIViewController, BuildingViewDelegate {
+class MotivationVC: UIViewController {
     private let buildings = BuildingView.shared
     
     private lazy var background : UIImageView = {
         let background = UIImageView(image: UIImage(named: "View.Background"))
         return background
     }()
-    
+
     private lazy var settingButton : UIBarButtonItem = {
         let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
         return button
@@ -78,10 +78,6 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
         updateCountLabel()
         addSubview()
         autoLayout()
-    }
-    
-    func didUpdateDiaryCount(_ diaryCount: Int) {
-        updateCountLabel()
     }
     
     @objc private func tabSettingBTN() {
