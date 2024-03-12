@@ -248,7 +248,6 @@ class BuildingView: UIView {
             handleBuilding(building, &windowOrder)
         }
     }
-    
     //inout 키워드를 사용하면 변수처럼 함수 내부에서 매개변수의 값을 변경할 수 있음
     func handleBuilding(_ building: BuildingSize, _ windowOrder: inout Int) {
         for (i, row) in building.windowLayout.columns.enumerated() {
