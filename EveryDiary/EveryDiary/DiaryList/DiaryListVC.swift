@@ -327,17 +327,27 @@ extension DiaryListVC: UICollectionViewDataSource {
                 if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
                     cell.imageView.isHidden = false
                     cell.imageView.image = nil  // cell 재사용 전 초기화
-                    let cellID = diary.id   // 셀 식별자
+//                    let cellID = diary.id   // 셀 식별자
+//                    
+//                    URLSession.shared.dataTask(with: imageUrl) { data, response, error in
+//                        guard let data = data, error == nil else { return }
+//                        DispatchQueue.main.async {
+//                            // 이미지 다운로드 완료 후 셀의 식별자 확인
+//                            if cellID == diary.id {
+//                                cell.imageView.image = UIImage(data: data)
+//                            }
+//                        }
+//                    }.resume()
                     
-                    URLSession.shared.dataTask(with: imageUrl) { data, response, error in
-                        guard let data = data, error == nil else { return }
+                    // ImageCacheManager를 사용하여 이미지 로드
+                    ImageCacheManager.shared.loadImage(from: imageUrl) { image in
                         DispatchQueue.main.async {
-                            // 이미지 다운로드 완료 후 셀의 식별자 확인
-                            if cellID == diary.id {
-                                cell.imageView.image = UIImage(data: data)
+                            // 셀이 재사용되며 이미지가 다른 항목에 들어갈 수 있으므로 다운로드가 완료된 시점의 indexPath가 동일한지 다시 확인.
+                            if let currntIndexPath = collectionView.indexPath(for: cell), currntIndexPath == indexPath {
+                                cell.imageView.image = image
                             }
                         }
-                    }.resume()
+                    }
                 } else {
                     // 이미지 URL이 없을 경우 imageView를 숨김
                     cell.imageView.isHidden = true
@@ -585,24 +595,22 @@ extension DiaryListVC {
                 }
             }
             // "삭제" 액션 생성
-            let deleteAction = UIAction(title: "삭제", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+            let deleteAction = UIAction(title: "휴지통", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 // "삭제" 선택 시 실행할 코드
                 let month = self.months[indexPath.section]
                 if let diary = self.monthlyDiaries[month]?[indexPath.row], let diaryID = diary.id {
-                    let alert = UIAlertController(title: "일기 삭제", message: "이 일기를 삭제하시겠습니까?", preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { _ in
-                        self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) { error in
-                            if let error = error {
-                                print("Error deleting diary: \(error.localizedDescription)")
-                            } else {
-                                DispatchQueue.main.async {
-                                    self.loadDiaries()
-                                }
+                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) { error in
+                        if let error = error {
+                            print("Error deleting diary: \(error.localizedDescription)")
+                        } else {
+                            DispatchQueue.main.async {
+                                self.loadDiaries()
                             }
                         }
-                    }))
-                    alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+                    }
+                    let alert = UIAlertController(title: "휴지통으로 이동하였습니다.", message: nil, preferredStyle: .actionSheet)
                     self.present(alert, animated: true, completion: nil)
+                    Timer.scheduledTimer(withTimeInterval: 0.7, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
                 }
             }
             // "수정"과 "삭제" 액션을 포함하는 메뉴 생성
