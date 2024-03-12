@@ -242,7 +242,6 @@ class BuildingView: UIView {
     
     func drawWindowInBuilding() {
         guard !buildings.isEmpty else { return }
-        
         var windowOrder = 1
         for building in buildings {
             handleBuilding(building, &windowOrder)
