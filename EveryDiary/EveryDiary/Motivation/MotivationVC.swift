@@ -12,14 +12,14 @@ import SnapKit
     MotivationVC()
 }
 
-class MotivationVC: UIViewController, BuildingViewDelegate {
+class MotivationVC: UIViewController {
     private let buildings = BuildingView.shared
     
     private lazy var background : UIImageView = {
         let background = UIImageView(image: UIImage(named: "View.Background"))
         return background
     }()
-    
+
     private lazy var settingButton : UIBarButtonItem = {
         let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
         return button
@@ -68,20 +68,16 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        buildings.windowsInBuildingData()
         setNavigationBar()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         buildings.delegate = self
+        buildings.windowsInBuildingData()
         updateCountLabel()
         addSubview()
         autoLayout()
-    }
-    
-    func didUpdateDiaryCount(_ diaryCount: Int) {
-        updateCountLabel()
     }
     
     @objc private func tabSettingBTN() {
@@ -92,6 +88,7 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
     
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
+        writeDiaryVC.delegate = self
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
     }
@@ -135,5 +132,11 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
         navigationItem.rightBarButtonItem = settingButton
         navigationItem.leftBarButtonItem = honorVCButton
         navigationController?.navigationBar.tintColor = .white
+    }
+}
+
+extension MotivationVC : DiaryUpdateDelegate {
+    func diaryDidUpdate() {
+        buildings.windowsInBuildingData()
     }
 }

@@ -57,13 +57,13 @@ class CalendarVC: UIViewController {
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
         configurateViews()
+        loadDiaries()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         dateSelectCalendar()
-        loadDiaries()
     }
     
     @objc private func tabSettingBTN() {
@@ -74,6 +74,7 @@ class CalendarVC: UIViewController {
     
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
+        writeDiaryVC.delegate = self
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
     }
@@ -120,7 +121,7 @@ class CalendarVC: UIViewController {
             
             // 로드된 각 일기의 상세 정보를 출력
             diaries.forEach { diary in
-                print("제목: \(diary.title), 날짜: \(diary.dateString), 내용: \(diary.content), 나알짜: \(diary.date)")
+                print("datestring: \(diary.dateString), date: \(diary.date)")
             }
 
             self.diaries = diaries
@@ -200,9 +201,15 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
             return
         }
         
+        // DateFormatter를 사용하여 날짜를 문자열로 변환
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd" // 원하는 날짜 형식을 설정하세요
+        let dateString = dateFormatter.string(from: date)
+        
         // 선택된 날짜에 해당하는 일기들을 필터링합니다.
         let selectedDiaries = diaries.filter { diary in
             guard let diaryDate = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) else { return false }
+            print("\(diaryDate) // \(date)")
             return Calendar.current.isDate(diaryDate, inSameDayAs: date)
         }
         
@@ -210,6 +217,7 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
         if !selectedDiaries.isEmpty {
             let calendarListVC = CalendarListVC()
             calendarListVC.selectedDiaries = selectedDiaries // CalendarListVC에 selectedDiaries 프로퍼티 추가 필요
+            calendarListVC.selectedDateString = dateString // 선택된 날짜 전달
             calendarListVC.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(calendarListVC, animated: true)
         }
@@ -223,4 +231,11 @@ extension DateFormatter {
         formatter.timeZone = .current
         return formatter
     }()
+}
+
+extension CalendarVC: DiaryUpdateDelegate {
+    func diaryDidUpdate() {
+        print("delegate 패턴 적용")
+        loadDiaries()
+    }
 }

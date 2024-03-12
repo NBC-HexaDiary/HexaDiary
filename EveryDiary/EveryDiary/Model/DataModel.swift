@@ -21,7 +21,7 @@ struct DiaryEntry: Codable {
 extension DiaryEntry {
     var date: Date {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
         return dateFormatter.date(from: dateString) ?? Date()
     }
     

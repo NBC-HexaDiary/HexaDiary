@@ -21,29 +21,35 @@ protocol BuildingViewDelegate: AnyObject {
 }
 
 class BuildingView: UIView {
+    // Singleton 패턴을 사용하여 공유 인스턴스 생성
     static let shared = BuildingView()
     weak var delegate: BuildingViewDelegate?
-    
+    // 이미지 캐시 관련 변수
+    var cachedBuildingImage: UIImage?
+    var cachedBackBuildingImage: UIImage?
+    // Firestore 관련 변수
     let db = Firestore.firestore()
-    var listener: ListenerRegistration?
     var diaryDays: Set<Int> = []
     
-    struct WindowLayout {
-        let columns: [[Int]]
-    }
+    var listener: ListenerRegistration?
     
+    // 빌딩 구조체 정의
     struct BuildingSize {
         let position: CGPoint
         let size: CGSize
         let windowLayout: WindowLayout
     }
-    
+    // 창문 레이아웃 구조체 정의
+    struct WindowLayout {
+        let columns: [[Int]]
+    }
+    // 빌딩 배열
     var buildings: [BuildingSize] = []
-    
+    // 레이어 정의
     let backgroundLayer = CALayer()
     let backBuildingLayer = CAShapeLayer()
     let buildingLayer = CAShapeLayer()
-    
+    // 창문 크기 및 간격 설정
     let windowSize = CGSize(width: 10, height: 22)
     let windowSpacing: CGFloat = 15
     
@@ -56,11 +62,9 @@ class BuildingView: UIView {
     }
     
     override func draw(_ rect: CGRect) {
-        drawBackBuilding()
-        drawBuilding()
+        super.draw(rect)
         drawWindowInBuilding()
     }
-    
     // UIView에 맞춰 동적으로 크기 변경
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -87,10 +91,12 @@ class BuildingView: UIView {
             
             BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.94, y: backgroundLayer.bounds.height * 0.89), size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[1]]))
         ]
+        setupBuildingLayers()
     }
     
     //MARK: - 빌딩 그림 UIBezierPath
     func drawBuilding() {
+        print("검은 빌딩 그림")
         let path = UIBezierPath()
         
         // black 첫 번째 건물
@@ -133,6 +139,7 @@ class BuildingView: UIView {
     }
     
     func drawBackBuilding() {
+        print("회색 빌딩 그림")
         let backPath = UIBezierPath()
         // gray 첫 번째 건물
         backPath.move(to: CGPoint(x: backgroundLayer.bounds.width * 0.01, y: backgroundLayer.bounds.height))
@@ -180,6 +187,50 @@ class BuildingView: UIView {
         backgroundLayer.addSublayer(backBuildingLayer)
     }
     
+    //MARK: - Image Caching
+    func drawBuildingImage() -> UIImage {
+        print("검은 빌딩 이미지 그리기")
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: self.bounds.width, height: self.bounds.height))
+        let image = renderer.image { context in
+            drawBuilding()
+        }
+        return image
+    }
+    
+    func drawBackBuildingImage() -> UIImage {
+        print("회색 빌딩 이미지 그리기")
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: self.bounds.width, height: self.bounds.height))
+        let image = renderer.image { context in
+            drawBackBuilding()
+        }
+        return image
+    }
+    
+    func setupBuildingLayers() {
+        // 이미지 캐싱
+        if cachedBuildingImage == nil {
+            cachedBuildingImage = drawBuildingImage()
+            print("Building image cached successfully")
+        }
+        
+        if cachedBackBuildingImage == nil {
+            cachedBackBuildingImage = drawBackBuildingImage()
+            print("Back building image cached successfully")
+        }
+        
+        // 빌딩 레이어 설정
+        let buildingLayer = CALayer()
+        buildingLayer.frame = self.bounds
+        buildingLayer.contents = cachedBuildingImage?.cgImage
+        self.layer.addSublayer(buildingLayer)
+        
+        // 배경 빌딩 레이어 설정
+        let backBuildingLayer = CALayer()
+        backBuildingLayer.frame = self.bounds
+        backBuildingLayer.contents = cachedBackBuildingImage?.cgImage
+        self.layer.addSublayer(backBuildingLayer)
+    }
+    
     //MARK: - 창문 관련 함수
     func drawWindows(at position: CGPoint, color: UIColor) {
         let windowPath = UIBezierPath(rect: CGRect(origin: position, size: windowSize))
@@ -191,20 +242,18 @@ class BuildingView: UIView {
     
     func drawWindowInBuilding() {
         guard !buildings.isEmpty else { return }
-        
         var windowOrder = 1
         for building in buildings {
             handleBuilding(building, &windowOrder)
         }
     }
-    
     //inout 키워드를 사용하면 변수처럼 함수 내부에서 매개변수의 값을 변경할 수 있음
     func handleBuilding(_ building: BuildingSize, _ windowOrder: inout Int) {
         for (i, row) in building.windowLayout.columns.enumerated() {
             handleFloor(i, row, building, &windowOrder)
         }
     }
-
+    
     func handleFloor(_ floorIndex: Int, _ floorWindows: [Int], _ building: BuildingSize, _ windowOrder: inout Int) {
         for (windowIndex, windowColumns) in floorWindows.enumerated() {
             if windowColumns == 0 { continue }
@@ -223,8 +272,6 @@ class BuildingView: UIView {
         }
     }
 }
-
-
 //MARK: - firebase
 extension BuildingView {
     //특정 월에 대한 일기 데이터를 Firestore 데이터베이스에서 가져오는 함수

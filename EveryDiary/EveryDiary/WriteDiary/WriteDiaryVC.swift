@@ -12,6 +12,7 @@ import SnapKit
 
 class WriteDiaryVC: UIViewController {
     
+    weak var delegate: DiaryUpdateDelegate?
     
     private var diaryManager = DiaryManager()
     
@@ -232,6 +233,7 @@ extension WriteDiaryVC {
             } else {
                 // 에러가 없다면, 화면 닫기
                 self.dismiss(animated: true, completion: nil)
+                self.delegate?.diaryDidUpdate()
             }
         }
     }
@@ -304,6 +306,7 @@ extension WriteDiaryVC {
             } else {
                 print("Dairy updated successfully")
                 self.dismiss(animated: true, completion: nil)
+                self.delegate?.diaryDidUpdate()
             }
         }
     }

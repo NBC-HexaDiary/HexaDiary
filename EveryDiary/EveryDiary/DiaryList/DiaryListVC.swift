@@ -98,10 +98,10 @@ class DiaryListVC: UIViewController {
         addSubviews()
         setLayout()
         setNavigationBar()
+        loadDiaries()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        loadDiaries()
     }
 }
 
@@ -274,6 +274,7 @@ extension DiaryListVC {
     }
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
+        writeDiaryVC.delegate = self
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
     }
@@ -377,6 +378,7 @@ extension DiaryListVC: UICollectionViewDataSource {
         
         // 선택된 일기 정보를 전달하고, 수정 버튼을 활성화
         writeDiaryVC.showsDiary(with: diary)
+        writeDiaryVC.delegate = self
         
         // 일기 수정 화면으로 전환
         writeDiaryVC.modalPresentationStyle = .automatic
@@ -585,6 +587,7 @@ extension DiaryListVC {
                 if let diary = self.monthlyDiaries[month]?[indexPath.row] {
                     let writeDiaryVC = WriteDiaryVC()
                     writeDiaryVC.showsDiary(with: diary)
+                    writeDiaryVC.delegate = self
                     writeDiaryVC.modalPresentationStyle = .automatic
                     DispatchQueue.main.async {
                         self.present(writeDiaryVC, animated: true, completion: nil)
@@ -719,5 +722,11 @@ extension DateFormatter {
     func date(from date: Date, withFormat format: String) -> String? {
         self.dateFormat = format
         return self.string(from: date)
+    }
+}
+
+extension DiaryListVC : DiaryUpdateDelegate {
+    func diaryDidUpdate() {
+        loadDiaries()
     }
 }

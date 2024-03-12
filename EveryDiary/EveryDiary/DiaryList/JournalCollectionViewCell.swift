@@ -73,7 +73,10 @@ class JournalCollectionViewCell: UICollectionViewCell {
         addSubView()
         setLayout()
         contentView.backgroundColor = .mainCell
-
+        contentView.layer.shadowOpacity = 0.1
+        contentView.layer.shadowColor = UIColor(named: "mainTheme")?.cgColor
+        contentView.layer.shadowRadius = 3
+        contentView.layer.shadowOffset = CGSize(width: 0, height: 0)
         self.layer.cornerRadius = 20
         self.clipsToBounds = true
         
