@@ -5,7 +5,6 @@
 //  Created by t2023-m0099 on 2/26/24.
 //
 
-import Foundation
 import UIKit
 import SnapKit
 import Firebase
@@ -27,6 +26,7 @@ class BuildingView: UIView {
     // 이미지 캐시 관련 변수
     var cachedBuildingImage: UIImage?
     var cachedBackBuildingImage: UIImage?
+    var windowImageCache = [Int: UIImage]()
     // Firestore 관련 변수
     let db = Firestore.firestore()
     var diaryDays: Set<Int> = []
@@ -63,7 +63,6 @@ class BuildingView: UIView {
     
     override func draw(_ rect: CGRect) {
         super.draw(rect)
-        drawWindowInBuilding()
     }
     // UIView에 맞춰 동적으로 크기 변경
     override func layoutSubviews() {
@@ -188,6 +187,22 @@ class BuildingView: UIView {
     }
     
     //MARK: - Image Caching
+    //창문 이미지로 랜더링하여 반환
+    func cacheWindowImageIfNeeded(windowIndex: Int, color: UIColor, windowSize: CGSize) {
+        if MotivationImageCache.shared.getImage(forKey: "window_\(windowIndex)") != nil {
+            print("Image for window \(windowIndex) is cached.")
+            return
+        } else {
+            let renderer = UIGraphicsImageRenderer(size: windowSize)
+            let windowImage = renderer.image { context in
+                color.setFill()
+                context.fill(CGRect(origin: .zero, size: windowSize))
+            }
+            MotivationImageCache.shared.setImage(windowImage, forKey: "window_\(windowIndex)")
+            print("Image for window \(windowIndex) is cached successfully.")
+        }
+    }
+    //검은 빌딩 이미지로 랜더링하여 반환
     func drawBuildingImage() -> UIImage {
         print("검은 빌딩 이미지 그리기")
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: self.bounds.width, height: self.bounds.height))
@@ -196,7 +211,7 @@ class BuildingView: UIView {
         }
         return image
     }
-    
+    //회색 빌딩 이미지로 랜더링하여 반환
     func drawBackBuildingImage() -> UIImage {
         print("회색 빌딩 이미지 그리기")
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: self.bounds.width, height: self.bounds.height))
@@ -217,7 +232,6 @@ class BuildingView: UIView {
             cachedBackBuildingImage = drawBackBuildingImage()
             print("Back building image cached successfully")
         }
-        
         // 빌딩 레이어 설정
         let buildingLayer = CALayer()
         buildingLayer.frame = self.bounds
@@ -232,12 +246,12 @@ class BuildingView: UIView {
     }
     
     //MARK: - 창문 관련 함수
-    func drawWindows(at position: CGPoint, color: UIColor) {
+    func createWindowLayer(at position: CGPoint, color: UIColor, windowIndex: Int) -> CAShapeLayer {
         let windowPath = UIBezierPath(rect: CGRect(origin: position, size: windowSize))
         let windowLayer = CAShapeLayer()
         windowLayer.path = windowPath.cgPath
         windowLayer.fillColor = color.cgColor
-        buildingLayer.addSublayer(windowLayer)
+        return windowLayer
     }
     
     func drawWindowInBuilding() {
@@ -262,11 +276,15 @@ class BuildingView: UIView {
             let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(windowIndex), y: building.position.y - windowHeight * CGFloat(floorIndex+1))
             
             if !diaryDays.isEmpty && windowOrder <= diaryDays.count {
-                self.drawWindows(at: windowPosition, color: .yellow)
+                cacheWindowImageIfNeeded(windowIndex: windowOrder, color: .yellow, windowSize: CGSize(width: windowWidth, height: windowHeight))
+                let windowLayer = createWindowLayer(at: windowPosition, color: .yellow, windowIndex: windowOrder)
+                buildingLayer.addSublayer(windowLayer)
                 print("Window \(windowOrder): 데이터 있음")
                 windowOrder += 1
             } else {
-                self.drawWindows(at: windowPosition, color: .darkGray)
+                cacheWindowImageIfNeeded(windowIndex: windowOrder, color: .darkGray, windowSize: CGSize(width: windowWidth, height: windowHeight))
+                let windowLayer = createWindowLayer(at: windowPosition, color: .darkGray, windowIndex: windowOrder)
+                buildingLayer.addSublayer(windowLayer)
                 print("Window \(windowOrder): 데이터 없음")
             }
         }
@@ -328,12 +346,11 @@ extension BuildingView {
                         return nil
                     }
                 }
-                
                 DispatchQueue.main.async {
                     self.diaryDays = Set(diaryDays)
-                    self.setNeedsDisplay()
                     print("self.diaryDays: \(self.diaryDays)")
                     self.delegate?.didUpdateDiaryCount(self.diaryDays.count)
+                    self.drawWindowInBuilding()
                 }
             }
         }
