@@ -22,6 +22,7 @@
 		3F0FEFFA2B8F2819001539AE /* DateConditionSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */; };
 		3F3DE3022B9E9D8100BC2038 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3F3DE3012B9E9D8100BC2038 /* GoogleService-Info.plist */; };
 		3F3DE3042B9EFC0900BC2038 /* ImageCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE3032B9EFC0900BC2038 /* ImageCacheManager.swift */; };
+		3F3DE3072BA0354C00BC2038 /* RichTextKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3F3DE3062BA0354C00BC2038 /* RichTextKit */; };
 		6B3C4CCA2B8ECF3F00C53005 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */; };
 		6B3C4CCD2B8EDACD00C53005 /* SettingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CCC2B8EDACD00C53005 /* SettingCell.swift */; };
 		6B3C4CCF2B8EE80700C53005 /* NotificationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CCE2B8EE80700C53005 /* NotificationVC.swift */; };
@@ -127,6 +128,7 @@
 				6BABC37E2B85D142009267B3 /* SnapKit in Frameworks */,
 				6B95C05D2B8DA79900DBB175 /* GoogleSignInSwift in Frameworks */,
 				6BB3CE462B8619D0005BC3E1 /* FirebaseFirestore in Frameworks */,
+				3F3DE3072BA0354C00BC2038 /* RichTextKit in Frameworks */,
 				1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */,
 				6BABC3832B85D235009267B3 /* Lottie in Frameworks */,
 				6B95C05B2B8DA79900DBB175 /* GoogleSignIn in Frameworks */,
@@ -308,6 +310,7 @@
 				6B95C05A2B8DA79900DBB175 /* GoogleSignIn */,
 				6B95C05C2B8DA79900DBB175 /* GoogleSignInSwift */,
 				1A03BDA12B92F910008C13DC /* FirebaseStorage */,
+				3F3DE3062BA0354C00BC2038 /* RichTextKit */,
 			);
 			productName = EveryDiary;
 			productReference = 6BABC3652B85D107009267B3 /* EveryDiary.app */;
@@ -342,6 +345,7 @@
 				6BABC3812B85D235009267B3 /* XCRemoteSwiftPackageReference "lottie-spm" */,
 				6BB3CE052B85DD74005BC3E1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				6B95C0592B8DA79900DBB175 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				3F3DE3052BA0354C00BC2038 /* XCRemoteSwiftPackageReference "RichTextKit" */,
 			);
 			productRefGroup = 6BABC3662B85D107009267B3 /* Products */;
 			projectDirPath = "";
@@ -639,6 +643,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3F3DE3052BA0354C00BC2038 /* XCRemoteSwiftPackageReference "RichTextKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/danielsaidi/RichTextKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.9;
+			};
+		};
 		6B95C0592B8DA79900DBB175 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
@@ -678,6 +690,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6BB3CE052B85DD74005BC3E1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		3F3DE3062BA0354C00BC2038 /* RichTextKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F3DE3052BA0354C00BC2038 /* XCRemoteSwiftPackageReference "RichTextKit" */;
+			productName = RichTextKit;
 		};
 		6B95C0552B8D74BD00DBB175 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;

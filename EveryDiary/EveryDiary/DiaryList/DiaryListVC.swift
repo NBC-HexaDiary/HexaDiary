@@ -592,24 +592,28 @@ extension DiaryListVC {
                 }
             }
             // "삭제" 액션 생성
-            let deleteAction = UIAction(title: "삭제", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+            let deleteAction = UIAction(title: "휴지통", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 // "삭제" 선택 시 실행할 코드
                 let month = self.months[indexPath.section]
                 if let diary = self.monthlyDiaries[month]?[indexPath.row], let diaryID = diary.id {
-                    let alert = UIAlertController(title: "일기 삭제", message: "이 일기를 삭제하시겠습니까?", preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { _ in
-                        self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) { error in
-                            if let error = error {
-                                print("Error deleting diary: \(error.localizedDescription)")
-                            } else {
-                                DispatchQueue.main.async {
-                                    self.loadDiaries()
-                                }
-                            }
-                        }
-                    }))
-                    alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+//                    let alert = UIAlertController(title: "일기 삭제", message: "이 일기를 삭제하시겠습니까?", preferredStyle: .alert)
+//                    alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { _ in
+//                        self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) { error in
+//                            if let error = error {
+//                                print("Error deleting diary: \(error.localizedDescription)")
+//                            } else {
+//                                DispatchQueue.main.async {
+//                                    self.loadDiaries()
+//                                }
+//                            }
+//                        }
+//                    }))
+//                    alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+                    // 임시
+                    let alert = UIAlertController(title: "휴지통으로 이동하였습니다.", message: nil, preferredStyle: .actionSheet)
+                    
                     self.present(alert, animated: true, completion: nil)
+                    Timer.scheduledTimer(withTimeInterval: 0.7, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
                 }
             }
             // "수정"과 "삭제" 액션을 포함하는 메뉴 생성
