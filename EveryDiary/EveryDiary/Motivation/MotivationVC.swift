@@ -12,14 +12,14 @@ import SnapKit
     MotivationVC()
 }
 
-class MotivationVC: UIViewController, BuildingViewDelegate {
+class MotivationVC: UIViewController {
     private let buildings = BuildingView.shared
     
     private lazy var background : UIImageView = {
         let background = UIImageView(image: UIImage(named: "View.Background"))
         return background
     }()
-    
+
     private lazy var settingButton : UIBarButtonItem = {
         let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
         return button
@@ -80,10 +80,6 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
         autoLayout()
     }
     
-    func didUpdateDiaryCount(_ diaryCount: Int) {
-        updateCountLabel()
-    }
-    
     @objc private func tabSettingBTN() {
         let settingVC = SettingVC()
         settingVC.hidesBottomBarWhenPushed = true
@@ -136,4 +132,11 @@ class MotivationVC: UIViewController, BuildingViewDelegate {
         navigationItem.leftBarButtonItem = honorVCButton
         navigationController?.navigationBar.tintColor = .white
     }
+}
+
+extension MotivationVC: BuildingViewDelegate {
+    func didUpdateDiaryCount(_ diaryCount: Int) {
+        updateCountLabel()
+    }
+
 }
