@@ -21,6 +21,8 @@ class WriteDiaryVC: UIViewController {
     
     // 수정할 일기의 ID를 저장하는 변수
     var diaryID: String?
+    // 중복저장을 방지하기 위한 변수(플래그)
+    private var isSavingDiary = false
     
     // 기존 이미지 URL 저장할 변수
     private var existingImageUrl: String?
@@ -172,6 +174,8 @@ class WriteDiaryVC: UIViewController {
 extension WriteDiaryVC {
     // 완료버튼 호출 메서드
     @objc func completeButtonTapped() {
+        guard !isSavingDiary else { return }    // 저장 중(=true)이면 실행되지 않음
+        isSavingDiary = true
         // 날짜 형식을 "yyyy-MM-dd HH:mm:ss Z"로 설정하여 dateString 생성
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
@@ -183,6 +187,7 @@ extension WriteDiaryVC {
             // FirebaseStorageManager를 사용해 이미지 업로드
             FirebaseStorageManager.uploadImage(image: image, pathRoot: "diary_images") { [weak self] imageUrl in
                 guard let imageUrl = imageUrl else {
+                    self?.isSavingDiary = false // 저장 실패하면, 변수 초기화
                     print("Image upload failed")
                     return
                 }
@@ -218,7 +223,9 @@ extension WriteDiaryVC {
         )
         
         // DiaryManager를 사용해 FireStore에 저장
-        diaryManager.addDiary(diary: newDiaryEntry) { error in
+        diaryManager.addDiary(diary: newDiaryEntry) { [weak self] error in
+            guard let self = self else { return }
+            self.isSavingDiary = false  // 성공, 실패 여부를 떠나서 저장 시도가 완료되었으므로 변수 초기화
             if let error = error {
                 // 에러처리
                 print("Error saving diary to Firestore: \(error.localizedDescription)")
