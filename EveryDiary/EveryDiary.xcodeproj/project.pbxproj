@@ -49,6 +49,7 @@
 		6BB3CE442B85F6B1005BC3E1 /* DiaryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */; };
 		6BB3CE462B8619D0005BC3E1 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE452B8619D0005BC3E1 /* FirebaseFirestore */; };
 		6BB3CE482B8619D5005BC3E1 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE472B8619D5005BC3E1 /* FirebaseFirestoreSwift */; };
+		D2094B2C2B9FE9BB00508230 /* DiaryDataDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */; };
 		D26829F02B99A16F00A1F0E5 /* DailyListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26829EF2B99A16F00A1F0E5 /* DailyListCell.swift */; };
 		D26E2F9D2B9023400083FEAC /* ProfileCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26E2F9C2B9023400083FEAC /* ProfileCell.swift */; };
 		D26E2F9F2B90239A0083FEAC /* SignOutCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26E2F9E2B90239A0083FEAC /* SignOutCell.swift */; };
@@ -105,6 +106,7 @@
 		6BB3CE3D2B85F66E005BC3E1 /* SettingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingVC.swift; sourceTree = "<group>"; };
 		6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationVC.swift; sourceTree = "<group>"; };
 		6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryListVC.swift; sourceTree = "<group>"; };
+		D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryDataDelegate.swift; sourceTree = "<group>"; };
 		D26829EF2B99A16F00A1F0E5 /* DailyListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyListCell.swift; sourceTree = "<group>"; };
 		D26E2F9B2B8F87DC0083FEAC /* EveryDiary.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EveryDiary.entitlements; sourceTree = "<group>"; };
 		D26E2F9C2B9023400083FEAC /* ProfileCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileCell.swift; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 				6BB3CE3B2B85F606005BC3E1 /* WriteDiaryVC.swift */,
 				3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */,
 				3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */,
+				D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */,
 			);
 			path = WriteDiary;
 			sourceTree = "<group>";
@@ -372,6 +375,7 @@
 				6BB3CE422B85F6A0005BC3E1 /* MotivationVC.swift in Sources */,
 				6BA011612B88790800A26CE0 /* FireStore.swift in Sources */,
 				6BA0115F2B8878F600A26CE0 /* DataModel.swift in Sources */,
+				D2094B2C2B9FE9BB00508230 /* DiaryDataDelegate.swift in Sources */,
 				6B3C4CCA2B8ECF3F00C53005 /* LoginVC.swift in Sources */,
 				1AF880E22B8EC021004076EB /* EveryDiary++Bundle.swift in Sources */,
 				6BB3CE3E2B85F66E005BC3E1 /* SettingVC.swift in Sources */,
