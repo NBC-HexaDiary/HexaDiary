@@ -68,13 +68,13 @@ class MotivationVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        buildings.windowsInBuildingData()
         setNavigationBar()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         buildings.delegate = self
+        buildings.windowsInBuildingData()
         updateCountLabel()
         addSubview()
         autoLayout()
@@ -88,6 +88,7 @@ class MotivationVC: UIViewController {
     
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
+        writeDiaryVC.delegate = self
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
     }
@@ -134,9 +135,8 @@ class MotivationVC: UIViewController {
     }
 }
 
-extension MotivationVC: BuildingViewDelegate {
-    func didUpdateDiaryCount(_ diaryCount: Int) {
-        updateCountLabel()
+extension MotivationVC : DiaryUpdateDelegate {
+    func diaryDidUpdate() {
+        buildings.windowsInBuildingData()
     }
-
 }
