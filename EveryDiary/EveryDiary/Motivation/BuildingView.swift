@@ -11,10 +11,6 @@ import SnapKit
 import Firebase
 import FirebaseFirestore
 
-#Preview{
-    BuildingView()
-}
-
 protocol BuildingViewDelegate: AnyObject {
     func didUpdateDiaryCount(_ diaryCount: Int)
 }
@@ -91,7 +87,6 @@ class BuildingView: UIView {
             BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.94, y: backgroundLayer.bounds.height * 0.89), size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[1]]))
         ]
         setupBuildingLayers()
-
     }
     
     //MARK: - 빌딩 그림 UIBezierPath

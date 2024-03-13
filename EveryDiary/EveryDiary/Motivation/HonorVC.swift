@@ -134,24 +134,19 @@ extension HonorVC {
             }
     }
     
-    private func sortDiariesByMonth() {
-        fetchDiariesButtonData { (diaries, error) in
-            if let diaries = diaries {
-                for diary in diaries {
-                    let month = Calendar.current.component(.month, from: diary.date)
-                    let day = Calendar.current.component(.day, from: diary.date)
-                    print("Month \(month), Day \(day)")
-                    if self.monthlyDiaries[month] == nil {
-                        self.monthlyDiaries[month] = Set<String>()
-                    }
-                    self.monthlyDiaries[month]?.insert("\(day)")
-                }
-                self.setupButton()
-            } else if let error = error {
-                // 데이터를 가져오는 데 실패했을 때의 처리
-                print("Error fetching diaries: \(error)")
+    private func sortDiariesByMonth(diaries: [DiaryEntry]) {
+        for diary in diaries {
+            let month = Calendar.current.component(.month, from: diary.date)
+            let day = Calendar.current.component(.day, from: diary.date)
+            print("Month \(month), Day \(day)")
+            if self.monthlyDiaries[month] == nil {
+                self.monthlyDiaries[month] = Set<String>()
             }
+            self.monthlyDiaries[month]?.insert("\(day)")
         }
+        self.setupButton()
     }
 }
+
+
 
