@@ -27,16 +27,21 @@ class DailyListCell: UICollectionViewCell {
         label.font = UIFont(name: "SFProDisplay-Bold", size: 20)
         return label
     }()
-    private lazy var contentText: UILabel = {
-        let label = UILabel()
-        label.font = UIFont(name: "SFProDisplay-Regular", size: 16)
-        return label
+
+    private lazy var contentTextView: UITextView = {
+        let view = UITextView()
+        view.font = UIFont(name: "SFProDisplay-Regular", size: 16)
+        view.isEditable = false
+        view.backgroundColor = .clear
+        view.isScrollEnabled = false
+        view.isUserInteractionEnabled = false
+        view.textContainerInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        view.contentInset = UIEdgeInsets(top: 0, left: -5, bottom: 0, right: 0)
+        return view
     }()
     
     private lazy var weatherIcon = UIImageView()
-    
     private lazy var emotionIcon = UIImageView()
-    
     private lazy var dateOfWriting: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: "SFProDisplay-Regular", size: 12)
@@ -70,7 +75,7 @@ class DailyListCell: UICollectionViewCell {
     
     func setDailyListCell(title: String, content: String, weather: String, emotion: String, date: String, imageName: String? = nil) {
         contentTitle.text = title
-        contentText.text = content
+        contentTextView.text = content
         weatherIcon.image = UIImage(named: weather)
         emotionIcon.image = UIImage(named: emotion)
         dateOfWriting.text = date
@@ -83,7 +88,7 @@ class DailyListCell: UICollectionViewCell {
 extension DailyListCell {
     private func addSubviewDailyListCell() {
         contentView.addSubview(contentTitle)
-        contentView.addSubview(contentText)
+        contentView.addSubview(contentTextView)
         contentView.addSubview(weatherIcon)
         contentView.addSubview(emotionIcon)
         contentView.addSubview(dateOfWriting)
@@ -96,7 +101,7 @@ extension DailyListCell {
             make.leading.equalTo(contentView.snp.leading).offset(15)
             make.trailing.equalTo(imageView.snp.leading).offset(-5)
         }
-        contentText.snp.makeConstraints { make in
+        contentTextView.snp.makeConstraints { make in
             make.top.equalTo(contentTitle.snp.bottom).offset(4)
             make.bottom.equalTo(weatherIcon.snp.top).offset(-4)
             make.leading.equalTo(contentTitle.snp.leading).offset(0)

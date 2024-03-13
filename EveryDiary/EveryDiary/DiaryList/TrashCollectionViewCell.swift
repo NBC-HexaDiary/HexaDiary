@@ -27,11 +27,6 @@ class TrashCollectionViewCell: UICollectionViewCell {
         label.font = UIFont(name: "SFProDisplay-Bold", size: 20)
         return label
     }()
-    private lazy var contentText: UILabel = {
-        let label = UILabel()
-        label.font = UIFont(name: "SFProDisplay-Regular", size: 16)
-        return label
-    }()
     
     private lazy var contentTextView: UITextView = {
         let view = UITextView()
@@ -103,7 +98,6 @@ class TrashCollectionViewCell: UICollectionViewCell {
 extension TrashCollectionViewCell {
     private func addSubView() {
         contentView.addSubview(contentTitle)
-        contentView.addSubview(contentText)
         contentView.addSubview(weatherIcon)
         contentView.addSubview(emotionIcon)
         contentView.addSubview(dateOfWriting)
@@ -116,12 +110,6 @@ extension TrashCollectionViewCell {
             make.height.equalTo(24)
             make.leading.equalTo(contentView.snp.leading).offset(15)
             make.trailing.equalTo(imageView.snp.leading).offset(-5)
-        }
-        contentText.snp.makeConstraints { make in
-            make.top.equalTo(contentTitle.snp.bottom).offset(4)
-            make.bottom.equalTo(weatherIcon.snp.top).offset(-4)
-            make.leading.equalTo(contentTitle.snp.leading).offset(0)
-            make.trailing.equalTo(contentTitle.snp.trailing).offset(0)
         }
         contentTextView.snp.makeConstraints { make in
             make.top.equalTo(contentTitle.snp.bottom).offset(4)

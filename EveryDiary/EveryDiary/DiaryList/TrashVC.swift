@@ -143,13 +143,10 @@ extension TrashVC {
     }
     private func organizeDiariesByMonth(diaries: [DiaryEntry]) {
         var organizedDiaries: [String: [DiaryEntry]] = [:]
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-        dateFormatter.locale = Locale(identifier: "ko_KR")
         
         for diary in diaries {
-            guard let diaryDate = dateFormatter.date(from: diary.dateString) else { continue }
-            let monthKey = diaryDate.toString(dateFormat: "yyyy.MM") // 월별 키 생성
+            guard let diaryDate = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) else { continue }
+            let monthKey = DateFormatter.yyyyMM.string(from: diaryDate) // 월별 키 생성
             
             var diariesForMonth = organizedDiaries[monthKey, default: []]
             diariesForMonth.append(diary)
@@ -159,8 +156,8 @@ extension TrashVC {
         // 각 월별로 시간 순서대로 정렬
         for (month, diariesInMonth) in organizedDiaries {
             organizedDiaries[month] = diariesInMonth.sorted(by: {
-                guard let date1 = dateFormatter.date(from: $0.dateString),
-                      let date2 = dateFormatter.date(from: $1.dateString) else { return false }
+                guard let date1 = DateFormatter.yyyyMMddHHmmss.date(from: $0.dateString),
+                      let date2 = DateFormatter.yyyyMMddHHmmss.date(from: $1.dateString) else { return false }
                 return date1 > date2
             })
         }
@@ -204,11 +201,8 @@ extension TrashVC: UICollectionViewDataSource {
             let diary = diariesForMonth[indexPath.row]
             
             // 날짜 포맷 변경
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"  // 원본 날짜 형식
-            if let date = dateFormatter.date(from: diary.dateString) {
-                dateFormatter.dateFormat = "yyyy.MM.dd" // 새로운 날짜 형식
-                let formattedDateString = dateFormatter.string(from: date)
+            if let date = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) {
+                let formattedDateString = DateFormatter.yyyyMMdd.string(from: date)
                 
                 cell.setTrashCollectionViewCell(
                     title: diary.title,

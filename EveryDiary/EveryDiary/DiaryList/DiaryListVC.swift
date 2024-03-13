@@ -241,13 +241,10 @@ extension DiaryListVC {
     }
     private func organizeDiariesByMonth(diaries: [DiaryEntry]) {
         var organizedDiaries: [String: [DiaryEntry]] = [:]
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-        dateFormatter.locale = Locale(identifier: "ko_KR")
         
         for diary in diaries {
-            guard let diaryDate = dateFormatter.date(from: diary.dateString) else { continue }
-            let monthKey = diaryDate.toString(dateFormat: "yyyy.MM") // 월별 키 생성
+            guard let diaryDate = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) else { continue }
+            let monthKey = DateFormatter.yyyyMM.string(from: diaryDate) // 월별 키 생성
             
             var diariesForMonth = organizedDiaries[monthKey, default: []]
             diariesForMonth.append(diary)
@@ -257,8 +254,8 @@ extension DiaryListVC {
         // 각 월별로 시간 순서대로 정렬
         for (month, diariesInMonth) in organizedDiaries {
             organizedDiaries[month] = diariesInMonth.sorted(by: {
-                guard let date1 = dateFormatter.date(from: $0.dateString),
-                      let date2 = dateFormatter.date(from: $1.dateString) else { return false }
+                guard let date1 = DateFormatter.yyyyMMddHHmmss.date(from: $0.dateString),
+                      let date2 = DateFormatter.yyyyMMddHHmmss.date(from: $1.dateString) else { return false }
                 return date1 > date2
             })
         }
@@ -329,11 +326,8 @@ extension DiaryListVC: UICollectionViewDataSource {
             let diary = diariesForMonth[indexPath.row]
             
             // 날짜 포맷 변경
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"  // 원본 날짜 형식
-            if let date = dateFormatter.date(from: diary.dateString) {
-                dateFormatter.dateFormat = "yyyy.MM.dd" // 새로운 날짜 형식
-                let formattedDateString = dateFormatter.string(from: date)
+            if let date = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) {
+                let formattedDateString = DateFormatter.yyyyMMdd.string(from: date)
                 
                 cell.setJournalCollectionViewCell(
                     title: diary.title,
@@ -709,15 +703,6 @@ extension DiaryListVC {
     }
 }
 
-// Date를 확장하여 문자열 변환 메서드 추가
-extension Date {
-    func toString(dateFormat format: String) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = format
-        return dateFormatter.string(from: self)
-    }
-}
-
 // 문자열 배열에서 중복 제거를 위한 확장
 extension Array where Element: Equatable {
     func unique() -> [Element] {
@@ -731,18 +716,7 @@ extension Array where Element: Equatable {
     }
 }
 
-// DateFormatter를 확장하여 문자열에서 Date로 변환하는 메서드 추가
-extension DateFormatter {
-    func date(from string: String, withFormat format: String) -> Date? {
-        self.dateFormat = format
-        return self.date(from: string)
-    }
-    func date(from date: Date, withFormat format: String) -> String? {
-        self.dateFormat = format
-        return self.string(from: date)
-    }
-}
-
+//MARK: - 일기 작성, 수정 시 data reload
 extension DiaryListVC : DiaryUpdateDelegate {
     func diaryDidUpdate() {
         loadDiaries()
