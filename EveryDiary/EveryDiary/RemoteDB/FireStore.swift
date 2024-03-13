@@ -4,7 +4,6 @@
 //
 //  Created by t2023-m0044 on 2/23/24.
 //
-// 현재 날짜가 아니면 날씨가 안뜨도록 -> 담주
 import Foundation
 
 import Firebase
@@ -15,12 +14,13 @@ class DiaryManager {
     static let shared = DiaryManager()
     let db = Firestore.firestore()
     var listener: ListenerRegistration?
+    var paginationManager: PaginationManager<DiaryEntry>?
 
     deinit {
         listener?.remove()
     }
-    
-    // 사용자 ID 가져오기
+        
+    //MARK: 사용자 ID 가져오기
     func getUserID() -> String? {
         if let currentUser = Auth.auth().currentUser {
             // 현재 사용자가 로그인되어 있는 경우
@@ -35,7 +35,7 @@ class DiaryManager {
         }
     }
     
-    // 익명으로 사용자 인증하기
+    //MARK: 익명으로 사용자 인증하기
     func authenticateAnonymouslyIfNeeded(completion: @escaping (Error?) -> Void) {
         // 이미 사용자가 로그인되어 있는지 확인
         if Auth.auth().currentUser != nil {
@@ -55,7 +55,7 @@ class DiaryManager {
         }
     }
     
-    // 일기 추가
+    //MARK: 일기 추가
     func addDiary(diary: DiaryEntry, completion: @escaping (Error?) -> Void) {
         // 익명으로 사용자 인증하기
         authenticateAnonymouslyIfNeeded { error in
@@ -78,24 +78,28 @@ class DiaryManager {
                 // 날씨 정보 가져오기에 실패하더라도 일기는 추가됩니다.
                 // 날씨 정보를 가져올 수 없는 경우에 대비하여 기본값을 "Unknown"으로 설정
                 var weatherDescription = "Unknown"
+                var weatherTemp = 0.0
                 
                 if case .success(let weatherResponse) = result {
                     // 날씨 정보에서 날씨 설명 가져오기
                     weatherDescription = weatherResponse.weather.first?.description ?? "Unknown"
+                    weatherTemp = weatherResponse.main.temp
                 }
                 
                 // 다이어리에 날씨 정보 추가
                 var diaryWithWeather = diary
                 
                 diaryWithWeather.weatherDescription = weatherDescription
+                diaryWithWeather.weatherTemp = weatherTemp
                 
-//                // 현재 날짜 가져오기
-//                let currentDate = Date()
-//                
-//                // 날짜가 현재 날짜와 다르다면 날씨를 비어 있도록 설정
-//                if !Calendar.current.isDate(diary.date, inSameDayAs: currentDate) {
-//                    diaryWithWeather.weather = "" // 혹은 "Unknown"으로 설정 가능
-//                }
+                // 현재 날짜 가져오기
+                let currentDate = Date()
+                
+                // 날짜가 현재 날짜와 다르다면 날씨를 비어 있도록 설정
+                if !Calendar.current.isDate(diary.date, inSameDayAs: currentDate) {
+                    diaryWithWeather.weatherDescription = "Unknown"
+                    diaryWithWeather.weatherTemp = 0
+                }
                 
                 // 다이어리 추가
                 var newDiaryWithUserID = diaryWithWeather
@@ -126,7 +130,77 @@ class DiaryManager {
         }
     }
     
-    // 다이어리 조회
+//    func fetchDiariesForSelectedMonth(selectedDate: Date, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+//        // 선택한 월의 시작일과 종료일 계산
+//        let calendar = Calendar.current
+//        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: selectedDate))!
+//        let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
+//
+//        // 해당 월의 일기 조회
+//        fetchDiariesByMonth(startOfMonth: startOfMonth, endOfMonth: endOfMonth, completion: completion)
+//    }
+//
+//    func fetchDiariesByMonth(startOfMonth: Date, endOfMonth: Date, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+//        guard let userID = getUserID() else {
+//            completion([], nil)
+//            return
+//        }
+//
+//        let query = db.collection("users").document(userID)
+//            .collection("diaries")
+//            .order(by: "dateString") // 날짜 순으로 정렬
+//
+//        // PaginationManager에서 onDataFetched 클로저를 정의
+//        paginationManager = PaginationManager(query: query, pageSize: 10)
+//        paginationManager?.onDataFetched = { diaries in
+//            // 파싱된 날짜가 startOfMonth과 endOfMonth 사이에 있는지 확인
+//            let filteredDiaries = diaries.filter { $0.date >= startOfMonth && $0.date <= endOfMonth }
+//            completion(filteredDiaries, nil)
+//        }
+//        paginationManager?.fetchNextPage()
+//    }
+    
+    //MARK: 현재월에 해당하는 일기만 뜬다
+    func fetchDiariesByMonth(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+        guard let userID = getUserID() else {
+            completion([], nil)
+            return
+        }
+        
+        let currentDate = Date()
+        let startOfMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Calendar.current.startOfDay(for: currentDate)))!
+        let endOfMonth = Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
+        
+        // 현재 월의 시작일과 종료일을 이용하여 쿼리를 작성
+        let query = db.collection("users").document(userID)
+            .collection("diaries")
+            .order(by: "dateString") // 날짜 순으로 정렬
+            
+        // PaginationManager에서 onDataFetched 클로저를 정의
+        paginationManager = PaginationManager(query: query, pageSize: 15)
+        paginationManager?.onDataFetched = { diaries in
+            // 파싱된 날짜가 startOfMonth과 endOfMonth 사이에 있는지 확인
+            let filteredDiaries = diaries.filter { $0.date >= startOfMonth && $0.date <= endOfMonth }
+            completion(filteredDiaries, nil)
+        }
+        paginationManager?.fetchNextPage()
+    }
+    
+    //MARK: 페이지네이션
+    func fetchDiariesWithPagination(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+        guard let userID = getUserID() else {
+            completion([], nil)
+            return
+        }
+        let query = db.collection("users").document(userID).collection("diaries").order(by: "dateString")
+        paginationManager = PaginationManager(query: query, pageSize: 10)
+        paginationManager?.onDataFetched = { diaries in
+            completion(diaries, nil)
+        }
+        paginationManager?.fetchNextPage()
+    }
+    
+    //MARK: 다이어리 조회
     func fetchDiaries(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
         // 사용자가 로그인되어 있는지 확인
         guard let userID = getUserID() else {
@@ -150,7 +224,7 @@ class DiaryManager {
         }
     }
     
-    // 다이어리 데이터 가져오기
+    //MARK: 다이어리 데이터 가져오기
     func getDiary(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
         // 사용자가 로그인되어 있는지 확인
         guard let userID = getUserID() else {
@@ -175,7 +249,7 @@ class DiaryManager {
         }
     }
     
-    // 다이어리 삭제
+    //MARK: 다이어리 삭제
     func deleteDiary(diaryID: String, imageURL: String?, completion: @escaping (Error?) -> Void) {
         guard let userID = getUserID() else {
             completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
@@ -205,7 +279,7 @@ class DiaryManager {
         }
     }
     
-    // 회원탈퇴시 데이터 삭제
+    //MARK: 회원탈퇴시 데이터 삭제
     func deleteUserData(for userID: String) {
         // 사용자의 일기 삭제
         db.collection("users").document(userID).collection("diaries").getDocuments { (querySnapshot, error) in
@@ -238,7 +312,7 @@ class DiaryManager {
         }
     }
     
-    // 다이어리 업데이트
+    //MARK: 다이어리 업데이트
     func updateDiary(diaryID: String, newDiary: DiaryEntry, completion: @escaping (Error?) -> Void) {
         guard let userID = getUserID() else {
             completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
