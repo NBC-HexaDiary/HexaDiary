@@ -20,6 +20,7 @@ class HonorVC: UIViewController {
     
     //딕셔너리. 키는 월(Int), 값은 일(Set)
     var monthlyDiaries = [Int: Set<String>]()
+    var listener: ListenerRegistration?
     
     private lazy var backgroundImage: UIImageView = {
         let backgroundImage = UIImageView()
@@ -55,34 +56,36 @@ class HonorVC: UIViewController {
         }
     }
     
-    private func setupButton() {
+    private func setupButton(monthlyDiaries: [Int: Set<String>]) {
         print("setupButton() called")
         for (month, days) in monthlyDiaries {
-            let cityButton = self.honorStackView.viewWithTag(month) as? UIButton
-            
-            if days.count == 0 {
-                cityButton?.setImage(UIImage(named: "button0"), for: .normal)
-            } else if days.count >= 1 && days.count <= 7 {
-                cityButton?.setImage(UIImage(named: "button1"), for: .normal)
-            } else if days.count >= 8 && days.count <= 14 {
-                cityButton?.setImage(UIImage(named: "button2"), for: .normal)
-            } else if days.count >= 15 && days.count <= 21 {
-                cityButton?.setImage(UIImage(named: "button3"), for: .normal)
-            } else if days.count >= 22 && days.count <= 27 {
-                cityButton?.setImage(UIImage(named: "button4"), for: .normal)
+            guard let cityButton = self.honorStackView.viewWithTag(month) as? UIButton else {
+                continue
+            }
+            if days.isEmpty {
+                cityButton.setImage(UIImage(named: "button0"), for: .normal)
             } else {
-                cityButton?.setImage(UIImage(named: "button5"), for: .normal)
+                switch days.count {
+                case 1...7:
+                    cityButton.setImage(UIImage(named: "button1"), for: .normal)
+                case 8...14:
+                    cityButton.setImage(UIImage(named: "button2"), for: .normal)
+                case 15...21:
+                    cityButton.setImage(UIImage(named: "button3"), for: .normal)
+                case 22...27:
+                    cityButton.setImage(UIImage(named: "button4"), for: .normal)
+                default:
+                    cityButton.setImage(UIImage(named: "button5"), for: .normal)
+                }
             }
         }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(monthlyDiaries)
         addSubView()
-        setupHonorStackViewButtons()
-        setupButton()
         autoLayout()
+        fetchDiariesButtonData()
     }
 }
 
@@ -108,45 +111,66 @@ extension HonorVC {
     }
     
     //MARK: - firebase
-    private func fetchDiariesButtonData(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+    private func fetchDiariesButtonData() {
         // 사용자가 로그인되어 있는지 확인
         guard let userID = DiaryManager.shared.getUserID() else {
-            completion([], nil)
+            return
+        }
+        // 현재 년도 가져오기
+        let currentYear = Calendar.current.component(.year, from: Date())
+        // 데이터가 있는 월을 저장할 집합
+        var existingMonths = Set<Int>()
+        
+        DiaryManager.shared.fetchDiaries { [weak self] (diaries, error) in
+            guard let self = self, let diaries = diaries, error == nil else {
+                // 에러 처리...
+                return
+            }
+            
+            // 월별 다이어리 구분
+            var monthlyDiaries = [Int: Set<Int>]()
+            for diary in diaries {
+                let month = Calendar.current.component(.month, from: diary.date)
+                let day = Calendar.current.component(.day, from: diary.date)
+                if monthlyDiaries[month] == nil {
+                    monthlyDiaries[month] = Set<Int>()
+                }
+                monthlyDiaries[month]?.insert(day)
+                // 데이터가 있는 월을 추가
+                existingMonths.insert(month)
+            }
+            print("Fetched diaries: \(diaries)")
+            for month in 1...12 {
+                if !existingMonths.contains(month) {
+                    // 데이터가 없는 월에 대한 처리
+                    print("No data found for month \(month)")
+                    // 빈 배열로 처리
+                    monthlyDiaries[month] = []
+                }
+            }
+            self.sortDiariesByMonth(diaries: diaries ?? [], monthlyDiaries: monthlyDiaries)
+        }
+    }
+    
+    private func sortDiariesByMonth(diaries: [DiaryEntry], monthlyDiaries: [Int: Set<Int>]) {
+        // 다이어리 데이터가 비어있을 경우 처리
+        guard !diaries.isEmpty else {
+            print("Diaries data is empty.")
             return
         }
         
-        let currentYear = Calendar.current.component(.year, from: Date())
-        DiaryManager.shared.listener = db.collection("users").document(userID).collection("diaries").whereField("year", isEqualTo: currentYear)
-            .addSnapshotListener { querySnapshot, error in
-                if let error = error {
-                    print("Error listening for real-time updates: \(error)")
-                    completion([], error)
-                } else {
-                    var diaries = [DiaryEntry]()
-                    for document in querySnapshot!.documents {
-                        if let diary = try? document.data(as: DiaryEntry.self) {
-                            diaries.append(diary)
-                        }
-                    }
-                    print("Fetched diaries: \(diaries)")
-                    completion(diaries, nil)
-                }
+        var monthlyDiariesWithStrings = [Int: Set<String>]()
+        
+        for (month, days) in monthlyDiaries {
+            var stringDays = Set<String>()
+            for day in days {
+                stringDays.insert("\(day)")
             }
-    }
-    
-    private func sortDiariesByMonth(diaries: [DiaryEntry]) {
-        for diary in diaries {
-            let month = Calendar.current.component(.month, from: diary.date)
-            let day = Calendar.current.component(.day, from: diary.date)
-            print("Month \(month), Day \(day)")
-            if self.monthlyDiaries[month] == nil {
-                self.monthlyDiaries[month] = Set<String>()
-            }
-            self.monthlyDiaries[month]?.insert("\(day)")
+            monthlyDiariesWithStrings[month] = stringDays
         }
-        self.setupButton()
+        DispatchQueue.main.async {
+            self.setupHonorStackViewButtons()
+            self.setupButton(monthlyDiaries: monthlyDiariesWithStrings)
+        }
     }
 }
-
-
-
