@@ -14,7 +14,7 @@ class DiaryManager {
     static let shared = DiaryManager()
     let db = Firestore.firestore()
     var listener: ListenerRegistration?
-    var paginationManager: PaginationManager<DiaryEntry>?
+    private let paginationManager = PaginationManager()
 
     deinit {
         listener?.remove()
@@ -58,12 +58,12 @@ class DiaryManager {
     //MARK: 일기 추가
     func addDiary(diary: DiaryEntry, completion: @escaping (Error?) -> Void) {
         // 익명으로 사용자 인증하기
-        authenticateAnonymouslyIfNeeded { error in
-            if let error = error {
-                print("Error authenticating anonymously: \(error)")
-                completion(error)
-                return
-            }
+//        authenticateAnonymouslyIfNeeded { error in
+//            if let error = error {
+//                print("Error authenticating anonymously: \(error)")
+//                completion(error)
+//                return
+//            }
             
             guard let userID = self.getUserID() else {
                 completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
@@ -127,9 +127,15 @@ class DiaryManager {
                     completion(error)
                 }
             }
-        }
+//        }
     }
     
+    //MARK: 페이지네이션
+    func fetchDiariesWithPagination(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+        // PaginationManager를 사용하여 다이어리 가져오기
+//        paginationManager.getNextPage(completion: completion)
+        paginationManager.getPage()
+    }
 //    func fetchDiariesForSelectedMonth(selectedDate: Date, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
 //        // 선택한 월의 시작일과 종료일 계산
 //        let calendar = Calendar.current
@@ -160,45 +166,45 @@ class DiaryManager {
 //        paginationManager?.fetchNextPage()
 //    }
     
-    //MARK: 현재월에 해당하는 일기만 뜬다
-    func fetchDiariesByMonth(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
-        guard let userID = getUserID() else {
-            completion([], nil)
-            return
-        }
-        
-        let currentDate = Date()
-        let startOfMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Calendar.current.startOfDay(for: currentDate)))!
-        let endOfMonth = Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
-        
-        // 현재 월의 시작일과 종료일을 이용하여 쿼리를 작성
-        let query = db.collection("users").document(userID)
-            .collection("diaries")
-            .order(by: "dateString") // 날짜 순으로 정렬
-            
-        // PaginationManager에서 onDataFetched 클로저를 정의
-        paginationManager = PaginationManager(query: query, pageSize: 15)
-        paginationManager?.onDataFetched = { diaries in
-            // 파싱된 날짜가 startOfMonth과 endOfMonth 사이에 있는지 확인
-            let filteredDiaries = diaries.filter { $0.date >= startOfMonth && $0.date <= endOfMonth }
-            completion(filteredDiaries, nil)
-        }
-        paginationManager?.fetchNextPage()
-    }
-    
-    //MARK: 페이지네이션
-    func fetchDiariesWithPagination(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
-        guard let userID = getUserID() else {
-            completion([], nil)
-            return
-        }
-        let query = db.collection("users").document(userID).collection("diaries").order(by: "dateString")
-        paginationManager = PaginationManager(query: query, pageSize: 10)
-        paginationManager?.onDataFetched = { diaries in
-            completion(diaries, nil)
-        }
-        paginationManager?.fetchNextPage()
-    }
+//    //MARK: 현재월에 해당하는 일기만 뜬다
+//    func fetchDiariesByMonth(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+//        guard let userID = getUserID() else {
+//            completion([], nil)
+//            return
+//        }
+//        
+//        let currentDate = Date()
+//        let startOfMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Calendar.current.startOfDay(for: currentDate)))!
+//        let endOfMonth = Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
+//        
+//        // 현재 월의 시작일과 종료일을 이용하여 쿼리를 작성
+//        let query = db.collection("users").document(userID)
+//            .collection("diaries")
+//            .order(by: "dateString") // 날짜 순으로 정렬
+//            
+//        // PaginationManager에서 onDataFetched 클로저를 정의
+//        paginationManager = PaginationManager(query: query, pageSize: 5)
+//        paginationManager?.onDataFetched = { diaries in
+//            // 파싱된 날짜가 startOfMonth과 endOfMonth 사이에 있는지 확인
+//            let filteredDiaries = diaries.filter { $0.date >= startOfMonth && $0.date <= endOfMonth }
+//            completion(filteredDiaries, nil)
+//        }
+//        paginationManager?.fetchNextPage()
+//    }
+//    
+//    //MARK: 페이지네이션
+//    func fetchDiariesWithPagination(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
+//        guard let userID = getUserID() else {
+//            completion([], nil)
+//            return
+//        }
+//        let query = db.collection("users").document(userID).collection("diaries").order(by: "dateString")
+//        paginationManager = PaginationManager(query: query, pageSize: 5)
+//        paginationManager?.onDataFetched = { diaries in
+//            completion(diaries, nil)
+//        }
+//        paginationManager?.fetchNextPage()
+//    }
     
     //MARK: 다이어리 조회
     func fetchDiaries(completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
