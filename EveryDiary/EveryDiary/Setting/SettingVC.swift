@@ -90,6 +90,7 @@ extension SettingVC {
                     .profileItem(email: "일기를 저장하려면 로그인해주세요", name: "Guest", image: "profile", isLoggedIn: false),
                     .settingItem(title: "알림", iconImage: "notification", number: 1),
                     .settingItem(title: "잠금", iconImage: "lock", number: 2),
+                    .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
                     .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: false),
                     .signOutItem(title: "회원 탈퇴", iconImage: "trash", number: 2, isLoggedIn: false)
                 ]
@@ -98,8 +99,9 @@ extension SettingVC {
                     .profileItem(email: currentUser.email ?? "일기를 저장하려면 로그인해주세요", name: currentUser.displayName ?? "Error", image: "profile", isLoggedIn: true),
                     .settingItem(title: "알림", iconImage: "notification", number: 1),
                     .settingItem(title: "잠금", iconImage: "lock", number: 2),
+                    .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
                     .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: true),
-                    .signOutItem(title: "회원 탈퇴", iconImage: "trash", number: 2, isLoggedIn: true)
+                    .signOutItem(title: "회원 탈퇴", iconImage: "withdrawal", number: 2, isLoggedIn: true)
                 ]
             }
         } else {
@@ -107,6 +109,7 @@ extension SettingVC {
                 .profileItem(email: "일기를 저장하려면 로그인해주세요", name: "손님", image: "profile", isLoggedIn: false),
                 .settingItem(title: "알림", iconImage: "notification", number: 1),
                 .settingItem(title: "잠금", iconImage: "lock", number: 2),
+                .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
                 .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: false),
                 .signOutItem(title: "회원 탈퇴", iconImage: "trash", number: 2, isLoggedIn: false)
             ]
@@ -309,6 +312,9 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
             case 2:
                 let lockVC = LockVC()
                 navigationController?.pushViewController(lockVC, animated: true)
+            case 3:
+                let trashVC = TrashVC()
+                navigationController?.pushViewController(trashVC, animated: true)
             default:
                 print("error")
             }

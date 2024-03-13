@@ -44,27 +44,18 @@ class CalendarVC: UIViewController {
         return calendarView
     }()
     
-    private let safeArea: UIView = {
-        let safeAreaView = UIView()
-        safeAreaView.backgroundColor = .black
-        return safeAreaView
-    }()
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(named: "mainBackground")
         addSubviewsCalendarVC()
         autoLayoutCalendarVC()
         configurateViews()
-        loadDiaries()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
+        loadDiaries() // 처음 View 로드 시, data load
+        NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil) // 로그인 & 로그아웃 감지하여 data reload
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
         dateSelectCalendar()
     }
     
@@ -124,14 +115,18 @@ class CalendarVC: UIViewController {
              guard let self = self else { return }
              if let diaries = diaries {
                  self.diaries = diaries
+                 let activeDiaries = diaries.filter { !$0.isDeleted }
                  // 날짜 정보를 기반으로 데코레이션 업데이트
-                 self.updateCalendarDecoration(with: diaries)
+                 self.updateCalendarDecoration(with: activeDiaries)
              } else if let error = error {
                  print("Error fetching diaries: \(error.localizedDescription)")
              }
          }
     }
-    
+}
+
+//MARK: - UICalendarView Custom & Decorations
+extension CalendarVC {
     private func updateCalendarDecoration(with diaries: [DiaryEntry]) {
         let updateDateComponents = Set(diaries.compactMap { diary -> DateComponents? in
             let diaryDate = diary.date
@@ -182,15 +177,18 @@ class CalendarVC: UIViewController {
     }
 }
 
+
+//MARK: - 일기를 쓴 해당 날짜 filter 후, 데이터 처리방법 표시
 extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDelegate {
    
     func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
         guard let date = Calendar.current.date(from: dateComponents) else {
             return nil
         }
-        let hasDiary = diaries.contains { diary in
-            guard let diaryDate = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) else { return false }
-            let isSameDay = Calendar.current.isDate(diaryDate, inSameDayAs: date)
+        
+        let activeDiaries = diaries.filter { !$0.isDeleted }
+        let hasDiary = activeDiaries.contains { diary in
+            let isSameDay = Calendar.current.isDate(diary.date, inSameDayAs: date)
             return isSameDay
         }
         return hasDiary ? .default(color: .mainTheme, size: .medium) : nil
@@ -202,22 +200,18 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
             return
         }
         
-        // DateFormatter를 사용하여 날짜를 문자열로 변환
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd" // 원하는 날짜 형식을 설정하세요
-        let dateString = dateFormatter.string(from: date)
+        let dateString = DateFormatter.yyyyMMdd.string(from: date)
         
         // 선택된 날짜에 해당하는 일기들을 필터링합니다.
-        let selectedDiaries = diaries.filter { diary in
-            guard let diaryDate = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) else { return false }
-            print("\(diaryDate) // \(date)")
-            return Calendar.current.isDate(diaryDate, inSameDayAs: date)
+        let activeDiaries = diaries.filter { !$0.isDeleted }
+        let selectedDiaries = activeDiaries.filter { diary in
+            return Calendar.current.isDate(diary.date, inSameDayAs: date)
         }
         
         // CalendarListVC로 이동하고 선택된 일기들을 전달합니다.
         if !selectedDiaries.isEmpty {
             let calendarListVC = CalendarListVC()
-            calendarListVC.selectedDiaries = selectedDiaries // CalendarListVC에 selectedDiaries 프로퍼티 추가 필요
+            calendarListVC.selectedDiaries = selectedDiaries // 선택된 일기 전달
             calendarListVC.selectedDateString = dateString // 선택된 날짜 전달
             calendarListVC.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(calendarListVC, animated: true)
@@ -225,9 +219,9 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
     }
 }
 
+//MARK: - 일기 데이터 수정 시, View Reload
 extension CalendarVC: DiaryUpdateDelegate {
     func diaryDidUpdate() {
-        print("delegate 패턴 적용")
         loadDiaries()
     }
 }

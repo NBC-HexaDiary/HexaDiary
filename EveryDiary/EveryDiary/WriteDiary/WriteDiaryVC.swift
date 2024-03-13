@@ -29,12 +29,8 @@ class WriteDiaryVC: UIViewController {
     private var existingImageUrl: String?
     
     private lazy var dateString: String = {
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "ko_KR")
-        dateFormatter.dateFormat = "yyyy. MM. dd(E)" // 원하는 날짜 및 시간 형식 지정
-        
         // Date를 String으로 변환
-        let dateString = dateFormatter.string(from: selectedDate)
+        let dateString = DateFormatter.yyyyMMddE.string(from: selectedDate)
         return dateString
     }()
     
@@ -177,11 +173,8 @@ extension WriteDiaryVC {
     @objc func completeButtonTapped() {
         guard !isSavingDiary else { return }    // 저장 중(=true)이면 실행되지 않음
         isSavingDiary = true
-        // 날짜 형식을 "yyyy-MM-dd HH:mm:ss Z"로 설정하여 dateString 생성
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-        dateFormatter.timeZone = TimeZone.current
-        let formattedDateString = dateFormatter.string(from: selectedDate)
+
+        let formattedDateString = DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
         
         // 이미지가 선택되었을 때 이미지 업로드 과정을 진행
         if let image = newImage {
@@ -241,11 +234,7 @@ extension WriteDiaryVC {
     @objc func updateButtonTapped() {
         guard let diaryID = self.diaryID else { return }
         
-        // 날짜 형식을 "yyyy-MM-dd HH:mm:ss Z"로 설정하여 dateString 생성
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-        dateFormatter.timeZone = TimeZone.current
-        let formattedDateString = dateFormatter.string(from: selectedDate)
+        let formattedDateString =  DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
         
         let fetchedDiary = DiaryEntry(
             id: diaryID,
@@ -329,13 +318,9 @@ extension WriteDiaryVC {
         self.weatherButton.isEnabled = false
         
         // 날짜 형식 업데이트
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "ko_KR")
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-        if let date = dateFormatter.date(from: diary.dateString) {
+        if let date = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) {
             self.selectedDate = date
-            dateFormatter.dateFormat = "yyyy. MM. dd(E)"
-            let dateString = dateFormatter.string(from: date)
+            let dateString = DateFormatter.yyyyMMddE.string(from: date)
             self.datePickingButton.setTitle(dateString, for: .normal)
         }
         
@@ -361,10 +346,8 @@ extension WriteDiaryVC {
             }
         }
     }
-    func formattedDateString(for date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"  // Firestore 날짜저장 형식
-        return dateFormatter.string(from: date)
+    func formattedDateString(for date: Date) -> String {  // Firestore 날짜저장 형식
+        return DateFormatter.yyyyMMddHHmmss.string(from: date)
     }
 }
 
@@ -475,15 +458,8 @@ extension WriteDiaryVC: DateSelectDelegate, UIPopoverPresentationControllerDeleg
     func didSelectDate(_ date: Date) {
         // 선택한 날짜를 변수에 저장
         self.selectedDate = date
-        
-        // 날짜 형식 설정
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "ko_KR")
-        dateFormatter.dateFormat = "yyyy. MM. dd(E)"
-        
         // 선택된 날짜로 문자열 변환
-        let dateString = dateFormatter.string(from: date)
-        
+        let dateString = DateFormatter.yyyyMMddE.string(from: date)
         datePickingButton.setTitle(dateString, for: .normal)
     }
 }

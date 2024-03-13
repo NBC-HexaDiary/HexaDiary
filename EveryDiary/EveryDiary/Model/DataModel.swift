@@ -23,16 +23,13 @@ struct DiaryEntry: Codable {
 
 extension DiaryEntry {
     var date: Date {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-        dateFormatter.timeZone = .current
-        return dateFormatter.date(from: dateString) ?? Date()
+        return DateFormatter.yyyyMMddHHmmss.date(from: dateString) ?? Date()
     }
     
     init(title: String, content: String, date: Date, emotion: String, weather: String, imageURL: String? = nil) {
         self.title = title
         self.content = content
-        self.dateString = "\(date)"
+        self.dateString = DateFormatter.yyyyMMddHHmmss.string(from: date)
         self.emotion = emotion
         self.weather = weather
         self.imageURL = imageURL
@@ -46,10 +43,16 @@ enum CellModel {
 }
 
 extension DateFormatter {
-    static let yyyyMMddHHmmss: DateFormatter = {
+    static func createFormatter(dateFormat: String) -> DateFormatter {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+        formatter.dateFormat = dateFormat
+        formatter.locale = Locale(identifier: "ko-KR")
         formatter.timeZone = .current
         return formatter
-    }()
+    }
+    
+    static let yyyyMMddHHmmss: DateFormatter = createFormatter(dateFormat: "yyyy-MM-dd HH:mm:ss Z")
+    static let yyyyMMdd: DateFormatter = createFormatter(dateFormat: "yyyy-MM-dd")
+    static let yyyyMM: DateFormatter = createFormatter(dateFormat: "yyyy.MM")
+    static let yyyyMMddE: DateFormatter = createFormatter(dateFormat: "yyyy. MM. dd(E)")
 }
