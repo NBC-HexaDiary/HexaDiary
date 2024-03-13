@@ -68,6 +68,14 @@ class DiaryListVC: UIViewController {
         return button
     }()
     
+    private lazy var trashButton : UIButton = {
+        var config = UIButton.Configuration.plain()
+        let button = UIButton(configuration: config)
+        button.setImage(UIImage(systemName: "trash"), for: .normal)
+        button.addTarget(self, action: #selector(tabtrashButton), for: .touchUpInside)
+        return button
+    }()
+    
     private lazy var journalCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -216,8 +224,10 @@ extension DiaryListVC {
         diaryManager.fetchDiaries { [weak self] (diaries, error) in
             guard let self = self else { return }
             if let diaries = diaries {
+                // 삭제하지 않은 일기만 필터링
+                let activeDiaries = diaries.filter { !$0.isDeleted }
                 // 월별로 데이터 분류
-                self.organizeDiariesByMonth(diaries: diaries)
+                self.organizeDiariesByMonth(diaries: activeDiaries)
                 DispatchQueue.main.async {
                     self.journalCollectionView.reloadData()
                 }
@@ -278,6 +288,10 @@ extension DiaryListVC {
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
     }
+    @objc private func tabtrashButton() {
+        let trashVC = TrashVC()
+        navigationController?.pushViewController(trashVC, animated: true)
+    }
 }
 
 // MARK: CollectionView 관련 extension
@@ -326,18 +340,6 @@ extension DiaryListVC: UICollectionViewDataSource {
                 // 이미지 URL이 있는 경우 이미지 다운로드 및 설정
                 if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
                     cell.imageView.isHidden = false
-                    cell.imageView.image = nil  // cell 재사용 전 초기화
-//                    let cellID = diary.id   // 셀 식별자
-//                    
-//                    URLSession.shared.dataTask(with: imageUrl) { data, response, error in
-//                        guard let data = data, error == nil else { return }
-//                        DispatchQueue.main.async {
-//                            // 이미지 다운로드 완료 후 셀의 식별자 확인
-//                            if cellID == diary.id {
-//                                cell.imageView.image = UIImage(data: data)
-//                            }
-//                        }
-//                    }.resume()
                     
                     // ImageCacheManager를 사용하여 이미지 로드
                     ImageCacheManager.shared.loadImage(from: imageUrl) { image in
@@ -594,15 +596,19 @@ extension DiaryListVC {
                     }
                 }
             }
-            // "삭제" 액션 생성
+            // "휴지통" 액션 생성
             let deleteAction = UIAction(title: "휴지통", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-                // "삭제" 선택 시 실행할 코드
+                // "휴지통" 선택 시 실행할 코드
                 let month = self.months[indexPath.section]
                 if let diary = self.monthlyDiaries[month]?[indexPath.row], let diaryID = diary.id {
-                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) { error in
+                    var updatedDiary = diary
+                    updatedDiary.isDeleted = true
+                    updatedDiary.deleteDate = Date() // 현재 날짜로 삭제날짜 설정
+                    DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: updatedDiary) { error in
                         if let error = error {
-                            print("Error deleting diary: \(error.localizedDescription)")
+                            print("Error moving diary to trash: \(error.localizedDescription)")
                         } else {
+                            print("Diary moved to trash successfully.")
                             DispatchQueue.main.async {
                                 self.loadDiaries()
                             }
@@ -670,6 +676,7 @@ extension DiaryListVC {
         view.addSubview(themeLabel)
         view.addSubview(journalCollectionView)
         view.addSubview(writeDiaryButton)
+        view.addSubview(trashButton)
     }
     
     private func setLayout() {
@@ -687,6 +694,11 @@ extension DiaryListVC {
             make.top.equalTo(view).offset(50)
             make.left.equalTo(view).offset(16)
             make.size.equalTo(CGSize(width:120, height: 50))
+        }
+        trashButton.snp.makeConstraints { make in
+            make.top.equalTo(themeLabel.snp.bottom).offset(10)
+            make.leading.equalTo(themeLabel.snp.leading).offset(0)
+            make.height.width.equalTo(20)
         }
     }
 }
