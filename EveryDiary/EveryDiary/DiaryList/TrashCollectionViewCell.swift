@@ -1,16 +1,16 @@
 //
-//  DailyListCell.swift
+//  TrashCollectionViewCell.swift
 //  EveryDiary
 //
-//  Created by eunsung ko on 3/7/24.
+//  Created by t2023-m0026 on 3/13/24.
 //
 
 import UIKit
 
 import SnapKit
 
-class DailyListCell: UICollectionViewCell {
-    static let id = "DailyListCell"
+class TrashCollectionViewCell: UICollectionViewCell {
+    static let reuseIdentifier = "TrashCollectionView"
     
     override var isSelected: Bool {
         didSet {
@@ -27,7 +27,7 @@ class DailyListCell: UICollectionViewCell {
         label.font = UIFont(name: "SFProDisplay-Bold", size: 20)
         return label
     }()
-
+    
     private lazy var contentTextView: UITextView = {
         let view = UITextView()
         view.font = UIFont(name: "SFProDisplay-Regular", size: 16)
@@ -47,7 +47,6 @@ class DailyListCell: UICollectionViewCell {
         label.font = UIFont(name: "SFProDisplay-Regular", size: 12)
         return label
     }()
-    
     lazy var imageView: UIImageView = {
         let view = UIImageView()
         view.layer.cornerRadius = 10
@@ -55,25 +54,36 @@ class DailyListCell: UICollectionViewCell {
         return view
     }()
     
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
-        addSubviewDailyListCell()
-        autoLayoutDailyListCell()
+        addSubView()
+        setLayout()
         contentView.backgroundColor = .mainCell
         contentView.layer.shadowOpacity = 0.1
         contentView.layer.shadowColor = UIColor(named: "mainTheme")?.cgColor
         contentView.layer.shadowRadius = 3
         contentView.layer.shadowOffset = CGSize(width: 0, height: 0)
-        contentView.layer.cornerRadius = 20
-
+        self.layer.cornerRadius = 20
+        self.clipsToBounds = true
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setDailyListCell(title: String, content: String, weather: String, emotion: String, date: String, imageName: String? = nil) {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        // UI 컴포넌트를 초기 상태로 리셋(cell 재사용시 다른 cell의 요소가 삽입되지 않도록)
+        imageView.image = nil
+        contentTitle.text = ""
+        contentTextView.text = ""
+        weatherIcon.image = nil
+        emotionIcon.image = nil
+        dateOfWriting.text = ""
+    }
+    
+    func setTrashCollectionViewCell(title: String, content: String, weather: String, emotion: String, date: String, imageName: String? = nil) {
         contentTitle.text = title
         contentTextView.text = content
         weatherIcon.image = UIImage(named: weather)
@@ -85,16 +95,16 @@ class DailyListCell: UICollectionViewCell {
     }
 }
 
-extension DailyListCell {
-    private func addSubviewDailyListCell() {
+extension TrashCollectionViewCell {
+    private func addSubView() {
         contentView.addSubview(contentTitle)
-        contentView.addSubview(contentTextView)
         contentView.addSubview(weatherIcon)
         contentView.addSubview(emotionIcon)
         contentView.addSubview(dateOfWriting)
         contentView.addSubview(imageView)
+        contentView.addSubview(contentTextView)
     }
-    private func autoLayoutDailyListCell() {
+    private func setLayout() {
         contentTitle.snp.makeConstraints { make in
             make.top.equalTo(contentView).offset(15)
             make.height.equalTo(24)

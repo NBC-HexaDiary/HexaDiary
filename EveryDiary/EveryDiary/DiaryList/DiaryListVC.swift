@@ -68,6 +68,14 @@ class DiaryListVC: UIViewController {
         return button
     }()
     
+    private lazy var trashButton : UIButton = {
+        var config = UIButton.Configuration.plain()
+        let button = UIButton(configuration: config)
+        button.setImage(UIImage(systemName: "trash"), for: .normal)
+        button.addTarget(self, action: #selector(tabtrashButton), for: .touchUpInside)
+        return button
+    }()
+    
     private lazy var journalCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -219,8 +227,10 @@ extension DiaryListVC {
         diaryManager.fetchDiaries { [weak self] (diaries, error) in
             guard let self = self else { return }
             if let diaries = diaries {
+                // 삭제하지 않은 일기만 필터링
+                let activeDiaries = diaries.filter { !$0.isDeleted }
                 // 월별로 데이터 분류
-                self.organizeDiariesByMonth(diaries: diaries)
+                self.organizeDiariesByMonth(diaries: activeDiaries)
                 DispatchQueue.main.async {
                     self.journalCollectionView.reloadData()
                 }
@@ -231,13 +241,10 @@ extension DiaryListVC {
     }
     private func organizeDiariesByMonth(diaries: [DiaryEntry]) {
         var organizedDiaries: [String: [DiaryEntry]] = [:]
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-        dateFormatter.locale = Locale(identifier: "ko_KR")
         
         for diary in diaries {
-            guard let diaryDate = dateFormatter.date(from: diary.dateString) else { continue }
-            let monthKey = diaryDate.toString(dateFormat: "yyyy.MM") // 월별 키 생성
+            guard let diaryDate = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) else { continue }
+            let monthKey = DateFormatter.yyyyMM.string(from: diaryDate) // 월별 키 생성
             
             var diariesForMonth = organizedDiaries[monthKey, default: []]
             diariesForMonth.append(diary)
@@ -247,8 +254,8 @@ extension DiaryListVC {
         // 각 월별로 시간 순서대로 정렬
         for (month, diariesInMonth) in organizedDiaries {
             organizedDiaries[month] = diariesInMonth.sorted(by: {
-                guard let date1 = dateFormatter.date(from: $0.dateString),
-                      let date2 = dateFormatter.date(from: $1.dateString) else { return false }
+                guard let date1 = DateFormatter.yyyyMMddHHmmss.date(from: $0.dateString),
+                      let date2 = DateFormatter.yyyyMMddHHmmss.date(from: $1.dateString) else { return false }
                 return date1 > date2
             })
         }
@@ -281,7 +288,10 @@ extension DiaryListVC {
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
     }
-    
+    @objc private func tabtrashButton() {
+        let trashVC = TrashVC()
+        navigationController?.pushViewController(trashVC, animated: true)
+    }
     @objc private func loginStatusChanged() {
         loadDiaries()
     }
@@ -316,11 +326,8 @@ extension DiaryListVC: UICollectionViewDataSource {
             let diary = diariesForMonth[indexPath.row]
             
             // 날짜 포맷 변경
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"  // 원본 날짜 형식
-            if let date = dateFormatter.date(from: diary.dateString) {
-                dateFormatter.dateFormat = "yyyy.MM.dd" // 새로운 날짜 형식
-                let formattedDateString = dateFormatter.string(from: date)
+            if let date = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) {
+                let formattedDateString = DateFormatter.yyyyMMdd.string(from: date)
                 
                 cell.setJournalCollectionViewCell(
                     title: diary.title,
@@ -333,18 +340,6 @@ extension DiaryListVC: UICollectionViewDataSource {
                 // 이미지 URL이 있는 경우 이미지 다운로드 및 설정
                 if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
                     cell.imageView.isHidden = false
-                    cell.imageView.image = nil  // cell 재사용 전 초기화
-//                    let cellID = diary.id   // 셀 식별자
-//                    
-//                    URLSession.shared.dataTask(with: imageUrl) { data, response, error in
-//                        guard let data = data, error == nil else { return }
-//                        DispatchQueue.main.async {
-//                            // 이미지 다운로드 완료 후 셀의 식별자 확인
-//                            if cellID == diary.id {
-//                                cell.imageView.image = UIImage(data: data)
-//                            }
-//                        }
-//                    }.resume()
                     
                     // ImageCacheManager를 사용하여 이미지 로드
                     ImageCacheManager.shared.loadImage(from: imageUrl) { image in
@@ -601,21 +596,39 @@ extension DiaryListVC {
                     }
                 }
             }
-            // "삭제" 액션 생성
+            // "휴지통" 액션 생성
             let deleteAction = UIAction(title: "휴지통", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-                // "삭제" 선택 시 실행할 코드
+                // "휴지통" 선택 시 실행할 코드
                 let month = self.months[indexPath.section]
                 if let diary = self.monthlyDiaries[month]?[indexPath.row], let diaryID = diary.id {
-                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) { error in
+                    var updatedDiary = diary
+                    updatedDiary.isDeleted = true
+                    updatedDiary.deleteDate = Date() // 현재 날짜로 삭제날짜 설정
+                    DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: updatedDiary) { error in
                         if let error = error {
-                            print("Error deleting diary: \(error.localizedDescription)")
+                            print("Error moving diary to trash: \(error.localizedDescription)")
                         } else {
+                            print("Diary moved to trash successfully.")
                             DispatchQueue.main.async {
                                 self.loadDiaries()
                             }
                         }
                     }
                     let alert = UIAlertController(title: "휴지통으로 이동하였습니다.", message: nil, preferredStyle: .actionSheet)
+//                    let alert = UIAlertController(title: "일기 삭제", message: "이 일기를 삭제하시겠습니까?", preferredStyle: .alert)
+//                    alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { _ in
+//                        self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) { error in
+//                            if let error = error {
+//                                print("Error deleting diary: \(error.localizedDescription)")
+//                            } else {
+//                                DispatchQueue.main.async {
+//                                    self.loadDiaries()
+//                                }
+//                            }
+//                        }
+//                    }))
+//                    alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+                    // 임시
                     self.present(alert, animated: true, completion: nil)
                     Timer.scheduledTimer(withTimeInterval: 0.7, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
                 }
@@ -677,6 +690,7 @@ extension DiaryListVC {
         view.addSubview(themeLabel)
         view.addSubview(journalCollectionView)
         view.addSubview(writeDiaryButton)
+        view.addSubview(trashButton)
     }
     
     private func setLayout() {
@@ -695,15 +709,11 @@ extension DiaryListVC {
             make.left.equalTo(view).offset(16)
             make.size.equalTo(CGSize(width:120, height: 50))
         }
-    }
-}
-
-// Date를 확장하여 문자열 변환 메서드 추가
-extension Date {
-    func toString(dateFormat format: String) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = format
-        return dateFormatter.string(from: self)
+        trashButton.snp.makeConstraints { make in
+            make.top.equalTo(themeLabel.snp.bottom).offset(10)
+            make.leading.equalTo(themeLabel.snp.leading).offset(0)
+            make.height.width.equalTo(20)
+        }
     }
 }
 
@@ -720,18 +730,7 @@ extension Array where Element: Equatable {
     }
 }
 
-// DateFormatter를 확장하여 문자열에서 Date로 변환하는 메서드 추가
-extension DateFormatter {
-    func date(from string: String, withFormat format: String) -> Date? {
-        self.dateFormat = format
-        return self.date(from: string)
-    }
-    func date(from date: Date, withFormat format: String) -> String? {
-        self.dateFormat = format
-        return self.string(from: date)
-    }
-}
-
+//MARK: - 일기 작성, 수정 시 data reload
 extension DiaryListVC : DiaryUpdateDelegate {
     func diaryDidUpdate() {
         loadDiaries()

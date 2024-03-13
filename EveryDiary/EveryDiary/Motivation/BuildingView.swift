@@ -334,9 +334,7 @@ extension BuildingView {
             
             if let diaries = diaries {
                 let diaryDays = diaries.compactMap { diaryEntry -> Int? in
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-                    if let date = dateFormatter.date(from: diaryEntry.dateString) {
+                    if let date = DateFormatter.yyyyMMddHHmmss.date(from: diaryEntry.dateString) {
                         let day = Calendar.current.component(.day, from: date)
                         return day
                     } else {
