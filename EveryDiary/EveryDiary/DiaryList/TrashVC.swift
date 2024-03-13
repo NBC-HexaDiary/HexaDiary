@@ -25,7 +25,7 @@ class TrashVC: UIViewController {
     // 화면 구성 요소
     private lazy var searchBar: UISearchBar = {
         let bounds = UIScreen.main.bounds
-        let width = bounds.size.width - 100
+        let width = bounds.size.width - 145
         let searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: width, height: 0))
         searchBar.placeholder = "찾고싶은 일기를 검색하세요."
         searchBar.delegate = self
@@ -37,23 +37,20 @@ class TrashVC: UIViewController {
         titleText: "돋보기",
         for: #selector(magnifyingButtonTapped)
     )
+    private lazy var seemMoreButton: UIBarButtonItem = {
+        var config = UIButton.Configuration.plain()
+        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 18)
+        config.image = UIImage(systemName: "ellipsis.circle")
+        let button = UIButton(configuration: config)
+        button.addTarget(self, action: #selector(seeMoreButtonTapped), for: .touchUpInside)
+        return UIBarButtonItem(customView: button)
+    }()
+    
     private lazy var cancelButton = setNavigationItem(
         imageNamed: "",
         titleText: "취소",
         for: #selector(cancelButtonTapped)
     )
-    
-    private lazy var writeDiaryButton : UIButton = {
-        var config = UIButton.Configuration.plain()
-        let button = UIButton(configuration: config)
-        button.layer.shadowRadius = 3
-        button.layer.borderColor = UIColor(named: "mainCell")?.cgColor
-        button.layer.shadowOpacity = 0.3
-        button.layer.shadowOffset = CGSize(width: 0, height: 0)
-        button.setImage(UIImage(named: "write"), for: .normal)
-        button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
-        return button
-    }()
     
     private lazy var trashCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -92,14 +89,14 @@ extension TrashVC {
         // 뒤로가기 버튼 활성화
         navigationItem.leftBarButtonItem = nil
         
-        self.navigationItem.rightBarButtonItems = [magnifyingButton]
+        self.navigationItem.rightBarButtonItems = [seemMoreButton, magnifyingButton]
         self.navigationItem.title = "휴지통"
         self.navigationController?.navigationBar.tintColor = .mainTheme
     }
     @objc private func magnifyingButtonTapped() {
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: searchBar)
         navigationItem.title = nil
-        navigationItem.rightBarButtonItems = [cancelButton]
+        navigationItem.rightBarButtonItems = [seemMoreButton, cancelButton]
         searchBar.becomeFirstResponder()
     }
     @objc private func cancelButtonTapped() {
@@ -110,6 +107,54 @@ extension TrashVC {
         
         setNavigationBar()  // navigationBar 초기화
         loadDiaries() // 원래의 일기목록 로드
+    }
+    @objc private func seeMoreButtonTapped() {
+        // 액션 시트 생성
+        let seeMoreActionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        // "모두 복원" 액션
+        let restoreAction = UIAlertAction(title: "모두 복원", style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            // 모든 휴지통 일기를 복원하는 로직
+            let deletedDiaries = self.monthlyDiaries.flatMap { $0.value }.filter { $0.isDeleted }
+            deletedDiaries.forEach { diary in
+                guard let diaryID = diary.id else { return }
+                var updatedDiary = diary
+                updatedDiary.isDeleted = false
+                updatedDiary.deleteDate = nil
+                self.diaryManager.updateDiary(diaryID: diaryID, newDiary: updatedDiary) { error in
+                    if let error = error {
+                        print("Error restoring diary: \(error.localizedDescription)")
+                    }
+                }
+            }
+            self.loadDiaries()
+        }
+        
+        // "비우기" 액션
+        let deleteAction = UIAlertAction(title: "비우기", style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+            // 모든 휴지통 일기를 삭제하는 로직
+            let deletedDiaries = self.monthlyDiaries.flatMap { $0.value }.filter { $0.isDeleted }
+            deletedDiaries.forEach { diary in
+                guard let diaryID = diary.id, let imageURL = diary.imageURL else { return }
+                self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: imageURL) { error in
+                    if let error = error {
+                        print("Error deleting diary: \(error.localizedDescription)")
+                    }
+                }
+            }
+            self.loadDiaries()
+        }
+        
+        
+        // 취소
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        
+        // 액션 시트에 액션 추가 및 표시
+        seeMoreActionSheet.addAction(restoreAction)
+        seeMoreActionSheet.addAction(deleteAction)
+        seeMoreActionSheet.addAction(cancelAction)
+        present(seeMoreActionSheet, animated: true)
     }
     private func setNavigationItem(imageNamed name: String, titleText: String, for action: Selector) -> UIBarButtonItem {
         var config = UIButton.Configuration.plain()
@@ -125,15 +170,36 @@ extension TrashVC {
         return UIBarButtonItem(customView: button)
     }
     
+    // 휴지통으로 이동된 diaries 중 만료된 일기를 삭제 후 불러오기
     private func loadDiaries() {
         diaryManager.fetchDiaries { [weak self] (diaries, error) in
             guard let self = self else { return }
             if let diaries = diaries {
-                // 삭제된 일기만 필터링
-                let deletedDiaries = diaries.filter { $0.isDeleted }
-                // 월별로 데이터 분류
-                self.organizeDiariesByMonth(diaries: deletedDiaries)
-                DispatchQueue.main.async {
+                // 현재 시간으로부터 (시간 * 분 * 초)이전의 시간을 계산.
+                let thresholdDate = Date().addingTimeInterval(-72 * 60 * 60)
+                
+                // 시간이 만료된 일기들을 식별
+                let expiredDiaries = diaries.filter { diary in
+                    guard let deleteDate = diary.deleteDate, diary.isDeleted else { return false }
+                    return deleteDate < thresholdDate
+                }
+                
+                // 만료된 일기들을 삭제
+                let dispatchGroup = DispatchGroup()
+                for diary in expiredDiaries {
+                    guard let diaryID = diary.id else { continue }
+                    dispatchGroup.enter()
+                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) {_ in
+                        dispatchGroup.leave()
+                    }
+                }
+                
+                // 삭제작업 완료 후 UI업데이트
+                dispatchGroup.notify(queue: .main) {
+                    // 삭제되지 않은 일기들만 필터링하여 표시
+                    let remainDiaries = diaries.filter { $0.isDeleted }
+                    // 월별로 데이터 분류
+                    self.organizeDiariesByMonth(diaries: remainDiaries)
                     self.trashCollectionView.reloadData()
                 }
             } else if let error = error {
@@ -163,12 +229,6 @@ extension TrashVC {
         }
         self.monthlyDiaries = organizedDiaries
         self.months = organizedDiaries.keys.sorted().reversed() // reversed 내림차순 정렬
-    }
-    @objc private func tabWriteDiaryBTN() {
-        let writeDiaryVC = WriteDiaryVC()
-        writeDiaryVC.delegate = self
-        writeDiaryVC.modalPresentationStyle = .automatic
-        self.present(writeDiaryVC, animated: true)
     }
 }
 
@@ -287,8 +347,31 @@ extension TrashVC {
                     }
                 }
             }
+            // "복원" 액션 생성
+            let restoreAction = UIAction(title: "복원", image: UIImage(systemName: "arrow.circlepath")) { action in
+                // "복원" 선택 시 실행할 코드
+                let month = self.months[indexPath.section]
+                if let diary = self.monthlyDiaries[month]?[indexPath.row], let diaryID = diary.id {
+                    var updatedDiary = diary
+                    updatedDiary.isDeleted = false
+                    updatedDiary.deleteDate = nil   // deleteDate 초기화
+                    DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: updatedDiary) { error in
+                        if let error = error {
+                            print("Error restoring diary: \(error.localizedDescription)")
+                        } else {
+                            print("Diary restored successfully.")
+                            DispatchQueue.main.async {
+                                self.loadDiaries()
+                            }
+                        }
+                    }
+                    let alert = UIAlertController(title: "일기가 복원되었습니다.", message: nil, preferredStyle: .actionSheet)
+                    self.present(alert, animated: true, completion: nil)
+                    Timer.scheduledTimer(withTimeInterval: 0.7, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
+                }
+            }
             // "삭제" 액션 생성
-            let deleteAction = UIAction(title: "휴지통", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+            let deleteAction = UIAction(title: "삭제", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 // "삭제" 선택 시 실행할 코드
                 let month = self.months[indexPath.section]
                 if let diary = self.monthlyDiaries[month]?[indexPath.row], let diaryID = diary.id {
@@ -307,7 +390,7 @@ extension TrashVC {
                 }
             }
             // "수정"과 "삭제" 액션을 포함하는 메뉴 생성
-            return UIMenu(title: "", children: [editAction, deleteAction])
+            return UIMenu(title: "", children: [editAction, restoreAction, deleteAction])
         }
     }
 }
@@ -361,7 +444,6 @@ extension TrashVC: UISearchBarDelegate {
 extension TrashVC {
     private func addSubviews() {
         view.addSubview(trashCollectionView)
-        view.addSubview(writeDiaryButton)
     }
     
     private func setLayout() {
@@ -370,10 +452,6 @@ extension TrashVC {
             make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.leading.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.trailing.equalTo(self.view.safeAreaLayoutGuide).offset(0)
-        }
-        writeDiaryButton.snp.makeConstraints { make in
-            make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
         }
     }
 }
