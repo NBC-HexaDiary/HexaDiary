@@ -294,6 +294,7 @@ extension DiaryListVC {
     @objc private func tabtrashButton() {
         let trashVC = TrashVC()
         navigationController?.pushViewController(trashVC, animated: true)
+    }
     @objc private func loginStatusChanged() {
         loadDiaries()
     }
