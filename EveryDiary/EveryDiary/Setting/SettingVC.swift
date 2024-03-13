@@ -160,6 +160,7 @@ extension SettingVC {
         let okAction = UIAlertAction(title: "확인", style: .default) { (_) in
             self.signOut()
             self.signOutConfirmAlert()
+            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
         }
         alertController.addAction(okAction)
         
@@ -208,6 +209,7 @@ extension SettingVC {
         let deleteAction = UIAlertAction(title: "회원 탈퇴", style: .destructive) { _ in
             self.deleteUserDataFromApple()
             self.showDeleteAccountConfirmAlert()
+            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
         }
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
         

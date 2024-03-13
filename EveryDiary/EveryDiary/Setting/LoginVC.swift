@@ -98,6 +98,7 @@ class LoginVC: UIViewController {
                         }
                         print("익명 사용자를 영구 계정으로 전환 성공")
                         print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
+                        NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
                         self.dismiss(animated: true, completion: nil)
                     }
                 }
@@ -109,6 +110,7 @@ class LoginVC: UIViewController {
                         return
                     }
                     print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
+                    NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
                     self.dismiss(animated: true, completion: nil)
                 }
             }
@@ -274,6 +276,7 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                 } else {
                     print("Full Name not provided")
                 }
+                NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
                 self.dismiss(animated: true, completion: nil)
                 // Apple 로그인을 통한 Firebase 로그인 성공 & SettingVC로 자동 전환
             }
