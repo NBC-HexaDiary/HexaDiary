@@ -58,12 +58,22 @@ class CalendarVC: UIViewController {
         autoLayoutCalendarVC()
         configurateViews()
         loadDiaries()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         dateSelectCalendar()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc private func loginStatusChanged() {
+        loadDiaries()
     }
     
     @objc private func tabSettingBTN() {
@@ -111,32 +121,23 @@ class CalendarVC: UIViewController {
     
     private func loadDiaries() {
         DiaryManager.shared.fetchDiaries { [weak self] (diaries, error) in
-            guard let self = self, let diaries = diaries, error == nil else {
-                print("일기데이터 로드 실패: \(String(describing: error))")
-                return
-            }
-            
-            // 로드된 일기 데이터의 개수를 출력
-            print("로드된 일기 개수: \(diaries.count)")
-            
-            // 로드된 각 일기의 상세 정보를 출력
-            diaries.forEach { diary in
-                print("datestring: \(diary.dateString), date: \(diary.date)")
-            }
-
-            self.diaries = diaries
-            let updateDateComponents = Set(diaries.compactMap { diary -> DateComponents? in
-                // dateString을 Date 객체로 변환합니다.
-                guard let diaryDate = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) else {
-                    return nil
-                }
-                
-                // 변환된 Date 객체로부터 DateComponents를 추출합니다.
-                let calendar = Calendar.current
-                return calendar.dateComponents([.year, .month, .day], from: diaryDate)
-            })
-            self.calendarView.reloadDecorations(forDateComponents: Array(updateDateComponents), animated: true)
-        }
+             guard let self = self else { return }
+             if let diaries = diaries {
+                 self.diaries = diaries
+                 // 날짜 정보를 기반으로 데코레이션 업데이트
+                 self.updateCalendarDecoration(with: diaries)
+             } else if let error = error {
+                 print("Error fetching diaries: \(error.localizedDescription)")
+             }
+         }
+    }
+    
+    private func updateCalendarDecoration(with diaries: [DiaryEntry]) {
+        let updateDateComponents = Set(diaries.compactMap { diary -> DateComponents? in
+            let diaryDate = diary.date
+            return Calendar.current.dateComponents([.year, .month, .day], from: diaryDate)
+        })
+        self.calendarView.reloadDecorations(forDateComponents: Array(updateDateComponents), animated: true)
     }
     
     private func configurateViews() {
@@ -222,15 +223,6 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
             navigationController?.pushViewController(calendarListVC, animated: true)
         }
     }
-}
-
-extension DateFormatter {
-    static let yyyyMMddHHmmss: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-        formatter.timeZone = .current
-        return formatter
-    }()
 }
 
 extension CalendarVC: DiaryUpdateDelegate {

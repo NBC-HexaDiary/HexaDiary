@@ -107,9 +107,12 @@ class DiaryListVC: UIViewController {
         setLayout()
         setNavigationBar()
         loadDiaries()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
     }
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
@@ -291,6 +294,8 @@ extension DiaryListVC {
     @objc private func tabtrashButton() {
         let trashVC = TrashVC()
         navigationController?.pushViewController(trashVC, animated: true)
+    @objc private func loginStatusChanged() {
+        loadDiaries()
     }
 }
 

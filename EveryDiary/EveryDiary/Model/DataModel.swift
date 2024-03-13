@@ -24,6 +24,7 @@ extension DiaryEntry {
     var date: Date {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+        dateFormatter.timeZone = .current
         return dateFormatter.date(from: dateString) ?? Date()
     }
     
@@ -41,4 +42,13 @@ enum CellModel {
     case profileItem(email: String, name: String, image: String?, isLoggedIn: Bool)
     case settingItem(title: String, iconImage: String, number:Int)
     case signOutItem(title: String, iconImage: String, number:Int, isLoggedIn: Bool)
+}
+
+extension DateFormatter {
+    static let yyyyMMddHHmmss: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+        formatter.timeZone = .current
+        return formatter
+    }()
 }
