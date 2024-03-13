@@ -16,6 +16,8 @@ struct DiaryEntry: Codable {
     var weatherDescription: String?
     var imageURL: String?
     var userID: String?
+    var isDeleted: Bool = false
+    var deleteDate: Date?
 }
 
 extension DiaryEntry {
