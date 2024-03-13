@@ -78,6 +78,12 @@ class MotivationVC: UIViewController {
         updateCountLabel()
         addSubview()
         autoLayout()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     @objc private func tabSettingBTN() {
@@ -97,6 +103,10 @@ class MotivationVC: UIViewController {
         let honorVC = HonorVC()
         honorVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(honorVC, animated: true)
+    }
+    
+    @objc private func loginStatusChanged() {
+        buildings.windowsInBuildingData()
     }
     
     private func addSubview() {

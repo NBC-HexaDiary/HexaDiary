@@ -99,9 +99,12 @@ class DiaryListVC: UIViewController {
         setLayout()
         setNavigationBar()
         loadDiaries()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
     }
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
@@ -277,6 +280,10 @@ extension DiaryListVC {
         writeDiaryVC.delegate = self
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
+    }
+    
+    @objc private func loginStatusChanged() {
+        loadDiaries()
     }
 }
 

@@ -6,10 +6,10 @@
 //
 
 import UIKit
+
 import SnapKit
 import Firebase
 import FirebaseFirestore
-import FirebaseAuth
 
 #Preview{
     BuildingView()
