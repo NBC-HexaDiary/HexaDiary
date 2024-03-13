@@ -91,6 +91,7 @@ class BuildingView: UIView {
             BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.94, y: backgroundLayer.bounds.height * 0.89), size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[1]]))
         ]
         setupBuildingLayers()
+
     }
     
     //MARK: - 빌딩 그림 UIBezierPath
@@ -202,6 +203,7 @@ class BuildingView: UIView {
             print("Image for window \(windowIndex) is cached successfully.")
         }
     }
+    
     //검은 빌딩 이미지로 랜더링하여 반환
     func drawBuildingImage() -> UIImage {
         print("검은 빌딩 이미지 그리기")
