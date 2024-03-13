@@ -164,10 +164,29 @@ class WriteDiaryVC: UIViewController {
         addSubView()
         setLayout()
         registerKeyboardNotifications()
+        imageViewFucntional()
     }
     
     deinit {
         unregisterKeyboardNotifications()
+    }
+}
+
+extension WriteDiaryVC {
+    private func imageViewFucntional() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageTapped(_: )))
+        imageView.addGestureRecognizer(tapGestureRecognizer)
+        imageView.isUserInteractionEnabled = true
+    }
+    @objc func imageTapped(_ tapgGestureRecognizer: UITapGestureRecognizer) {
+        guard let imageView = tapgGestureRecognizer.view as? UIImageView else { return }
+        guard let imageToZoom = imageView.image else { return }
+        showZoomedImage(imageToZoom)
+    }
+    private func showZoomedImage(_ image: UIImage) {
+        let zoomVC = ImageZoomViewController(image: image)
+        zoomVC.modalPresentationStyle = .fullScreen
+        present(zoomVC, animated: true, completion: nil)
     }
 }
 
