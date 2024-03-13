@@ -74,7 +74,7 @@ class MotivationVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         buildings.delegate = self
-        buildings.windowsInBuildingData()
+        diaryDidUpdate()
         updateCountLabel()
         addSubview()
         autoLayout()
