@@ -31,7 +31,7 @@ class WeatherService: NSObject, CLLocationManagerDelegate {
             return completion(.failure(.noData))
         }
         
-        let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(location.coordinate.latitude)&lon=\(location.coordinate.longitude)&appid=\(apiKey) &units=metric"
+        let urlString = "https://api.openweathermap.org/data/2.5/weather?lat=\(location.coordinate.latitude)&lon=\(location.coordinate.longitude)&appid=\(apiKey)&lang=kr&units=metric"
         
         guard let url = URL(string: urlString) else {
             return completion(.failure(.badUrl))
