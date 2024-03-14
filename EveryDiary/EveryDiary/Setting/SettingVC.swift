@@ -37,15 +37,21 @@ class SettingVC: UIViewController {
         super.viewDidLoad()
         addSubviewsSettingVC()
         autoLayoutSettingVC()
+        observeAuthState()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
         }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setNavigationBar()
-        observeAuthState()
         tableView.selectRow(at: .none,
                             animated: true,
                             scrollPosition: .top)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     private func addSubviewsSettingVC() {
@@ -60,6 +66,10 @@ class SettingVC: UIViewController {
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-10)
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(10)
         }
+    }
+    
+    @objc func loginStatusChanged() {
+        observeAuthState()
     }
     
     @objc func didTapLoginButton() {
@@ -272,6 +282,8 @@ extension SettingVC {
 extension SettingVC : UITableViewDelegate, UITableViewDataSource {
     // TableView의 Cell 갯수는 datasource의 조건에 따라 달라진다
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        print("\(dataSource.count)")
+
         return dataSource.count
     }
     

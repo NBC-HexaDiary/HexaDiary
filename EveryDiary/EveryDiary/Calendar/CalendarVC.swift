@@ -99,8 +99,8 @@ class CalendarVC: UIViewController {
         }
         calendarView.snp.makeConstraints { make in
             make.centerX.equalTo(view)
-            make.leading.equalTo(view.safeAreaLayoutGuide).offset(10)
-            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-10)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(15)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-15)
             make.top.equalTo(calendarLabel.snp.bottom).offset(20)
         }
         calendarLabel.snp.makeConstraints { make in
@@ -153,7 +153,7 @@ extension CalendarVC {
         calendarView.locale = .current
         calendarView.timeZone = .current
         calendarView.fontDesign = .rounded
-        calendarView.layer.cornerRadius = 10
+        calendarView.layer.cornerRadius = 20
         calendarView.delegate = self
     }
     
