@@ -5,6 +5,7 @@
 //  Created by t2023-m0044 on 2/21/24.
 //
 
+import PhotosUI
 import UIKit
 
 import Firebase
@@ -76,7 +77,7 @@ class WriteDiaryVC: UIViewController {
         textFont: "SFProDisplay-Regular",
         fontSize: 0,
         buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(photoButtonTapped),
+        for: #selector(phPhotoButtonTapped),
         hidden: false
     )
     private lazy var emotionButton = setButton(
@@ -655,6 +656,39 @@ extension WriteDiaryVC: UITextViewDelegate {
         if contentTextView.text.isEmpty {
             textView.text = textViewPlaceHolder
             textView.textColor = .lightGray
+        }
+    }
+}
+
+extension WriteDiaryVC: PHPickerViewControllerDelegate {
+    // PHPickerController를 불러오는 메서드
+    @objc func phPhotoButtonTapped() {
+        var configuration = PHPickerConfiguration()
+        configuration.selectionLimit = 1    // 이미지를 한 개만 선택할 수 있도록 제한
+        configuration.filter = .images  // 이미지만 선택할 수 있도록 필터링
+        
+        let picker = PHPickerViewController(configuration: configuration)
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+    
+    // PHPickerControllerDelegate 메서드
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        picker.dismiss(animated: true)
+        
+        // 선택한 이미지 처리
+        let itemProviders = results.map(\.itemProvider)
+        if let itemProvider = itemProviders.first, itemProvider.canLoadObject(ofClass: UIImage.self) {
+            itemProvider.loadObject(ofClass: UIImage.self) { [weak self] (image, error) in
+                DispatchQueue.main.async {
+                    if let image = image as? UIImage {
+                        // 선택한 이미지를 imageView에 설정하고 높이를 업데이트
+                        self?.newImage = image
+                        self?.imageView.image = image
+                        self?.updateImageViewHeight(with: image)
+                    }
+                }
+            }
         }
     }
 }
