@@ -109,6 +109,49 @@ class JournalCollectionViewCell: UICollectionViewCell {
             imageView.image = UIImage(named: imageName)
         }
     }
+    func setImage(_ image: UIImage?) {
+        imageView.image = image
+        imageView.isHidden = false
+        updateLayoutForImageVisible(true)
+    }
+    func hideImage() {
+        imageView.isHidden = true
+        updateLayoutForImageVisible(false)
+    }
+    
+    private func updateLayoutForImageVisible(_ isVisible: Bool) {
+        if isVisible {
+            // 이미지가 표시될 때
+            contentTitle.snp.remakeConstraints { make in
+                make.top.equalTo(contentView).offset(15)
+                make.height.equalTo(24)
+                make.leading.equalTo(contentView.snp.leading).offset(15)
+                make.trailing.equalTo(imageView.snp.leading).offset(-5)
+            }
+            contentTextView.snp.remakeConstraints { make in
+                make.top.equalTo(contentTitle.snp.bottom).offset(4)
+                make.bottom.equalTo(weatherIcon.snp.top).offset(-4)
+                make.leading.equalTo(contentTitle.snp.leading)
+                make.trailing.equalTo(imageView.snp.leading).offset(-5)
+            }
+        } else {
+            // 이미지가 숨겨졌을 때
+            contentTitle.snp.remakeConstraints { make in
+                make.top.equalTo(contentView).offset(15)
+                make.height.equalTo(24)
+                make.leading.equalTo(contentView.snp.leading).offset(15)
+                make.trailing.equalTo(contentView.snp.trailing).offset(-15)
+            }
+            contentTextView.snp.remakeConstraints { make in
+                make.top.equalTo(contentTitle.snp.bottom).offset(4)
+                make.bottom.equalTo(weatherIcon.snp.top).offset(-4)
+                make.leading.equalTo(contentTitle.snp.leading)
+                make.trailing.equalTo(contentView.snp.trailing).offset(-15)
+            }
+        }
+        // 변경된 제약 조건을 기반으로 레이아웃을 즉시 업데이트
+        self.layoutIfNeeded()
+    }
 }
 
 // MARK: Cell Swipe(삭제 예정)
