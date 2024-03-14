@@ -28,6 +28,14 @@ class DateSelectVC: UIViewController {
         picker.preferredDatePickerStyle = .inline
         picker.datePickerMode = .date
         picker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
+        
+        // 최대 선택가능한 날짜 지정
+        let calendar = Calendar(identifier: .gregorian)
+        let currentDate = Date()
+        var components = DateComponents()
+        components.calendar = calendar
+        let maxDate = calendar.date(byAdding: components, to: currentDate)
+        picker.maximumDate = maxDate
         return picker
     }()
     
