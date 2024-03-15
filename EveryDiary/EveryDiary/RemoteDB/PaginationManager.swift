@@ -18,7 +18,12 @@ class PaginationManager {
             return
         }
         
-        var collection = db.collection("users").document(userID).collection("diaries").order(by: "dateString", descending: true)
+        var collection = db.collection("users")
+            .document(userID)
+            .collection("diaries")
+            .order(by: "dateString", descending: true)
+            .whereField("isDeleted", isEqualTo: false) // isDeleted가 false인 문서만 가져오기
+
         
         if let lastDocumentSnapshot = lastDocumentSnapshot {
             // 이전 페이지의 마지막 문서 다음부터 쿼리

@@ -768,6 +768,11 @@ extension DiaryListVC: UICollectionViewDelegate {
                 !self.diaries.contains { $0.id == newDiary.id } // 기존 데이터와 중복되지 않는 경우만 필터링
             }
             
+            guard !uniqueNewDiaries.isEmpty else {
+                self.isLoadingData = false
+                return
+            }
+            
             // 새로운 데이터를 기존 데이터에 추가
             self.diaries.append(contentsOf: uniqueNewDiaries)
             
