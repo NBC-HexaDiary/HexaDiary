@@ -16,6 +16,8 @@ protocol DateSelectDelegate: AnyObject {
 class DateSelectVC: UIViewController {
     weak var delegate: DateSelectDelegate?
     
+    var selectedDate: Date?
+    
     private lazy var contentView : UIView = {
         let contentView = UIView()
         contentView.layer.cornerRadius = 15
@@ -46,8 +48,14 @@ class DateSelectVC: UIViewController {
 
         addSubViews()
         makeConstraints()
+        deliverDate()
         
 //        tapGustureCheck()
+    }
+    private func deliverDate() {
+        if let selectedDate = selectedDate {
+            datePicker.date = selectedDate
+        }
     }
     
     @objc private func dateChanged(_ sender: UIDatePicker) {
