@@ -17,11 +17,10 @@ import FirebaseAuth
 
 class HonorVC: UIViewController {
     let db = Firestore.firestore()
-    
     //딕셔너리. 키는 월(Int), 값은 일(Set)
     var monthlyDiaries = [Int: Set<String>]()
     var listener: ListenerRegistration?
-    
+
     private lazy var backgroundImage: UIImageView = {
         let backgroundImage = UIImageView()
         backgroundImage.translatesAutoresizingMaskIntoConstraints = false
@@ -47,10 +46,19 @@ class HonorVC: UIViewController {
         return honorStackView
     }()
     
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setNavigationBar()
+        addSubView()
+        autoLayout()
+        fetchDiariesButtonData()
+    }
+    
+// MARK: - Button UI Update
     private func setupHonorStackViewButtonsAndLabels() {
         print("setupHonorStackViewButtons() called")
         for month in 1...12 {
-            //
             let containerView = UIView()
             honorStackView.addArrangedSubview(containerView)
             
@@ -61,13 +69,13 @@ class HonorVC: UIViewController {
             containerView.addSubview(rightView)
             
             leftView.snp.makeConstraints { make in
-                make.left.equalTo(containerView.snp.left)
+                make.left.equalTo(containerView.snp.left).offset(30)
                 make.top.bottom.equalTo(containerView)
                 make.width.equalTo(containerView.snp.width).multipliedBy(0.5)
             }
             
             rightView.snp.makeConstraints { make in
-                make.right.equalTo(containerView.snp.right)
+                make.right.equalTo(containerView.snp.right).offset(-30)
                 make.top.bottom.equalTo(containerView)
                 make.width.equalTo(leftView.snp.width)
             }
@@ -92,9 +100,10 @@ class HonorVC: UIViewController {
             button.snp.makeConstraints { make in
                 make.top.equalToSuperview().offset(10)
                 make.centerX.equalToSuperview()
+                make.centerY.equalToSuperview()
             }
             label.snp.makeConstraints { make in
-                make.top.equalTo(button.snp.bottom)
+                make.top.equalTo(button.snp.bottom).offset(20)
                 make.centerX.equalTo(button)
             }
         }
@@ -133,15 +142,8 @@ class HonorVC: UIViewController {
             }
         }
     }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        addSubView()
-        autoLayout()
-        fetchDiariesButtonData()
-    }
 }
-
+//MARK: - UI 설정
 extension HonorVC {
     private func addSubView() {
         view.addSubview(backgroundImage)
@@ -162,8 +164,10 @@ extension HonorVC {
             make.height.equalTo(honorSV.snp.height).multipliedBy(4)
         }
     }
+}
     
-    //MARK: - firebase
+//MARK: - firebase
+extension HonorVC {
     private func fetchDiariesButtonData() {
         // 사용자가 로그인되어 있는지 확인
         guard let userID = DiaryManager.shared.getUserID() else {
@@ -225,5 +229,8 @@ extension HonorVC {
             self.setupHonorStackViewButtonsAndLabels()
             self.setupButton(monthlyDiaries: monthlyDiariesWithStrings)
         }
+    }
+    private func setNavigationBar() {
+        navigationController?.navigationBar.tintColor = .black
     }
 }

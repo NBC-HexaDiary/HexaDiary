@@ -27,7 +27,7 @@ class BuildingView: UIView {
     let db = Firestore.firestore()
     var diaryDays: Set<Int> = []
     
-    var listener: ListenerRegistration?
+//    var listener: ListenerRegistration?
     
     // 빌딩 구조체 정의
     struct BuildingSize {
@@ -57,9 +57,6 @@ class BuildingView: UIView {
         super.init(coder: coder)
     }
     
-    override func draw(_ rect: CGRect) {
-        super.draw(rect)
-    }
     // UIView에 맞춰 동적으로 크기 변경
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -222,12 +219,10 @@ class BuildingView: UIView {
         // 이미지 캐싱
         if cachedBuildingImage == nil {
             cachedBuildingImage = drawBuildingImage()
-            print("Building image cached successfully")
         }
         
         if cachedBackBuildingImage == nil {
             cachedBackBuildingImage = drawBackBuildingImage()
-            print("Back building image cached successfully")
         }
         // 빌딩 레이어 설정
         let buildingLayer = CALayer()
