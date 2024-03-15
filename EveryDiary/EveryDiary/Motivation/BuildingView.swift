@@ -19,9 +19,7 @@ class BuildingView: UIView {
     // Singleton 패턴을 사용하여 공유 인스턴스 생성
     static let shared = BuildingView()
     weak var delegate: BuildingViewDelegate?
-    // 이미지 캐시 관련 변수
-    var cachedBuildingImage: UIImage?
-    var cachedBackBuildingImage: UIImage?
+
     var windowImageCache = [Int: UIImage]()
     // Firestore 관련 변수
     let db = Firestore.firestore()
@@ -196,10 +194,36 @@ class BuildingView: UIView {
         }
     }
     
+    func setupBuildingLayers() {
+        // 빌딩 레이어 설정
+        let buildingLayer = CALayer()
+        buildingLayer.frame = bounds
+        if let cachedBuildingImage = MotivationImageCache.shared.getImage(forKey: "cachedBuildingImage") {
+            buildingLayer.contents = cachedBuildingImage.cgImage
+        } else {
+            let buildingImage = drawBuildingImage()
+            MotivationImageCache.shared.setImage(buildingImage, forKey: "cachedBuildingImage")
+            buildingLayer.contents = buildingImage.cgImage
+        }
+        layer.addSublayer(buildingLayer)
+
+        // 배경 빌딩 레이어 설정
+        let backBuildingLayer = CALayer()
+        backBuildingLayer.frame = bounds
+        if let cachedBackBuildingImage = MotivationImageCache.shared.getImage(forKey: "cachedBackBuildingImage") {
+            backBuildingLayer.contents = cachedBackBuildingImage.cgImage
+        } else {
+            let backBuildingImage = drawBackBuildingImage()
+            MotivationImageCache.shared.setImage(backBuildingImage, forKey: "cachedBackBuildingImage")
+            backBuildingLayer.contents = backBuildingImage.cgImage
+        }
+        layer.addSublayer(backBuildingLayer)
+    }
+    
     //검은 빌딩 이미지로 랜더링하여 반환
     func drawBuildingImage() -> UIImage {
         print("검은 빌딩 이미지 그리기")
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: self.bounds.width, height: self.bounds.height))
+        let renderer = UIGraphicsImageRenderer(size: bounds.size)
         let image = renderer.image { context in
             drawBuilding()
         }
@@ -208,33 +232,11 @@ class BuildingView: UIView {
     //회색 빌딩 이미지로 랜더링하여 반환
     func drawBackBuildingImage() -> UIImage {
         print("회색 빌딩 이미지 그리기")
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: self.bounds.width, height: self.bounds.height))
+        let renderer = UIGraphicsImageRenderer(size: bounds.size)
         let image = renderer.image { context in
             drawBackBuilding()
         }
         return image
-    }
-    
-    func setupBuildingLayers() {
-        // 이미지 캐싱
-        if cachedBuildingImage == nil {
-            cachedBuildingImage = drawBuildingImage()
-        }
-        
-        if cachedBackBuildingImage == nil {
-            cachedBackBuildingImage = drawBackBuildingImage()
-        }
-        // 빌딩 레이어 설정
-        let buildingLayer = CALayer()
-        buildingLayer.frame = self.bounds
-        buildingLayer.contents = cachedBuildingImage?.cgImage
-        self.layer.addSublayer(buildingLayer)
-        
-        // 배경 빌딩 레이어 설정
-        let backBuildingLayer = CALayer()
-        backBuildingLayer.frame = self.bounds
-        backBuildingLayer.contents = cachedBackBuildingImage?.cgImage
-        self.layer.addSublayer(backBuildingLayer)
     }
     
     //MARK: - 창문 관련 함수
