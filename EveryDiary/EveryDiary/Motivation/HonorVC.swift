@@ -47,35 +47,88 @@ class HonorVC: UIViewController {
         return honorStackView
     }()
     
-    private func setupHonorStackViewButtons() {
+    private func setupHonorStackViewButtonsAndLabels() {
         print("setupHonorStackViewButtons() called")
         for month in 1...12 {
+            //
+            let containerView = UIView()
+            honorStackView.addArrangedSubview(containerView)
+            
+            let leftView = UIView()
+            let rightView = UIView()
+            
+            containerView.addSubview(leftView)
+            containerView.addSubview(rightView)
+            
+            leftView.snp.makeConstraints { make in
+                make.left.equalTo(containerView.snp.left)
+                make.top.bottom.equalTo(containerView)
+                make.width.equalTo(containerView.snp.width).multipliedBy(0.5)
+            }
+            
+            rightView.snp.makeConstraints { make in
+                make.right.equalTo(containerView.snp.right)
+                make.top.bottom.equalTo(containerView)
+                make.width.equalTo(leftView.snp.width)
+            }
+            
             let button = UIButton()
             button.tag = month
-            honorStackView.addArrangedSubview(button)
+            
+            let label = UILabel()
+            label.text = "\(month)월"
+            label.textAlignment = .center
+            
+            if month % 2 != 0 {
+                // 홀수 월: 왼쪽 뷰에 버튼과 라벨 추가
+                leftView.addSubview(button)
+                leftView.addSubview(label)
+            } else {
+                // 짝수 월: 오른쪽 뷰에 버튼과 라벨 추가
+                rightView.addSubview(button)
+                rightView.addSubview(label)
+            }
+            
+            button.snp.makeConstraints { make in
+                make.top.equalToSuperview().offset(10)
+                make.centerX.equalToSuperview()
+            }
+            label.snp.makeConstraints { make in
+                make.top.equalTo(button.snp.bottom)
+                make.centerX.equalTo(button)
+            }
         }
     }
     
     private func setupButton(monthlyDiaries: [Int: Set<String>]) {
         print("setupButton() called")
         for (month, days) in monthlyDiaries {
-            guard let cityButton = self.honorStackView.viewWithTag(month) as? UIButton else {
+            let containerView = self.honorStackView.arrangedSubviews[month - 1]
+            var button: UIButton?
+            for subview in containerView.subviews {
+                if let btn = subview.subviews.first(where: { $0 is UIButton }) as? UIButton {
+                    button = btn
+                    break
+                }
+            }
+            
+            guard let button = button else {
                 continue
             }
             if days.isEmpty {
-                cityButton.setImage(UIImage(named: "button0"), for: .normal)
+                button.setImage(UIImage(named: "button0"), for: .normal)
             } else {
                 switch days.count {
                 case 1...7:
-                    cityButton.setImage(UIImage(named: "button1"), for: .normal)
+                    button.setImage(UIImage(named: "button1"), for: .normal)
                 case 8...14:
-                    cityButton.setImage(UIImage(named: "button2"), for: .normal)
+                    button.setImage(UIImage(named: "button2"), for: .normal)
                 case 15...21:
-                    cityButton.setImage(UIImage(named: "button3"), for: .normal)
+                    button.setImage(UIImage(named: "button3"), for: .normal)
                 case 22...27:
-                    cityButton.setImage(UIImage(named: "button4"), for: .normal)
+                    button.setImage(UIImage(named: "button4"), for: .normal)
                 default:
-                    cityButton.setImage(UIImage(named: "button5"), for: .normal)
+                    button.setImage(UIImage(named: "button5"), for: .normal)
                 }
             }
         }
@@ -169,7 +222,7 @@ extension HonorVC {
             monthlyDiariesWithStrings[month] = stringDays
         }
         DispatchQueue.main.async {
-            self.setupHonorStackViewButtons()
+            self.setupHonorStackViewButtonsAndLabels()
             self.setupButton(monthlyDiaries: monthlyDiariesWithStrings)
         }
     }
