@@ -80,6 +80,7 @@ class HonorVC: UIViewController {
             
             let button = UIButton()
             button.tag = month
+            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
             
             let label = UILabel()
             label.text = "\(month)월"
@@ -228,6 +229,17 @@ extension HonorVC {
             self.setupButton(monthlyDiaries: monthlyDiariesWithStrings)
         }
     }
+    @objc private func buttonTapped() {
+        let detailVC = DetailVC()
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
+    
+//    func navigateToMotivationVC(month: Int, days: Set<String>) {
+//        let detailVC = DetailVC()
+//        detailVC.configure(month: month, days: days)
+//        navigationController?.pushViewController(detailVC, animated: true)
+//    }
+    
     private func setNavigationBar() {
         navigationController?.navigationBar.tintColor = .black
     }
