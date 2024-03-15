@@ -8,6 +8,9 @@
 import UIKit
 import FirebaseAuth
 
+#Preview {
+    StartVC()
+}
 class StartVC: UIViewController {
     
     override func viewDidLoad() {
@@ -28,7 +31,9 @@ class StartVC: UIViewController {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
         button.setTitle("시작하기", for: .normal)
-        button.backgroundColor = .systemGray
+        button.backgroundColor = .searchText
+        button.setTitleColor(.white, for: .normal) // 폰트 색상 변경
+        button.layer.cornerRadius = 8 // 각을 둥글게 만드는 부분
         button.addTarget(self, action: #selector(tabStartButton), for: .touchUpInside)
         return button
     }()
