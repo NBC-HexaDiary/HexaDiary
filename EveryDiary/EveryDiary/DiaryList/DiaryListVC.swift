@@ -17,11 +17,13 @@ class DiaryListVC: UIViewController {
     private var monthlyDiaries: [String: [DiaryEntry]] = [:]
     private var months: [String] = []
     private var diaries: [DiaryEntry] = []
-    
+    private var isLoadingData: Bool = false // 데이터를 로드 중인지 여부를 나타내는 플래그
+
     // contextMenu 관련 변수
     private var currentLongPressedCell: JournalCollectionViewCell?
     private var selectedIndexPath: IndexPath?
-    
+    private let paginationManager = PaginationManager() // PaginationManager 추가
+
     // 화면 구성 요소
     private lazy var themeLabel : UILabel = {
         let label = UILabel()
@@ -106,7 +108,7 @@ class DiaryListVC: UIViewController {
         addSubviews()
         setLayout()
         setNavigationBar()
-        loadDiaries()
+//        loadDiaries()
         
         NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
     }
@@ -734,5 +736,49 @@ extension Array where Element: Equatable {
 extension DiaryListVC : DiaryUpdateDelegate {
     func diaryDidUpdate() {
         loadDiaries()
+    }
+}
+extension DiaryListVC: UICollectionViewDelegate {
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let height = scrollView.frame.size.height
+        
+        // 스크롤이 컬렉션 뷰의 전체 contentHeight의 80% 정도로 내려갔을 때 데이터를 요청
+        let triggerPoint = contentHeight - height
+        
+        if offsetY > triggerPoint {
+            // 데이터를 로드 중이 아닌 경우에만 다음 페이지의 데이터를 요청
+            guard !isLoadingData else { return }
+            isLoadingData = true // 데이터 로드 중 플래그 설정
+            getPage()
+        }
+    }
+    
+    func getPage() {
+        paginationManager.getNextPage { [weak self] newDiaries in
+            guard let self = self, let newDiaries = newDiaries else {
+                self?.isLoadingData = false // 데이터 로드 완료 후 플래그 재설정
+                return
+            }
+            
+            // 중복된 데이터를 제거하고 새로운 데이터만 추가
+            let uniqueNewDiaries = newDiaries.filter { newDiary in
+                !self.diaries.contains { $0.id == newDiary.id } // 기존 데이터와 중복되지 않는 경우만 필터링
+            }
+            
+            // 새로운 데이터를 기존 데이터에 추가
+            self.diaries.append(contentsOf: uniqueNewDiaries)
+            
+            // 월별로 데이터 재구성
+            self.organizeDiariesByMonth(diaries: self.diaries)
+            
+            // 컬렉션 뷰 리로드
+            DispatchQueue.main.async {
+                self.journalCollectionView.reloadData()
+                self.isLoadingData = false // 데이터 로드 완료 후 플래그 재설정
+            }
+        }
     }
 }

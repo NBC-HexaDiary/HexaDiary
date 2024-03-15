@@ -247,40 +247,51 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                                                       idToken: idTokenString,
                                                       rawNonce: nonce)
             // Firebase에 로그인
-            Auth.auth().signInAnonymously { (authResult, error) in
-                if let error = error {
-                    // Error. If error.code == .MissingOrInvalidNonce, make sure
-                    // you're sending the SHA256-hashed nonce as a hex string with
-                    // your request to Apple.
-                    print(error.localizedDescription)
-                    return
-                }
-                guard let user = authResult?.user else { return }
-                user.link(with: credential) { authResult, error in
+            if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
+                currentUser.link(with: credential) { authResult, error in
                     if let error = error {
-                        print("Error converting anonymous user to permanent account: \(error.localizedDescription)")
-                    } else {
-                        print("Anonymous user converted to permanent account successfully")
+                        print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
+                        return
+                    }
+                    let changeRequest = currentUser.createProfileChangeRequest()
+                    changeRequest.commitChanges { error in
+                        if let error = error {
+                            print("Error updating user profile: \(error)")
+                        }
+                        print("익명 사용자를 영구 계정으로 전환 성공")
+                        NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                        self.dismiss(animated: true, completion: nil)
                     }
                 }
-                print("identityToken: \(idTokenString)")
-                if let email = appleIDCredential.email {
-                    print("Email: \(email)")
-                } else {
-                    print("Email not provided")
+            } else {
+                // 익명 사용자가 아닌 경우에는 바로 로그인
+                Auth.auth().signIn(with: credential) { authResult, error in
+                    if let error = error {
+                        print("자격 증명으로 로그인 중 오류 발생: \(error.localizedDescription)")
+                        return
+                    }
+                    NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                    self.dismiss(animated: true, completion: nil)
                 }
-
-                if let fullName = appleIDCredential.fullName {
-                    let displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
-                    print("Full Name: \(displayName)")
-                } else {
-                    print("Full Name not provided")
-                }
-                NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                self.dismiss(animated: true, completion: nil)
-                // Apple 로그인을 통한 Firebase 로그인 성공 & SettingVC로 자동 전환
             }
-
+            print("identityToken: \(idTokenString)")
+            if let email = appleIDCredential.email {
+                print("Email: \(email)")
+            } else {
+                print("Email not provided")
+            }
+            
+            if let fullName = appleIDCredential.fullName {
+                let displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
+                print("Full Name: \(displayName)")
+            } else {
+                print("Full Name not provided")
+            }
+            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+            self.dismiss(animated: true, completion: nil)
+            // Apple 로그인을 통한 Firebase 로그인 성공 & SettingVC로 자동 전환
+            
+            
             // 사용자의 authorizationCode를 로그인 시 미리 가져온다. 회원 탈퇴 시, 필요하기 때문이다.
             if let authorizationCode = appleIDCredential.authorizationCode, let codeString = String(data: authorizationCode, encoding: .utf8) {
                 let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/getRefreshToken?code=\(codeString)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "https://apple.com")!
