@@ -919,6 +919,15 @@ extension WriteDiaryVC: UICollectionViewDataSource, UICollectionViewDelegateFlow
 }
 
 extension WriteDiaryVC: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.item < imagesLocationInfo.count {
+            let zoomVC = ImageZoomCollectionViewController()
+            zoomVC.images = imagesLocationInfo.map { $0.image } // 모든 이미지 전달
+            zoomVC.initialIndex = indexPath.item    // 탭한 이미지의 인덱스 전달
+            zoomVC.modalPresentationStyle = .fullScreen
+            present(zoomVC, animated: true)
+        }
+    }
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         // UICollectionViewFlowLayout 인스턴스
         guard let flowLayout = imagesCollectionView.collectionViewLayout as? UICollectionViewFlowLayout else { return }
