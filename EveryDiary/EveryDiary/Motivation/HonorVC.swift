@@ -20,7 +20,7 @@ class HonorVC: UIViewController {
     //딕셔너리. 키는 월(Int), 값은 일(Set)
     var monthlyDiaries = [Int: Set<String>]()
     var listener: ListenerRegistration?
-
+    
     private lazy var backgroundImage: UIImageView = {
         let backgroundImage = UIImageView()
         backgroundImage.translatesAutoresizingMaskIntoConstraints = false
@@ -30,7 +30,6 @@ class HonorVC: UIViewController {
     
     private lazy var honorSV: UIScrollView = {
         let honorSV = UIScrollView()
-        honorSV.translatesAutoresizingMaskIntoConstraints = false
         honorSV.backgroundColor = .clear
         honorSV.showsVerticalScrollIndicator = false
         return honorSV
@@ -46,7 +45,6 @@ class HonorVC: UIViewController {
         return honorStackView
     }()
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setNavigationBar()
@@ -55,7 +53,7 @@ class HonorVC: UIViewController {
         fetchDiariesButtonData()
     }
     
-// MARK: - Button UI Update
+    // MARK: - Button UI Update
     private func setupHonorStackViewButtonsAndLabels() {
         print("setupHonorStackViewButtons() called")
         for month in 1...12 {
@@ -100,7 +98,7 @@ class HonorVC: UIViewController {
             button.snp.makeConstraints { make in
                 make.top.equalToSuperview().offset(10)
                 make.centerX.equalToSuperview()
-                make.centerY.equalToSuperview()
+                //make.centerY.equalToSuperview()
             }
             label.snp.makeConstraints { make in
                 make.top.equalTo(button.snp.bottom).offset(20)
@@ -161,7 +159,7 @@ extension HonorVC {
         honorStackView.snp.makeConstraints{ make in
             make.top.bottom.leading.trailing.equalTo(honorSV)
             make.width.equalTo(honorSV.snp.width)
-            make.height.equalTo(honorSV.snp.height).multipliedBy(4)
+            make.height.equalTo(honorSV.snp.height).multipliedBy(2)
         }
     }
 }
