@@ -5,6 +5,7 @@
 //  Created by t2023-m0044 on 2/21/24.
 //
 
+import PhotosUI
 import UIKit
 
 import Firebase
@@ -76,7 +77,7 @@ class WriteDiaryVC: UIViewController {
         textFont: "SFProDisplay-Regular",
         fontSize: 0,
         buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(photoButtonTapped),
+        for: #selector(phPhotoButtonTapped),
         hidden: false
     )
     private lazy var emotionButton = setButton(
@@ -128,6 +129,29 @@ class WriteDiaryVC: UIViewController {
     }()
     
     private var imageViewHeightConstraint: NSLayoutConstraint?
+    
+    // 여러개의 이미지를 보여주기 위한 배열과 collectionView
+    private var images: [UIImage] = []
+    private lazy var imagesCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.itemSize = CGSize(width: self.view.bounds.width - 50, height: self.view.bounds.width - 50)
+        layout.minimumLineSpacing = 50
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 25, bottom: 0, right: 25)
+        layout.scrollDirection = .horizontal
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.showsHorizontalScrollIndicator = false
+        
+        collectionView.decelerationRate = .fast
+        collectionView.isPagingEnabled = false
+        
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: ImageCollectionViewCell.reuseIdentifier)
+        return collectionView
+    }()
+    private var imageCollectionViewHeightConstraint: NSLayoutConstraint?
     
     private let textViewPlaceHolder = "텍스트를 입력하세요."
     
@@ -498,6 +522,7 @@ extension WriteDiaryVC {
         contentView.addSubview(titleTextField)
         contentView.addSubview(contentTextView)
         contentView.addSubview(imageView)
+        contentView.addSubview(imagesCollectionView)
     }
     private func setLayout() {
         scrollView.snp.makeConstraints { make in
@@ -567,6 +592,12 @@ extension WriteDiaryVC {
             make.trailing.equalToSuperview().offset(-15)
         }
         
+        imagesCollectionView.snp.makeConstraints { make in
+            make.top.equalTo(photoButton.snp.bottom).offset(15)
+            make.leading.equalToSuperview().offset(0)
+            make.trailing.equalToSuperview().offset(0)
+        }
+        
         // contentTextView의 최소 높이 설정
         contentTextView.snp.makeConstraints { make in
             make.top.equalTo(imageView.snp.bottom).offset(10)
@@ -576,6 +607,7 @@ extension WriteDiaryVC {
             make.bottom.equalTo(contentView.snp.bottom)
         }
         setupImageViewHeightConstraint()
+        setupImageCollectionViewHeightConstraint()
     }
     
     // 버튼 이미지, 타이틀 설정 메서드
@@ -656,5 +688,86 @@ extension WriteDiaryVC: UITextViewDelegate {
             textView.text = textViewPlaceHolder
             textView.textColor = .lightGray
         }
+    }
+}
+
+extension WriteDiaryVC: PHPickerViewControllerDelegate {
+    // PHPickerController를 불러오는 메서드
+    @objc func phPhotoButtonTapped() {
+        var configuration = PHPickerConfiguration()
+        configuration.selectionLimit = 3    // 이미지를 한 개만 선택할 수 있도록 제한
+        configuration.filter = .images  // 이미지만 선택할 수 있도록 필터링
+        
+        let picker = PHPickerViewController(configuration: configuration)
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+    
+    // PHPickerControllerDelegate 메서드
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        picker.dismiss(animated: true)
+        
+        // 선택한 이미지 처리
+        let itemProviders = results.map(\.itemProvider)
+        for itemProvider in itemProviders where itemProvider.canLoadObject(ofClass: UIImage.self) {
+            itemProvider.loadObject(ofClass: UIImage.self) { [weak self] (image, error) in
+                DispatchQueue.main.async {
+                    if let image = image as? UIImage {
+                        // 선택한 이미지를 imageView에 설정하고 높이를 업데이트
+                        self?.images.append(image)
+                        self?.imagesCollectionView.reloadData()
+                        self?.updateImageCollectionViewHeight(with: image)
+                    }
+                }
+            }
+        }
+    }
+}
+
+extension WriteDiaryVC: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        images.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCollectionViewCell.reuseIdentifier, for: indexPath) as? ImageCollectionViewCell else {
+            fatalError("Unalble to dequeue ImageCollectionView Cell")
+        }
+        cell.configure(with: images[indexPath.row])
+        return cell
+    }
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        let height = collectionView.frame.height - 50
+//        let width = height
+//        return CGSize(width: width, height: height)
+//    }
+    private func setupImageCollectionViewHeightConstraint() {
+        imageCollectionViewHeightConstraint = imagesCollectionView.heightAnchor.constraint(equalToConstant: 0)   // 초기 높이를 0으로 설정
+        imageCollectionViewHeightConstraint?.isActive = true
+    }
+    private func updateImageCollectionViewHeight(with image: UIImage?) {
+        // 이미지가 nil이면 높이를 0, 아니면 view의 너비와 동일하게 설정
+        imageCollectionViewHeightConstraint?.constant = image == nil ? 0 : imagesCollectionView.frame.width
+    }
+}
+
+extension WriteDiaryVC: UICollectionViewDelegate {
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        // UICollectionViewFlowLayout 인스턴스를 안전하게 얻어옵니다.
+        guard let flowLayout = imagesCollectionView.collectionViewLayout as? UICollectionViewFlowLayout else { return }
+
+        // 페이지 계산을 위해 현재 오프셋을 기준으로 한다.
+        let offsetWhenDraggingEnds = targetContentOffset.pointee.x + scrollView.contentInset.left
+        var pageWidth = flowLayout.itemSize.width + flowLayout.minimumLineSpacing // 각 페이지의 전체 너비를 계산한다.
+        
+        // 현재 페이지 인덱스를 업데이트한다.
+        let index = round(offsetWhenDraggingEnds / pageWidth)
+        pageWidth = max(pageWidth, 1) // 나눗셈 에러를 방지하기 위해 pageWidth가 0이 되지 않도록 한다.
+
+        // 새로운 오프셋을 계산한다.
+        let newOffset = CGPoint(x: index * pageWidth - scrollView.contentInset.left, y: -scrollView.contentInset.top)
+        
+        // 계산된 새로운 오프셋을 적용한다.
+        targetContentOffset.pointee = newOffset
     }
 }

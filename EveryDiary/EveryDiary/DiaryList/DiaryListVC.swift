@@ -348,13 +348,13 @@ extension DiaryListVC: UICollectionViewDataSource {
                         DispatchQueue.main.async {
                             // 셀이 재사용되며 이미지가 다른 항목에 들어갈 수 있으므로 다운로드가 완료된 시점의 indexPath가 동일한지 다시 확인.
                             if let currntIndexPath = collectionView.indexPath(for: cell), currntIndexPath == indexPath {
-                                cell.imageView.image = image
+                                cell.setImage(image)
                             }
                         }
                     }
                 } else {
                     // 이미지 URL이 없을 경우 imageView를 숨김
-                    cell.imageView.isHidden = true
+                    cell.hideImage()
                 }
             }
         } else {
