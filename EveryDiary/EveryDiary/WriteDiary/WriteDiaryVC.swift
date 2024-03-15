@@ -734,34 +734,39 @@ extension WriteDiaryVC: UITextViewDelegate {
     }
 }
 
+// MARK: PHPickerControllerDelegate
 extension WriteDiaryVC: PHPickerViewControllerDelegate {
-    // PHPickerController를 불러오는 메서드
+    // PHPickerController를 불러오는 메서드(사진 접근 권한 요청)
     @objc func phPhotoButtonTapped() {
+        // 사진첩에 대해 읽고 쓰기가 가능하도록 권한 확인 및 요청
         PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
             switch status {
-            case .notDetermined:
+            case .notDetermined:    // 사용자가 아직 권한을 부여하지 않은 상태
                 DispatchQueue.main.async {
+                    // FIXME: UIAlert로 수정(취소 or 설정으로 보내기)
                     print("갤러리를 불러올 수 없습니다. 핸드폰 설정에서 사진 접근 허용을 모든 사진으로 변경해주세요.")
                 }
-            case .denied, .restricted:
+            case .denied, .restricted:  // 접근권한이 거부되었거나 제한된 상타
                 DispatchQueue.main.async {
+                    // FIXME: UIAlert로 수정(취소 or 설정으로 보내기)
                     print("갤러리를 불러올 수 없습니다. 핸드폰 설정에서 사진 접근 허용을 모든 사진으로 변경해주세요.")
                 }
             case .authorized, .limited: // 모두 허용, 일부 허용
+                // 허용된 상태라면 PHPickerController 호출
                 self.loadPHPickerViewController()
-            @unknown default:
+            @unknown default:   // 알 수 없는 상태
                 print("PHPhotoLibrary::execute - \"Unkown case\"")
             }
         }
     }
-    
+    // 접근 권한 획득 시, picker 호출하는 메서드
     private func loadPHPickerViewController() {
         var configuration = PHPickerConfiguration(photoLibrary: .shared())
-        configuration.selectionLimit = 3    // 이미지를 한 개만 선택할 수 있도록 제한
-        configuration.selection = .ordered
+        configuration.selectionLimit = 3    // 사용자가 선택할 수 있는 이미지의 최대 개수
+        configuration.selection = .ordered  // 선택 순서 지정
         configuration.filter = .images  // 이미지만 선택할 수 있도록 필터링
         
-        // 이미 선택한 이미지가 있을 경우, 이를 configuration에 설정
+        // 이미 선택한 이미지가 있을 경우, 이를 picker에서 사전 선택된 상태로 설정
         configuration.preselectedAssetIdentifiers = selectedPhotoIdentifiers
         
         DispatchQueue.main.async {
@@ -771,63 +776,108 @@ extension WriteDiaryVC: PHPickerViewControllerDelegate {
         }
     }
     
-    // PHPickerControllerDelegate 메서드
+    // didFinishPicking 메서드(사진 선택 완료시 호출되는 메서드). 선택한 이미지를 처리.
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true)
+        picker.dismiss(animated: true)  // 선택완료 -> picker dimiss
         
-        selectedPhotoIdentifiers.removeAll()    // 이전에 선택한 사진의 identifiers 초기화
+        var newImagesLocationInfo: [ImageLocationInfo] = []
+        
+        // 새로운 결과에 가빈한 identifier 목록을 생성합니다.
+        let newResultsIdentifiers = results.compactMap { $0.assetIdentifier}
+        
+        // 기존에 선택된 이미지 중에서 새로운 결과에 포함되지 않은 항목을 제외합니다.
+        let retainedImages = imagesLocationInfo.filter { newResultsIdentifiers.contains($0.assetIdentifier ?? "") }
+        
+        // 선택한 사진의 identifier를 저장할 배열
+        //        var newSelecedIdentifiers: [String] = []
+        
+        // 신규 선택된 사진 식별자를 기반으로 새로운 ImageLocationInfo 배열을 구성
+        newImagesLocationInfo.append(contentsOf: retainedImages)
+        
+        let group = DispatchGroup() // 모든 비동기작업을 추적하기 위한 DispatchGroup
+        
         for result in results {
             // 새로 선택된 이미지의 assetIdentifier 저장
-            if let assetIdentifier = result.assetIdentifier, !selectedPhotoIdentifiers.contains(assetIdentifier) {
-                selectedPhotoIdentifiers.append(assetIdentifier)
-            }
-            print("Asset Identifier: \(result.assetIdentifier ?? "None")")
+            guard let assetIdentifier = result.assetIdentifier, !retainedImages.contains(where: { $0.assetIdentifier == assetIdentifier}) else { continue }
             let itemProvider = result.itemProvider
-            if itemProvider.canLoadObject(ofClass: UIImage.self) {
+            
+            // itemProver를 통해 선택한 이미지에 대한 처리 시작
+            if itemProvider.canLoadObject(ofClass: UIImage.self) {  // itemProvider가 UIImage 객체를 로드할 수 있는지 확인
+                group.enter()   // 그룹에 작업 추가
                 itemProvider.loadObject(ofClass: UIImage.self) { [weak self] (image, error) in
-                    guard let self = self, let image = image as? UIImage else { return }
+                    guard let self = self, let image = image as? UIImage else {
+                        group.leave()   // 이미지 로드에 실패한 경우 작업그룹에서 제거
+                        return
+                    }
                     
+                    // UTType.image.identifier를 사용해 itemProvider가 이미지 파일을 가지고 있는지 확인
                     if itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
+                        // 이미지 파일의 실제 데이터를 로드
                         itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.image.identifier) { url, error in
-                            guard let url = url, error == nil else {
-                                DispatchQueue.main.async {
-                                    // 위치정보가 없을 때, 이미지만 append
-                                    self.imagesLocationInfo.append(ImageLocationInfo(image: image, locationInfo: nil, assetIdentifier: result.assetIdentifier))
-                                    self.imagesCollectionView.reloadData()
-                                    self.updateImageCollectionViewHeight()
-                                }
-                                return
+                            defer { group.leave() }
+                            var locationInfo: LocationInfo? = nil
+                            if let url = url, error == nil {
+                                locationInfo = self.extractMetadata(from: url)  // 메타 데이터에서 위치정보 추출
                             }
                             
-                            let locationInfo = self.extractMetadata(from: url)
                             DispatchQueue.main.async {
-                                self.imagesLocationInfo.append(ImageLocationInfo(image: image, locationInfo: locationInfo, assetIdentifier: result.assetIdentifier))
-                                self.imagesCollectionView.reloadData()
-                                self.updateImageCollectionViewHeight()
+                            // ImageLocationInfo 객체 생성 및 임시 배열에 추가
+                            let imageLocationInfo = ImageLocationInfo(image: image, locationInfo: locationInfo, assetIdentifier: assetIdentifier)
+                                newImagesLocationInfo.append(imageLocationInfo)
                             }
                         }
                     } else {
+                        // 메타데이터 없이 이미지만 처리
+                        let imageLocationInfo = ImageLocationInfo(image: image, locationInfo: nil, assetIdentifier: assetIdentifier)
                         DispatchQueue.main.async {
-                            self.imagesLocationInfo.append(ImageLocationInfo(image: image, locationInfo: nil, assetIdentifier: result.assetIdentifier))
-                            self.imagesCollectionView.reloadData()
-                            self.updateImageCollectionViewHeight()
+                            newImagesLocationInfo.append(imageLocationInfo)
                         }
+                        group.leave()
                     }
                 }
             }
         }
+        // 모든 선택된 사진에 대한 처리 수행 후 변수 및 UI 업데이트 실행
+        group.notify(queue: .main) { [weak self] in
+            guard let self = self else { return }
+            // imagesLocationInfo 배열을 새로운 정보로 업데이트
+            self.imagesLocationInfo = newImagesLocationInfo
+            // 선택된 사진 identifier 배열 업데이트
+            self.selectedPhotoIdentifiers = newResultsIdentifiers
+            // UI 업데이트
+            self.imagesCollectionView.reloadData()
+            self.updateImageCollectionViewHeight()
+            print("newImagesLocationInfo: \(newImagesLocationInfo)")
+            print("newSelectedIdentifiers: \(newResultsIdentifiers)")
+        }
     }
-
+    
+        
+    // 이미지 파일의 URL로부터 위치 정보를 추출하는 메서드
     private func extractMetadata(from url: URL) -> LocationInfo? {
-        let source = CGImageSourceCreateWithURL(url as CFURL, nil)
-        let metadata = CGImageSourceCopyPropertiesAtIndex(source!, 0, nil)! as Dictionary
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+                   let metadata = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as Dictionary? else { return nil}
+        
         if let gpsDict = metadata[kCGImagePropertyGPSDictionary] as? Dictionary<String, Any> {
             if let latitude = gpsDict[kCGImagePropertyGPSLatitude as String] as? Double,
                let longitude = gpsDict[kCGImagePropertyGPSLongitude as String] as? Double {
+                // 위도와 경도를 사용해 LocationInfo 객체를 생성
                 return LocationInfo(latitude: latitude, longitude: longitude)
             }
         }
-        return nil
+        return nil  // 위치정보 없으면 nil
+    }
+    private func updateImageCollectionViewHeight() {
+        // 이미지가 없을 경우 높이를 0으로 설정
+        if imagesLocationInfo.isEmpty {
+            imageCollectionViewHeightConstraint?.constant = 0
+        } else {
+            // 이미지가 있을 경우, 높이를 조정
+            imageCollectionViewHeightConstraint?.constant = imagesCollectionView.frame.width
+        }
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
 }
 
@@ -866,18 +916,6 @@ extension WriteDiaryVC: UICollectionViewDataSource, UICollectionViewDelegateFlow
         imageCollectionViewHeightConstraint = imagesCollectionView.heightAnchor.constraint(equalToConstant: 0)   // 초기 높이를 0으로 설정
         imageCollectionViewHeightConstraint?.isActive = true
     }
-    private func updateImageCollectionViewHeight() {
-        // 이미지가 없을 경우 높이를 0으로 설정
-        if imagesLocationInfo.isEmpty {
-            imageCollectionViewHeightConstraint?.constant = 0
-        } else {
-            // 이미지가 있을 경우, 높이를 조정
-            imageCollectionViewHeightConstraint?.constant = imagesCollectionView.frame.width
-        }
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-        }
-    }
 }
 
 extension WriteDiaryVC: UICollectionViewDelegate {
@@ -887,7 +925,6 @@ extension WriteDiaryVC: UICollectionViewDelegate {
         
         // 페이지 계산을 위해 현재 오프셋을 기준으로 한다.
         let currentOffset = scrollView.contentOffset.x
-        let maximumOffset = scrollView.contentSize.width - scrollView.frame.width
         
         // 한 페이지의 너비를 계산한다.
         let pageWidth = flowLayout.itemSize.width + flowLayout.minimumLineSpacing
