@@ -108,6 +108,8 @@ class DiaryListVC: UIViewController {
         addSubviews()
         setLayout()
         setNavigationBar()
+//        loadDiaries()
+
         
         NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
     }
@@ -428,7 +430,7 @@ extension DiaryListVC {
                         } else {
                             print("Diary moved to trash successfully.")
                             DispatchQueue.main.async {
-                                self.loadDiaries()
+                                self.refreshDiaryData()
                             }
                         }
                     }
@@ -551,7 +553,9 @@ extension Array where Element: Equatable {
 //MARK: - 일기 작성, 수정 시 data reload
 extension DiaryListVC : DiaryUpdateDelegate {
     func diaryDidUpdate() {
-        loadDiaries()
+//        loadDiaries()
+        print("Update Diary")
+        refreshDiaryData()
     }
 }
 extension DiaryListVC: UICollectionViewDelegate {
@@ -599,6 +603,27 @@ extension DiaryListVC: UICollectionViewDelegate {
             DispatchQueue.main.async {
                 self.journalCollectionView.reloadData()
                 self.isLoadingData = false // 데이터 로드 완료 후 플래그 재설정
+            }
+            print("scroll")
+        }
+    }
+    
+    func refreshDiaryData() {
+        // PaginationManager의 query를 초기화하여 새로고침
+        paginationManager.resetQuery()
+        
+        paginationManager.getNextPage { newDiaries in
+            if let newDiaries = newDiaries {
+                let filteredDiaries = newDiaries.filter { !$0.isDeleted }
+                
+                self.diaries = filteredDiaries
+                self.organizeDiariesByMonth(diaries: self.diaries)
+                DispatchQueue.main.async {
+                    self.journalCollectionView.reloadData()
+                }
+                print("refresh")
+            } else {
+                print("Failed to fetch new diaries.")
             }
         }
     }

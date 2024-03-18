@@ -313,8 +313,8 @@
 				D26E2F9E2B90239A0083FEAC /* SignOutCell.swift */,
 				D26E2F9C2B9023400083FEAC /* ProfileCell.swift */,
 				6B3C4CCC2B8EDACD00C53005 /* SettingCell.swift */,
-				6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */,
 				6B3C4CD02B8EE81300C53005 /* LockVC.swift */,
+				6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */,
 			);
 			path = Setting;
 			sourceTree = "<group>";
