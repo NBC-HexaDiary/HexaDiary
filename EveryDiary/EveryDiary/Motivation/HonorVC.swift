@@ -17,9 +17,8 @@ import FirebaseAuth
 
 class HonorVC: UIViewController {
     let db = Firestore.firestore()
-    
     //딕셔너리. 키는 월(Int), 값은 일(Set)
-    var monthlyDiaries = [Int: Set<String>]()
+    var monthlyDiaries = [Int: Set<Int>]()
     var listener: ListenerRegistration?
     
     private lazy var backgroundImage: UIImageView = {
@@ -31,7 +30,6 @@ class HonorVC: UIViewController {
     
     private lazy var honorSV: UIScrollView = {
         let honorSV = UIScrollView()
-        honorSV.translatesAutoresizingMaskIntoConstraints = false
         honorSV.backgroundColor = .clear
         honorSV.showsVerticalScrollIndicator = false
         return honorSV
@@ -47,48 +45,104 @@ class HonorVC: UIViewController {
         return honorStackView
     }()
     
-    private func setupHonorStackViewButtons() {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setNavigationBar()
+        addSubView()
+        autoLayout()
+        fetchDiariesButtonData()
+    }
+    
+    // MARK: - Button UI Update
+    private func setupHonorStackViewButtonsAndLabels() {
         print("setupHonorStackViewButtons() called")
         for month in 1...12 {
+            let containerView = UIView()
+            honorStackView.addArrangedSubview(containerView)
+            
+            let leftView = UIView()
+            let rightView = UIView()
+            
+            containerView.addSubview(leftView)
+            containerView.addSubview(rightView)
+            
+            leftView.snp.makeConstraints { make in
+                make.left.equalTo(containerView.snp.left).offset(30)
+                make.top.bottom.equalTo(containerView)
+                make.width.equalTo(containerView.snp.width).multipliedBy(0.5)
+            }
+            
+            rightView.snp.makeConstraints { make in
+                make.right.equalTo(containerView.snp.right).offset(-30)
+                make.top.bottom.equalTo(containerView)
+                make.width.equalTo(leftView.snp.width)
+            }
+            
             let button = UIButton()
             button.tag = month
-            honorStackView.addArrangedSubview(button)
+            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+            
+            let label = UILabel()
+            label.text = "\(month)월"
+            label.textAlignment = .center
+            
+            if month % 2 != 0 {
+                // 홀수 월: 왼쪽 뷰에 버튼과 라벨 추가
+                leftView.addSubview(button)
+                leftView.addSubview(label)
+            } else {
+                // 짝수 월: 오른쪽 뷰에 버튼과 라벨 추가
+                rightView.addSubview(button)
+                rightView.addSubview(label)
+            }
+            
+            button.snp.makeConstraints { make in
+                make.top.equalToSuperview().offset(10)
+                make.centerX.equalToSuperview()
+                //make.centerY.equalToSuperview()
+            }
+            label.snp.makeConstraints { make in
+                make.top.equalTo(button.snp.bottom).offset(20)
+                make.centerX.equalTo(button)
+            }
         }
     }
     
     private func setupButton(monthlyDiaries: [Int: Set<String>]) {
         print("setupButton() called")
         for (month, days) in monthlyDiaries {
-            guard let cityButton = self.honorStackView.viewWithTag(month) as? UIButton else {
+            let containerView = self.honorStackView.arrangedSubviews[month - 1]
+            var button: UIButton?
+            for subview in containerView.subviews {
+                if let btn = subview.subviews.first(where: { $0 is UIButton }) as? UIButton {
+                    button = btn
+                    break
+                }
+            }
+            
+            guard let button = button else {
                 continue
             }
             if days.isEmpty {
-                cityButton.setImage(UIImage(named: "button0"), for: .normal)
+                button.setImage(UIImage(named: "button0"), for: .normal)
             } else {
                 switch days.count {
                 case 1...7:
-                    cityButton.setImage(UIImage(named: "button1"), for: .normal)
+                    button.setImage(UIImage(named: "button1"), for: .normal)
                 case 8...14:
-                    cityButton.setImage(UIImage(named: "button2"), for: .normal)
+                    button.setImage(UIImage(named: "button2"), for: .normal)
                 case 15...21:
-                    cityButton.setImage(UIImage(named: "button3"), for: .normal)
+                    button.setImage(UIImage(named: "button3"), for: .normal)
                 case 22...27:
-                    cityButton.setImage(UIImage(named: "button4"), for: .normal)
+                    button.setImage(UIImage(named: "button4"), for: .normal)
                 default:
-                    cityButton.setImage(UIImage(named: "button5"), for: .normal)
+                    button.setImage(UIImage(named: "button5"), for: .normal)
                 }
             }
         }
     }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        addSubView()
-        autoLayout()
-        fetchDiariesButtonData()
-    }
 }
-
+//MARK: - UI 설정
 extension HonorVC {
     private func addSubView() {
         view.addSubview(backgroundImage)
@@ -106,14 +160,16 @@ extension HonorVC {
         honorStackView.snp.makeConstraints{ make in
             make.top.bottom.leading.trailing.equalTo(honorSV)
             make.width.equalTo(honorSV.snp.width)
-            make.height.equalTo(honorSV.snp.height).multipliedBy(4)
+            make.height.equalTo(honorSV.snp.height).multipliedBy(2)
         }
     }
-    
-    //MARK: - firebase
+}
+
+//MARK: - firebase
+extension HonorVC {
     private func fetchDiariesButtonData() {
         // 사용자가 로그인되어 있는지 확인
-        guard let userID = DiaryManager.shared.getUserID() else {
+        guard DiaryManager.shared.getUserID() != nil else {
             return
         }
         // 현재 년도 가져오기
@@ -169,8 +225,30 @@ extension HonorVC {
             monthlyDiariesWithStrings[month] = stringDays
         }
         DispatchQueue.main.async {
-            self.setupHonorStackViewButtons()
+            self.setupHonorStackViewButtonsAndLabels()
             self.setupButton(monthlyDiaries: monthlyDiariesWithStrings)
         }
     }
+    
+    @objc private func buttonTapped(sender: UIButton) {
+        //버튼의 tag로 월을 식별
+        let month = sender.tag
+        //해당 월의 일자 데이터
+        
+        let detailVC = DetailVC()
+        detailVC.daysSet = monthlyDiaries[month]
+        
+        if let daysSet = detailVC.daysSet, !daysSet.isEmpty {
+            print("daysSet 배열에 데이터가 있습니다.")
+        } else {
+            print("daysSet 배열이 비어 있습니다.")
+        }
+        
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
+    private func setNavigationBar() {
+        navigationController?.navigationBar.tintColor = .black
+    }
 }
+
+

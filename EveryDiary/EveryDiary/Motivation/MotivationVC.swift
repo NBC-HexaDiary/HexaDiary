@@ -13,7 +13,7 @@ import SnapKit
 }
 
 class MotivationVC: UIViewController {
-    private let buildings = BuildingView.shared
+    private let buildings = BuildingView()
     
     private lazy var background : UIImageView = {
         let background = UIImageView(image: UIImage(named: "View.Background"))
@@ -54,7 +54,7 @@ class MotivationVC: UIViewController {
         return countLabel
     }()
     
-    private func updateCountLabel() {
+    func updateCountLabel() {
         let diaryCount = buildings.diaryDays.count
         let date = Date()
         let calendar = Calendar.current
@@ -109,7 +109,7 @@ class MotivationVC: UIViewController {
         buildings.windowsInBuildingData()
     }
     
-    private func addSubview() {
+    func addSubview() {
         view.addSubview(background)
         view.addSubview(buildings)
         view.addSubview(writeDiaryButton)
@@ -117,7 +117,7 @@ class MotivationVC: UIViewController {
         view.addSubview(countLabel)
     }
     
-    private func autoLayout() {
+    func autoLayout() {
         background.snp.makeConstraints{ make in
             make.top.bottom.leading.trailing.equalToSuperview()
         }
