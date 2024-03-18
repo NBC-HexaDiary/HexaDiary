@@ -246,44 +246,42 @@ extension WriteDiaryVC {
         
         let formattedDateString = DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
         
-        // 이미지가 선택되었을 때 이미지 업로드 과정을 진행
-        if let image = newImage {
-            // FirebaseStorageManager를 사용해 이미지 업로드
-            FirebaseStorageManager.uploadImage(image: [image], pathRoot: "diary_images") { [weak self] imageUrl in
-                guard let imageUrl = imageUrl else {
-                    self?.isSavingDiary = false // 저장 실패하면, 변수 초기화
+        // 이미지가 선택되었는지 확인
+        if imagesLocationInfo.isEmpty {
+            // 이미지가 없으면 바로 DiaryEntry 생성 및 업로드
+            createAndUploadDiaryEntry(
+                with: titleTextField.text ?? "",
+                content: contentTextView.text ?? "",
+                dateString: formattedDateString
+            )
+        } else {
+            // 이미지 배열을 전달하여 업로드
+            FirebaseStorageManager.uploadImage(image: imagesLocationInfo.map { $0.image }, pathRoot: "diary_images") { [weak self] imageUrls in
+                guard let self = self, let imageUrls = imageUrls else {
+                    self?.isSavingDiary = false
                     print("Image upload failed")
                     return
                 }
-                print("Image uploaded successfully. URL: \(imageUrl.absoluteString)")
                 
                 // DiaryEntry 생성 및 업로드
-                self?.createAndUploadDiaryEntry(
-                    with: self?.titleTextField.text ?? "",
-                    content: self?.contentTextView.text ?? "",
+                self.createAndUploadDiaryEntry(
+                    with: self.titleTextField.text ?? "",
+                    content: self.contentTextView.text ?? "",
                     dateString: formattedDateString,
-                    imageUrl: imageUrl.absoluteString
+                    imageUrls: imageUrls.map { $0.absoluteString }
                 )
             }
-        } else {
-            // 이미지가 없다면 바로 DiaryEntry 생성 및 업로드
-            createAndUploadDiaryEntry(
-                with: self.titleTextField.text ?? "",
-                content: self.contentTextView.text ?? "",
-                dateString: formattedDateString
-            )
-            print("No image selected, creating entry without an image.")
         }
     }
     
-    func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, imageUrl: String? = nil) {
+    func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, imageUrls: [String] = []) {
         let newDiaryEntry = DiaryEntry(
             title: title,
             content: content,
             dateString: dateString,
             emotion: selectedEmotion,
             weather: selectedWeather,
-            imageURL: imageUrl
+            imageURL: imageUrls
         )
         
         // DiaryManager를 사용해 FireStore에 저장
@@ -305,44 +303,40 @@ extension WriteDiaryVC {
         guard let diaryID = self.diaryID else { return }
         
         let formattedDateString =  DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
+        let imagesToUpload = imagesLocationInfo.map { $0.image }
         
-        let fetchedDiary = DiaryEntry(
-            id: diaryID,
-            title: titleTextField.text ?? "",
-            content: contentTextView.text,
-            dateString: formattedDateString,
-            emotion: selectedEmotion,
-            weather: selectedWeather,
-            imageURL: self.existingImageUrl
-        )
-        
-        // 새 이미지가 있고 기존 이미지 URL과 다른 경우에만 업데이트 진행
-        if let newImage = newImage {
-            // 기존 이미지가 있다면 삭제
-            if let existingImageUrl = self.existingImageUrl {
-                FirebaseStorageManager.deleteImage(urlString: existingImageUrl) { error in
-                    if let error = error {
-                        print("Error deleting existing image: \(error)")
-                    }
-                }
-            }
-            
-            // 새로운 이미지 업로드
-            FirebaseStorageManager.uploadImage(image: newImage, pathRoot: "diary_images") { [weak self] imageUrl in
-                guard let imageUrl = imageUrl else {
-                    print("Image upload failed")
+        if !imagesToUpload.isEmpty {
+            FirebaseStorageManager.uploadImage(image: imagesToUpload, pathRoot: "diary_images") { [weak self] imageUrls in
+                guard let self = self, let imageUrls = imageUrls else {
+                    print("Image update failed")
                     return
                 }
-                // 업로드가 성공하면 imageURL을 업데이트하여 Firestore에 저장
-                var updatedDiaryEntry = fetchedDiary
-                updatedDiaryEntry.imageURL = imageUrl.absoluteString
+                
+                // 이미지 URL 배열을 이용해 DiaryEntry 생성
+                let updatedDiaryEntry = DiaryEntry(
+                    id: diaryID,
+                    title: self.titleTextField.text ?? "",
+                    content: self.contentTextView.text ?? "",
+                    dateString: formattedDateString,
+                    emotion: self.selectedEmotion,
+                    weather: self.selectedWeather,
+                    imageURL: imageUrls.map { $0.absoluteString }
+                )
                 
                 // Firestore에 업데이트
-                self?.updateDiaryInFirestore(diaryID: diaryID, diaryEntry: updatedDiaryEntry)
+                self.updateDiaryInFirestore(diaryID: diaryID, diaryEntry: updatedDiaryEntry)
             }
         } else {
-            // 이미지가 선택되지 않았다면 기존 imageURL 사용
-            updateDiaryInFirestore(diaryID: diaryID, diaryEntry: fetchedDiary)
+            let updatedDiaryEntry = DiaryEntry(
+                id: diaryID,
+                title: titleTextField.text ?? "",
+                content: contentTextView.text ?? "",
+                dateString: formattedDateString,
+                emotion: selectedEmotion,
+                weather: selectedWeather,
+                imageURL: []
+            )
+            updateDiaryInFirestore(diaryID: diaryID, diaryEntry: updatedDiaryEntry)
         }
     }
     @objc func allowEditButtonTapped() {
@@ -378,14 +372,14 @@ extension WriteDiaryVC {
         self.contentTextView.textColor = .black
         self.selectedEmotion = diary.emotion
         self.selectedWeather = diary.weather
-        self.existingImageUrl = diary.imageURL
+//        self.existingImageUrl = diary.imageURL
         
-        self.datePickingButton.isEnabled = false
-        self.titleTextField.isEnabled = false
-        self.contentTextView.isEditable = false
-        self.photoButton.isEnabled = false
-        self.emotionButton.isEnabled = false
-        self.weatherButton.isEnabled = false
+//        self.datePickingButton.isEnabled = false
+//        self.titleTextField.isEnabled = false
+//        self.contentTextView.isEditable = false
+//        self.photoButton.isEnabled = false
+//        self.emotionButton.isEnabled = false
+//        self.weatherButton.isEnabled = false
         
         // 날짜 형식 업데이트
         if let date = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) {
@@ -398,24 +392,41 @@ extension WriteDiaryVC {
         self.emotionButton.setImage(UIImage(named: diary.emotion)?.withRenderingMode(.alwaysOriginal), for: .normal)
         self.weatherButton.setImage(UIImage(named: diary.weather)?.withRenderingMode(.alwaysOriginal), for: .normal)
         
-        // 완료, 저장 버튼 숨김, 수정 버튼 등장
-        self.completeButton.isHidden = true
-        self.updateButton.isHidden = true
-        self.allowEditButton.isHidden = false
+        self.imagesLocationInfo.removeAll() // 기존 이미지 정보 초기화
         
-        // 이미지 URL이 있을 경우, 이미지를 다운로드하여 imageView에 설정
-        if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
-            // FirebaseStorageManager를 사용해 이미지 다운로드
-            FirebaseStorageManager.downloadImage(urlString: imageUrlString) { [weak self] downloadedImage in
-                DispatchQueue.main.async {
-                    if let image = downloadedImage {
-                        self?.imageView.image = image
-                        self?.updateImageViewHeight(with: image)
-                    }
+        // 이미지 URL 배열에서 각 이미지를 다운로드
+        let group = DispatchGroup()
+        diary.imageURL?.forEach { urlString in
+            guard let imageURL = URL(string: urlString) else { return }
+            group.enter()
+            FirebaseStorageManager.downloadImage(urlString: urlString) { [weak self] downloadedImage in
+                if let image = downloadedImage {
+                    self?.imagesLocationInfo.append(ImageLocationInfo(image: image, locationInfo: nil, assetIdentifier: nil))
                 }
+                group.leave()
             }
         }
+        
+        group.notify(queue: .main) { [weak self] in
+            self?.imagesCollectionView.reloadData()
+            self?.updateImageCollectionViewHeight()
+        }
+        
+        // UI Interaction 제어
+        toggleUI(isEditingEnabled: false)
     }
+    private func toggleUI(isEditingEnabled: Bool) {
+        self.datePickingButton.isEnabled = isEditingEnabled
+        self.titleTextField.isEnabled = isEditingEnabled
+        self.contentTextView.isEditable = isEditingEnabled
+        self.photoButton.isEnabled = isEditingEnabled
+        self.emotionButton.isEnabled = isEditingEnabled
+        self.weatherButton.isEnabled = isEditingEnabled
+        self.completeButton.isHidden = !isEditingEnabled
+        self.updateButton.isHidden = !isEditingEnabled
+        self.allowEditButton.isHidden = isEditingEnabled
+    }
+    
     func formattedDateString(for date: Date) -> String {  // Firestore 날짜저장 형식
         return DateFormatter.yyyyMMddHHmmss.string(from: date)
     }

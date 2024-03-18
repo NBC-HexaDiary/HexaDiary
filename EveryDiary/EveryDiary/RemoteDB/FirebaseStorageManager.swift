@@ -13,7 +13,7 @@ class FirebaseStorageManager {
     static func uploadImage(image: [UIImage], pathRoot: String, completion: @escaping ([URL]?) -> Void) {
         var uploadedURL: [URL] = []
         let dispatchGroup = DispatchGroup()
-        
+
         for image in image {
             guard let imageData = image.jpegData(compressionQuality: 0.4) else {
                 completion(nil)
@@ -21,21 +21,24 @@ class FirebaseStorageManager {
             }
             let metaData = StorageMetadata()
             metaData.contentType = "image/jpeg"
-            
             let imageName = "\(UUID().uuidString)_\(Date().timeIntervalSince1970)"
             let firebaseReference = Storage.storage().reference().child("\(pathRoot)/\(imageName)")
-            
             dispatchGroup.enter()
             firebaseReference.putData(imageData, metadata: metaData) { metaData, error in
                 firebaseReference.downloadURL { url, error in
                     if let downloadURL = url {
                         uploadedURL.append(downloadURL)
+                        print("Image Uploaded")
                     }
                     dispatchGroup.leave()
                 }
+
             }
         }
         
+        dispatchGroup.notify(queue: .main) {
+            completion(uploadedURL)
+        }
         dispatchGroup.notify(queue: .main) {
             completion(uploadedURL)
         }
