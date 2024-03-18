@@ -138,7 +138,7 @@ class DiaryManager {
             return
         }
         
-        listener = db.collection("users").document(userID).collection("diaries").order(by: "dateString", descending: true).limit(to: 5).addSnapshotListener { querySnapshot, error in
+        listener = db.collection("users").document(userID).collection("diaries").order(by: "dateString", descending: true).addSnapshotListener { querySnapshot, error in
             if let error = error {
                 print("Error listening for real-time updates: \(error)")
                 completion([], error)

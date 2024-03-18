@@ -12,6 +12,8 @@ struct ImageLocationInfo {
     var image: UIImage
     var locationInfo: LocationInfo?
     var assetIdentifier: String?
+    var captureTime: String?
+    var location: String?
 }
 struct LocationInfo {
     var latitude: CLLocationDegrees
@@ -45,13 +47,17 @@ class MapCollectionViewCell: UICollectionViewCell {
             make.edges.equalToSuperview()
         }
     }
-    func configureMapWith(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-        mapView.addAnnotation(annotation)
+    func configureMapWith(locationsInfo: [LocationInfo]) {
+        var annotations = [MKPointAnnotation]()
         
-        // 지도 중심으로 핀 위치 이동
-        let region = MKCoordinateRegion(center: annotation.coordinate, latitudinalMeters: 300, longitudinalMeters: 300)
-        mapView.setRegion(region, animated: false)
+        for location in locationsInfo {
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+            mapView.addAnnotation(annotation)
+            annotations.append(annotation)
+        }
+        
+        // 모든 annotation이 보이도록 지도의 영역 조절
+        mapView.showAnnotations(annotations, animated: false)
     }
 }
