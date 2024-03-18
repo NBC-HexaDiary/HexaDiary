@@ -11,9 +11,7 @@ import SnapKit
 
 class TimePickerCell: UITableViewCell {
     static let id = "TimePickerCell"
-    
-    weak var delegate: TimePickerCellDelegate?
-    
+
     private lazy var timePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .time
@@ -27,7 +25,6 @@ class TimePickerCell: UITableViewCell {
         selectionStyle = .none
         addSubViewTimePickerCell()
         autoLayoutTimePickerCell()
-        timePicker.addTarget(self, action: #selector(timePickerChanged(_:)), for: .valueChanged)
     }
     
     required init?(coder: NSCoder) {
@@ -44,15 +41,7 @@ class TimePickerCell: UITableViewCell {
         }
     }
     
-    @objc private func timePickerChanged(_ picker: UIDatePicker) {
-        delegate?.selectTime(self, didPickTime: picker.date)
-    }
-    
     func configure(with date: Date?) {
         timePicker.date = date ?? Date()
     }
-}
-
-protocol TimePickerCellDelegate: AnyObject {
-    func selectTime(_ cell: TimePickerCell, didPickTime date: Date)
 }
