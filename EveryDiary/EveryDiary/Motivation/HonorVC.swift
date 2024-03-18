@@ -18,7 +18,7 @@ import FirebaseAuth
 class HonorVC: UIViewController {
     let db = Firestore.firestore()
     //딕셔너리. 키는 월(Int), 값은 일(Set)
-    var monthlyDiaries = [Int: Set<String>]()
+    var monthlyDiaries = [Int: Set<Int>]()
     var listener: ListenerRegistration?
     
     private lazy var backgroundImage: UIImageView = {
@@ -164,12 +164,12 @@ extension HonorVC {
         }
     }
 }
-    
+
 //MARK: - firebase
 extension HonorVC {
     private func fetchDiariesButtonData() {
         // 사용자가 로그인되어 있는지 확인
-        guard let userID = DiaryManager.shared.getUserID() else {
+        guard DiaryManager.shared.getUserID() != nil else {
             return
         }
         // 현재 년도 가져오기
@@ -229,18 +229,26 @@ extension HonorVC {
             self.setupButton(monthlyDiaries: monthlyDiariesWithStrings)
         }
     }
-    @objc private func buttonTapped() {
+    
+    @objc private func buttonTapped(sender: UIButton) {
+        //버튼의 tag로 월을 식별
+        let month = sender.tag
+        //해당 월의 일자 데이터
+        
         let detailVC = DetailVC()
+        detailVC.daysSet = monthlyDiaries[month]
+        
+        if let daysSet = detailVC.daysSet, !daysSet.isEmpty {
+            print("daysSet 배열에 데이터가 있습니다.")
+        } else {
+            print("daysSet 배열이 비어 있습니다.")
+        }
+        
         navigationController?.pushViewController(detailVC, animated: true)
     }
-    
-//    func navigateToMotivationVC(month: Int, days: Set<String>) {
-//        let detailVC = DetailVC()
-//        detailVC.configure(month: month, days: days)
-//        navigationController?.pushViewController(detailVC, animated: true)
-//    }
-    
     private func setNavigationBar() {
         navigationController?.navigationBar.tintColor = .black
     }
 }
+
+

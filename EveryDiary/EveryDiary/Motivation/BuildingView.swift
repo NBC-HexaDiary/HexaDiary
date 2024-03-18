@@ -20,10 +20,11 @@ class BuildingView: UIView {
     static let shared = BuildingView()
     weak var delegate: BuildingViewDelegate?
 
-    var windowImageCache = [Int: UIImage]()
+//    var windowImageCache = [Int: UIImage]()
     // Firestore 관련 변수
     let db = Firestore.firestore()
     var diaryDays: Set<Int> = []
+    
     
 //    var listener: ListenerRegistration?
     
@@ -286,6 +287,11 @@ class BuildingView: UIView {
 }
 //MARK: - firebase
 extension BuildingView {
+    func updateWindowsWithDiaryCount(_ count: Int) {
+        self.diaryDays = Set(1...count)
+        drawWindowInBuilding()
+    }
+    
     //특정 월에 대한 일기 데이터를 Firestore 데이터베이스에서 가져오는 함수
     func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
         

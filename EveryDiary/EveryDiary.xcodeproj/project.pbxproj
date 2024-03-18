@@ -30,6 +30,7 @@
 		6B3C4CCF2B8EE80700C53005 /* NotificationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CCE2B8EE80700C53005 /* NotificationVC.swift */; };
 		6B3C4CD12B8EE81300C53005 /* LockVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CD02B8EE81300C53005 /* LockVC.swift */; };
 		6B42613D2B8C579F00F12CE3 /* BuildingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B42613C2B8C579F00F12CE3 /* BuildingView.swift */; };
+		6B937F552BA6F30400691657 /* DetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B937F542BA6F30400691657 /* DetailVC.swift */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
 		6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */; };
 		6B95C04C2B8C7A5A00DBB175 /* SFProDisplay-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0412B8C7A5900DBB175 /* SFProDisplay-Regular.otf */; };
@@ -54,9 +55,7 @@
 		6BB3CE442B85F6B1005BC3E1 /* DiaryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */; };
 		6BB3CE462B8619D0005BC3E1 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE452B8619D0005BC3E1 /* FirebaseFirestore */; };
 		6BB3CE482B8619D5005BC3E1 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE472B8619D5005BC3E1 /* FirebaseFirestoreSwift */; };
-		6BC75CE82BA439BA0083BD9E /* DetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC75CE72BA439BA0083BD9E /* DetailVC.swift */; };
 		6BE7C99F2BA07D2700374A2A /* MotivationImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BE7C99E2BA07D2700374A2A /* MotivationImageCache.swift */; };
-		6BEFADFE2BA1BF660018922A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6BEFADFD2BA1BF660018922A /* GoogleService-Info.plist */; };
 		D2094B2C2B9FE9BB00508230 /* DiaryDataDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */; };
 		D2094B352BA14A6600508230 /* NotificationName.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B342BA14A6600508230 /* NotificationName.swift */; };
 		D26829F02B99A16F00A1F0E5 /* DailyListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26829EF2B99A16F00A1F0E5 /* DailyListCell.swift */; };
@@ -101,6 +100,7 @@
 		6B3C4CCE2B8EE80700C53005 /* NotificationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationVC.swift; sourceTree = "<group>"; };
 		6B3C4CD02B8EE81300C53005 /* LockVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockVC.swift; sourceTree = "<group>"; };
 		6B42613C2B8C579F00F12CE3 /* BuildingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingView.swift; sourceTree = "<group>"; };
+		6B937F542BA6F30400691657 /* DetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailVC.swift; sourceTree = "<group>"; };
 		6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProDisplay-Bold.otf"; sourceTree = "<group>"; };
 		6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProRounded-Bold.otf"; sourceTree = "<group>"; };
 		6B95C0412B8C7A5900DBB175 /* SFProDisplay-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProDisplay-Regular.otf"; sourceTree = "<group>"; };
@@ -120,9 +120,7 @@
 		6BB3CE3D2B85F66E005BC3E1 /* SettingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingVC.swift; sourceTree = "<group>"; };
 		6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationVC.swift; sourceTree = "<group>"; };
 		6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryListVC.swift; sourceTree = "<group>"; };
-		6BC75CE72BA439BA0083BD9E /* DetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailVC.swift; sourceTree = "<group>"; };
 		6BE7C99E2BA07D2700374A2A /* MotivationImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationImageCache.swift; sourceTree = "<group>"; };
-		6BEFADFD2BA1BF660018922A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Desktop/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryDataDelegate.swift; sourceTree = "<group>"; };
 		D2094B342BA14A6600508230 /* NotificationName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationName.swift; sourceTree = "<group>"; };
 		D26829EF2B99A16F00A1F0E5 /* DailyListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyListCell.swift; sourceTree = "<group>"; };
@@ -248,7 +246,6 @@
 				6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */,
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
-				6BEFADFD2BA1BF660018922A /* GoogleService-Info.plist */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
 				1AF880D22B8DB5A2004076EB /* Api.plist */,
 			);
@@ -283,7 +280,7 @@
 				6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */,
 				6B42613C2B8C579F00F12CE3 /* BuildingView.swift */,
 				6BA0115A2B886A9100A26CE0 /* HonorVC.swift */,
-				6BC75CE72BA439BA0083BD9E /* DetailVC.swift */,
+				6B937F542BA6F30400691657 /* DetailVC.swift */,
 			);
 			path = Motivation;
 			sourceTree = "<group>";
@@ -398,7 +395,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6B95C0512B8C7A5A00DBB175 /* SFProRounded-Regular.otf in Resources */,
-				6BEFADFE2BA1BF660018922A /* GoogleService-Info.plist in Resources */,
 				1AF880D32B8DB5A2004076EB /* Api.plist in Resources */,
 				6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */,
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
@@ -437,7 +433,7 @@
 				3F0FEFFA2B8F2819001539AE /* DateConditionSelectVC.swift in Sources */,
 				1AF880D82B8DC135004076EB /* WeatherService.swift in Sources */,
 				6BABC3692B85D107009267B3 /* AppDelegate.swift in Sources */,
-				6BC75CE82BA439BA0083BD9E /* DetailVC.swift in Sources */,
+				6B937F552BA6F30400691657 /* DetailVC.swift in Sources */,
 				3F0FEFE92B8D8881001539AE /* JournalCollectionViewCell.swift in Sources */,
 				6BB3CE442B85F6B1005BC3E1 /* DiaryListVC.swift in Sources */,
 				6BA011592B8852B400A26CE0 /* CalendarVC.swift in Sources */,
