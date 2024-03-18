@@ -74,7 +74,7 @@ class FirebaseStorageManager {
                     completion(image, nil)
                     return
                 }
-                
+                print("storageReference.name: \(storageReference.name)")
                 // 메타데이터의 customMetadata 추출
                 let customMetadata = metadata.customMetadata
                 completion(image, customMetadata)
