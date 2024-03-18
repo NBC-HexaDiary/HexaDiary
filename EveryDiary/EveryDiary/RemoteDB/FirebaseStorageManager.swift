@@ -13,6 +13,7 @@ class FirebaseStorageManager {
     static func uploadImage(image: [UIImage], pathRoot: String, completion: @escaping ([URL]?) -> Void) {
         var uploadedURL: [URL] = []
         let dispatchGroup = DispatchGroup()
+
         for image in image {
             guard let imageData = image.jpegData(compressionQuality: 0.4) else {
                 completion(nil)
@@ -31,7 +32,12 @@ class FirebaseStorageManager {
                     }
                     dispatchGroup.leave()
                 }
+
             }
+        }
+        
+        dispatchGroup.notify(queue: .main) {
+            completion(uploadedURL)
         }
         dispatchGroup.notify(queue: .main) {
             completion(uploadedURL)
