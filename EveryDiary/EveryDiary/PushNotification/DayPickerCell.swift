@@ -11,6 +11,8 @@ import SnapKit
 
 class DayPickerCell: UITableViewCell {
     static let id = "DayPickerCell"
+    
+    weak var delegate: DayPickerCellDelegate?
 
     private lazy var dayLabel: UILabel = {
         let label = UILabel()
@@ -56,8 +58,26 @@ class DayPickerCell: UITableViewCell {
         }
     }
     
+    @objc private func dayTapped() {
+        guard let day = dayLabel.text else { return }
+        // checkImageView.isHidden 값을 먼저 반전시킵니다.
+        // 이는 실제 선택 상태의 반대입니다. 따라서, 이 값을 토글하기 전에 값을 반전시킵니다.
+        checkImageView.isHidden = !checkImageView.isHidden
+        // 이제 isSelected는 사용자의 최종 선택 상태를 올바르게 반영합니다.
+        let isSelected = !checkImageView.isHidden
+        // delegate에 최종 상태를 알립니다.
+        delegate?.selectDay(self, didPickDay: day, isSelected: isSelected)
+
+    }
+    
     func prepare(title: String, isSelected: Bool) {
         dayLabel.text = title
         checkImageView.isHidden = !isSelected
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dayTapped))
+        self.addGestureRecognizer(tapGesture)
     }
+}
+
+protocol DayPickerCellDelegate: AnyObject {
+    func selectDay(_ cell: DayPickerCell, didPickDay day: String, isSelected: Bool)
 }
