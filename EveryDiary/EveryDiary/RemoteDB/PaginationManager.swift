@@ -4,63 +4,68 @@
 //
 //  Created by Dahlia on 3/12/24.
 //
+import Firebase
 
-import Foundation
-import FirebaseFirestore
-
-class PaginationManager<T: Decodable> {
-    private var query: Query
-    private var pageSize: Int
+class PaginationManager {
+    private let db = Firestore.firestore()
+    private var query: Query? = nil
     private var lastDocumentSnapshot: DocumentSnapshot?
-    private var isFetching: Bool = false
-    private var documents: [T] = []
+    private var listener: ListenerRegistration?
     
-    var onDataFetched: (([T]) -> Void)?
-    
-    init(query: Query, pageSize: Int) {
-        self.query = query
-        self.pageSize = pageSize
-    }
-    
-    func fetchNextPage() {
-        guard !isFetching else { return }
-        isFetching = true
-        
-        var newQuery = query.limit(to: pageSize)
-        
-        if let lastDocumentSnapshot = lastDocumentSnapshot {
-            newQuery = newQuery.start(afterDocument: lastDocumentSnapshot)
+    func getNextPage(completion: @escaping ([DiaryEntry]?) -> Void) {
+        guard let userID = DiaryManager.shared.getUserID() else {
+            completion(nil)
+            return
         }
         
-        newQuery.getDocuments { [weak self] (snapshot, error) in
+        var collection = db.collection("users")
+            .document(userID)
+            .collection("diaries")
+            .order(by: "dateString", descending: true)
+            .whereField("isDeleted", isEqualTo: false) // isDeleted가 false인 문서만 가져오기
+
+        
+        if let lastDocumentSnapshot = lastDocumentSnapshot {
+            // 이전 페이지의 마지막 문서 다음부터 쿼리
+            collection = collection.start(afterDocument: lastDocumentSnapshot)
+        }
+        
+        // 페이지 크기에 따라 쿼리 제한
+        let query = collection.limit(to: 5)
+        
+        // 쿼리 실행
+        query.addSnapshotListener { [weak self] (snapshot, error) in
             guard let self = self else { return }
-            self.isFetching = false
             
             if let error = error {
                 print("Error fetching documents: \(error)")
+                completion(nil)
                 return
             }
             
-            guard let snapshot = snapshot else { return }
-            
-            if snapshot.documents.isEmpty {
-                print("No more documents")
+            guard let snapshot = snapshot else {
+                print("Snapshot is nil")
+                completion(nil)
                 return
             }
             
-            self.lastDocumentSnapshot = snapshot.documents.last
-            
-            let newItems: [T] = snapshot.documents.compactMap { document in
-                if let item = try? document.data(as: T.self) {
-                    return item
-                } else {
-                    print("Failed to parse document \(document.documentID) as \(T.self)")
+            // 가져온 문서를 DiaryEntry로 변환
+            let entries = snapshot.documents.compactMap { document -> DiaryEntry? in
+                do {
+                    let entry = try document.data(as: DiaryEntry.self)
+                    return entry
+                } catch {
+                    print("Error decoding document: \(error)")
                     return nil
                 }
             }
             
-            self.documents.append(contentsOf: newItems)
-            self.onDataFetched?(self.documents)
+            // 마지막 문서 기록
+            if let lastDocument = snapshot.documents.last {
+                self.lastDocumentSnapshot = lastDocument
+            }
+            
+            completion(entries)
         }
     }
 }
