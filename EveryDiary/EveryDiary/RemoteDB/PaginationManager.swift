@@ -38,7 +38,7 @@ class PaginationManager {
             guard let self = self else { return }
             
             if let error = error {
-//                print("Error fetching documents: \(error)")
+                print("Error fetching documents: \(error)")
                 completion(nil)
                 return
             }
@@ -55,7 +55,7 @@ class PaginationManager {
                     let entry = try document.data(as: DiaryEntry.self)
                     return entry
                 } catch {
-//                    print("Error decoding document: \(error)")
+                    print("Error decoding document: \(error)")
                     return nil
                 }
             }
@@ -67,5 +67,9 @@ class PaginationManager {
             
             completion(entries)
         }
+    }
+    func resetQuery() {
+        query = nil
+        lastDocumentSnapshot = nil
     }
 }

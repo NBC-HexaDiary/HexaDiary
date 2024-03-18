@@ -19,15 +19,14 @@ class BuildingView: UIView {
     // Singleton 패턴을 사용하여 공유 인스턴스 생성
     static let shared = BuildingView()
     weak var delegate: BuildingViewDelegate?
-    // 이미지 캐시 관련 변수
-    var cachedBuildingImage: UIImage?
-    var cachedBackBuildingImage: UIImage?
-    var windowImageCache = [Int: UIImage]()
+
+//    var windowImageCache = [Int: UIImage]()
     // Firestore 관련 변수
     let db = Firestore.firestore()
     var diaryDays: Set<Int> = []
     
-    var listener: ListenerRegistration?
+    
+//    var listener: ListenerRegistration?
     
     // 빌딩 구조체 정의
     struct BuildingSize {
@@ -57,9 +56,6 @@ class BuildingView: UIView {
         super.init(coder: coder)
     }
     
-    override func draw(_ rect: CGRect) {
-        super.draw(rect)
-    }
     // UIView에 맞춰 동적으로 크기 변경
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -79,7 +75,7 @@ class BuildingView: UIView {
                          size: CGSize(width: backgroundLayer.bounds.width * 0.048, height: backgroundLayer.bounds.height * 0.25), windowLayout: WindowLayout(columns: [[1, 1, 0],[0, 1, 1], [1, 0, 1], [0, 1]])),
             
             BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.73, y: backgroundLayer.bounds.height * 1.03),
-                         size: CGSize(width: (backgroundLayer.bounds.width - backgroundLayer.bounds.width * 0.92), height: backgroundLayer.bounds.height * 0.4), windowLayout: WindowLayout(columns: [[0, 0, 1], [1, 1], [1, 0, 1], [1, 1]])),
+                         size: CGSize(width: (backgroundLayer.bounds.width - backgroundLayer.bounds.width * 0.92), height: backgroundLayer.bounds.height * 0.4), windowLayout: WindowLayout(columns: [[0], [1, 0, 1], [1, 1, 1], [1, 1]])),
             
             BuildingSize(position: CGPoint(x: 0, y: backgroundLayer.bounds.height * 0.9),
                          size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1, 1]])),
@@ -199,10 +195,36 @@ class BuildingView: UIView {
         }
     }
     
+    func setupBuildingLayers() {
+        // 빌딩 레이어 설정
+        let buildingLayer = CALayer()
+        buildingLayer.frame = bounds
+        if let cachedBuildingImage = MotivationImageCache.shared.getImage(forKey: "cachedBuildingImage") {
+            buildingLayer.contents = cachedBuildingImage.cgImage
+        } else {
+            let buildingImage = drawBuildingImage()
+            MotivationImageCache.shared.setImage(buildingImage, forKey: "cachedBuildingImage")
+            buildingLayer.contents = buildingImage.cgImage
+        }
+        layer.addSublayer(buildingLayer)
+
+        // 배경 빌딩 레이어 설정
+        let backBuildingLayer = CALayer()
+        backBuildingLayer.frame = bounds
+        if let cachedBackBuildingImage = MotivationImageCache.shared.getImage(forKey: "cachedBackBuildingImage") {
+            backBuildingLayer.contents = cachedBackBuildingImage.cgImage
+        } else {
+            let backBuildingImage = drawBackBuildingImage()
+            MotivationImageCache.shared.setImage(backBuildingImage, forKey: "cachedBackBuildingImage")
+            backBuildingLayer.contents = backBuildingImage.cgImage
+        }
+        layer.addSublayer(backBuildingLayer)
+    }
+    
     //검은 빌딩 이미지로 랜더링하여 반환
     func drawBuildingImage() -> UIImage {
         print("검은 빌딩 이미지 그리기")
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: self.bounds.width, height: self.bounds.height))
+        let renderer = UIGraphicsImageRenderer(size: bounds.size)
         let image = renderer.image { context in
             drawBuilding()
         }
@@ -211,35 +233,11 @@ class BuildingView: UIView {
     //회색 빌딩 이미지로 랜더링하여 반환
     func drawBackBuildingImage() -> UIImage {
         print("회색 빌딩 이미지 그리기")
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: self.bounds.width, height: self.bounds.height))
+        let renderer = UIGraphicsImageRenderer(size: bounds.size)
         let image = renderer.image { context in
             drawBackBuilding()
         }
         return image
-    }
-    
-    func setupBuildingLayers() {
-        // 이미지 캐싱
-        if cachedBuildingImage == nil {
-            cachedBuildingImage = drawBuildingImage()
-            print("Building image cached successfully")
-        }
-        
-        if cachedBackBuildingImage == nil {
-            cachedBackBuildingImage = drawBackBuildingImage()
-            print("Back building image cached successfully")
-        }
-        // 빌딩 레이어 설정
-        let buildingLayer = CALayer()
-        buildingLayer.frame = self.bounds
-        buildingLayer.contents = cachedBuildingImage?.cgImage
-        self.layer.addSublayer(buildingLayer)
-        
-        // 배경 빌딩 레이어 설정
-        let backBuildingLayer = CALayer()
-        backBuildingLayer.frame = self.bounds
-        backBuildingLayer.contents = cachedBackBuildingImage?.cgImage
-        self.layer.addSublayer(backBuildingLayer)
     }
     
     //MARK: - 창문 관련 함수
@@ -289,6 +287,11 @@ class BuildingView: UIView {
 }
 //MARK: - firebase
 extension BuildingView {
+    func updateWindowsWithDiaryCount(_ count: Int) {
+        self.diaryDays = Set(1...count)
+        drawWindowInBuilding()
+    }
+    
     //특정 월에 대한 일기 데이터를 Firestore 데이터베이스에서 가져오는 함수
     func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
         
