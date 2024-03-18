@@ -16,6 +16,8 @@ protocol DateSelectDelegate: AnyObject {
 class DateSelectVC: UIViewController {
     weak var delegate: DateSelectDelegate?
     
+    var selectedDate: Date?
+    
     private lazy var contentView : UIView = {
         let contentView = UIView()
         contentView.layer.cornerRadius = 15
@@ -28,6 +30,14 @@ class DateSelectVC: UIViewController {
         picker.preferredDatePickerStyle = .inline
         picker.datePickerMode = .date
         picker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
+        
+        // 최대 선택가능한 날짜 지정
+        let calendar = Calendar(identifier: .gregorian)
+        let currentDate = Date()
+        var components = DateComponents()
+        components.calendar = calendar
+        let maxDate = calendar.date(byAdding: components, to: currentDate)
+        picker.maximumDate = maxDate
         return picker
     }()
     
@@ -38,8 +48,14 @@ class DateSelectVC: UIViewController {
 
         addSubViews()
         makeConstraints()
+        deliverDate()
         
 //        tapGustureCheck()
+    }
+    private func deliverDate() {
+        if let selectedDate = selectedDate {
+            datePicker.date = selectedDate
+        }
     }
     
     @objc private func dateChanged(_ sender: UIDatePicker) {

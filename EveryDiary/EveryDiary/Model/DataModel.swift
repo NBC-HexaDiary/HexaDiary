@@ -15,7 +15,7 @@ struct DiaryEntry: Codable {
     var weather: String
     var weatherDescription: String?
     var weatherTemp: Double?
-    var imageURL: String?
+    var imageURL: [String]?
     var userID: String?
     var isDeleted: Bool = false
     var deleteDate: Date?
@@ -26,7 +26,7 @@ extension DiaryEntry {
         return DateFormatter.yyyyMMddHHmmss.date(from: dateString) ?? Date()
     }
     
-    init(title: String, content: String, date: Date, emotion: String, weather: String, imageURL: String? = nil) {
+    init(title: String, content: String, date: Date, emotion: String, weather: String, imageURL: [String]? = nil) {
         self.title = title
         self.content = content
         self.dateString = DateFormatter.yyyyMMddHHmmss.string(from: date)
@@ -40,6 +40,13 @@ enum CellModel {
     case profileItem(email: String, name: String, image: String?, isLoggedIn: Bool)
     case settingItem(title: String, iconImage: String, number:Int)
     case signOutItem(title: String, iconImage: String, number:Int, isLoggedIn: Bool)
+}
+
+enum AlertCellModel {
+    case switchItem(title: String, image: String, switchStatus: Bool)
+    case dateItem(title: String, image: String, label: String, switchStatus: Bool, isExpanded: Bool)
+    case timePicker
+    case dayItem(title: String, isSelected: Bool)
 }
 
 extension DateFormatter {

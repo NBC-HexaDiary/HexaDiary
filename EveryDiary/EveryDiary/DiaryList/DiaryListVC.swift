@@ -17,11 +17,13 @@ class DiaryListVC: UIViewController {
     private var monthlyDiaries: [String: [DiaryEntry]] = [:]
     private var months: [String] = []
     private var diaries: [DiaryEntry] = []
-    
+    private var isLoadingData: Bool = false // 데이터를 로드 중인지 여부를 나타내는 플래그
+
     // contextMenu 관련 변수
     private var currentLongPressedCell: JournalCollectionViewCell?
     private var selectedIndexPath: IndexPath?
-    
+    private let paginationManager = PaginationManager() // PaginationManager 추가
+
     // 화면 구성 요소
     private lazy var themeLabel : UILabel = {
         let label = UILabel()
@@ -68,11 +70,11 @@ class DiaryListVC: UIViewController {
         return button
     }()
     
-    private lazy var trashButton : UIButton = {
+    private lazy var loadDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
-        button.setImage(UIImage(systemName: "trash"), for: .normal)
-        button.addTarget(self, action: #selector(tabtrashButton), for: .touchUpInside)
+        button.setImage(UIImage(systemName: "arrow.clockwise"), for: .normal)
+        button.addTarget(self, action: #selector(tabLoadDiaryButton), for: .touchUpInside)
         return button
     }()
     
@@ -180,12 +182,12 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
                 // diary.id와 diary.imageURL을 올바르게 참조하여 삭제
                 if let diaryID = diary.id {
                     let imageURL = diary.imageURL
-                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: imageURL) { error in
-                        if let error = error {
-                            print("Error deleting diary: \(error.localizedDescription)")
-                        } else {
-                        }
-                    }
+//                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: imageURL) { error in
+//                        if let error = error {
+//                            print("Error deleting diary: \(error.localizedDescription)")
+//                        } else {
+//                        }
+//                    }
                 }
             }))
             alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
@@ -224,7 +226,7 @@ extension DiaryListVC {
     }
     
     private func loadDiaries() {
-        diaryManager.fetchDiaries { [weak self] (diaries, error) in
+        diaryManager.getDiary { [weak self] (diaries, error) in
             guard let self = self else { return }
             if let diaries = diaries {
                 // 삭제하지 않은 일기만 필터링
@@ -288,9 +290,10 @@ extension DiaryListVC {
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
     }
-    @objc private func tabtrashButton() {
-        let trashVC = TrashVC()
-        navigationController?.pushViewController(trashVC, animated: true)
+    @objc private func tabLoadDiaryButton() {
+        loadDiaries()
+        journalCollectionView.reloadData()
+        print("Load Diaries")
     }
     @objc private func loginStatusChanged() {
         loadDiaries()
@@ -337,22 +340,21 @@ extension DiaryListVC: UICollectionViewDataSource {
                     date: formattedDateString   // 변경된 날짜 형식 사용
                 )
                 
-                // 이미지 URL이 있는 경우 이미지 다운로드 및 설정
-                if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
-                    cell.imageView.isHidden = false
+                // 여러 이미지 중 첫번째 이미지로 셀 설정
+                if let firstImageUrlString = diary.imageURL?.first, let imageUrl = URL(string: firstImageUrlString) {
                     
                     // ImageCacheManager를 사용하여 이미지 로드
                     ImageCacheManager.shared.loadImage(from: imageUrl) { image in
                         DispatchQueue.main.async {
                             // 셀이 재사용되며 이미지가 다른 항목에 들어갈 수 있으므로 다운로드가 완료된 시점의 indexPath가 동일한지 다시 확인.
                             if let currntIndexPath = collectionView.indexPath(for: cell), currntIndexPath == indexPath {
-                                cell.imageView.image = image
+                                cell.setImage(image)
                             }
                         }
                     }
                 } else {
                     // 이미지 URL이 없을 경우 imageView를 숨김
-                    cell.imageView.isHidden = true
+                    cell.hideImage()
                 }
             }
         } else {
@@ -690,7 +692,7 @@ extension DiaryListVC {
         view.addSubview(themeLabel)
         view.addSubview(journalCollectionView)
         view.addSubview(writeDiaryButton)
-        view.addSubview(trashButton)
+        view.addSubview(loadDiaryButton)
     }
     
     private func setLayout() {
@@ -709,7 +711,7 @@ extension DiaryListVC {
             make.left.equalTo(view).offset(16)
             make.size.equalTo(CGSize(width:120, height: 50))
         }
-        trashButton.snp.makeConstraints { make in
+        loadDiaryButton.snp.makeConstraints { make in
             make.top.equalTo(themeLabel.snp.bottom).offset(10)
             make.leading.equalTo(themeLabel.snp.leading).offset(0)
             make.height.width.equalTo(20)
@@ -734,5 +736,54 @@ extension Array where Element: Equatable {
 extension DiaryListVC : DiaryUpdateDelegate {
     func diaryDidUpdate() {
         loadDiaries()
+    }
+}
+extension DiaryListVC: UICollectionViewDelegate {
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let height = scrollView.frame.size.height
+        
+        // 스크롤이 컬렉션 뷰의 전체 contentHeight의 80% 정도로 내려갔을 때 데이터를 요청
+        let triggerPoint = contentHeight - height
+        
+        if offsetY > triggerPoint {
+            // 데이터를 로드 중이 아닌 경우에만 다음 페이지의 데이터를 요청
+            guard !isLoadingData else { return }
+            isLoadingData = true // 데이터 로드 중 플래그 설정
+            getPage()
+        }
+    }
+    
+    func getPage() {
+        paginationManager.getNextPage { [weak self] newDiaries in
+            guard let self = self, let newDiaries = newDiaries else {
+                self?.isLoadingData = false // 데이터 로드 완료 후 플래그 재설정
+                return
+            }
+            
+            // 중복된 데이터를 제거하고 새로운 데이터만 추가
+            let uniqueNewDiaries = newDiaries.filter { newDiary in
+                !self.diaries.contains { $0.id == newDiary.id } // 기존 데이터와 중복되지 않는 경우만 필터링
+            }
+            
+            guard !uniqueNewDiaries.isEmpty else {
+                self.isLoadingData = false
+                return
+            }
+            
+            // 새로운 데이터를 기존 데이터에 추가
+            self.diaries.append(contentsOf: uniqueNewDiaries)
+            
+            // 월별로 데이터 재구성
+            self.organizeDiariesByMonth(diaries: self.diaries)
+            
+            // 컬렉션 뷰 리로드
+            DispatchQueue.main.async {
+                self.journalCollectionView.reloadData()
+                self.isLoadingData = false // 데이터 로드 완료 후 플래그 재설정
+            }
+        }
     }
 }

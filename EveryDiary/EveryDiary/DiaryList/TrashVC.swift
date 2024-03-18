@@ -135,15 +135,26 @@ extension TrashVC {
             guard let self = self else { return }
             // 모든 휴지통 일기를 삭제하는 로직
             let deletedDiaries = self.monthlyDiaries.flatMap { $0.value }.filter { $0.isDeleted }
-            deletedDiaries.forEach { diary in
-                guard let diaryID = diary.id, let imageURL = diary.imageURL else { return }
-                self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: imageURL) { error in
+            let dispatchGroup = DispatchGroup()
+            
+            for diary in deletedDiaries {
+                guard let diaryID = diary.id else { continue }
+                dispatchGroup.enter()
+                
+                // 각 일기에 대해 deleteDiary 호출
+                self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL ?? []) { error in
                     if let error = error {
                         print("Error deleting diary: \(error.localizedDescription)")
                     }
+                    dispatchGroup.leave()
                 }
             }
-            self.loadDiaries()
+            dispatchGroup.notify(queue: .main) {
+                self.loadDiaries()
+                let alert = UIAlertController(title: "휴지통이 비워졌습니다.", message: nil, preferredStyle: .actionSheet)
+                self.present(alert, animated: true, completion: nil)
+                Timer.scheduledTimer(withTimeInterval: 0.7, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
+            }
         }
         
         
@@ -172,7 +183,7 @@ extension TrashVC {
     
     // 휴지통으로 이동된 diaries 중 만료된 일기를 삭제 후 불러오기
     private func loadDiaries() {
-        diaryManager.fetchDiaries { [weak self] (diaries, error) in
+        diaryManager.getDiary { [weak self] (diaries, error) in
             guard let self = self else { return }
             if let diaries = diaries {
                 // 현재 시간으로부터 (시간 * 분 * 초)이전의 시간을 계산.
@@ -189,7 +200,7 @@ extension TrashVC {
                 for diary in expiredDiaries {
                     guard let diaryID = diary.id else { continue }
                     dispatchGroup.enter()
-                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) {_ in
+                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL ?? []) {_ in
                         dispatchGroup.leave()
                     }
                 }
@@ -273,7 +284,7 @@ extension TrashVC: UICollectionViewDataSource {
                 )
                 
                 // 이미지 URL이 있는 경우 이미지 다운로드 및 설정
-                if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
+                if let firstImageUrlString = diary.imageURL?.first, let imageUrl = URL(string: firstImageUrlString) {
                     cell.imageView.isHidden = false
                     // ImageCacheManager를 사용하여 이미지 로드
                     ImageCacheManager.shared.loadImage(from: imageUrl) { image in
@@ -375,7 +386,7 @@ extension TrashVC {
                 // "삭제" 선택 시 실행할 코드
                 let month = self.months[indexPath.section]
                 if let diary = self.monthlyDiaries[month]?[indexPath.row], let diaryID = diary.id {
-                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) { error in
+                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL ?? []) { error in
                         if let error = error {
                             print("Error deleting diary: \(error.localizedDescription)")
                         } else {
@@ -384,7 +395,7 @@ extension TrashVC {
                             }
                         }
                     }
-                    let alert = UIAlertController(title: "휴지통으로 이동하였습니다.", message: nil, preferredStyle: .actionSheet)
+                    let alert = UIAlertController(title: "일기가 영구적으로 삭제되었습니다.", message: nil, preferredStyle: .actionSheet)
                     self.present(alert, animated: true, completion: nil)
                     Timer.scheduledTimer(withTimeInterval: 0.7, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
                 }
@@ -448,7 +459,7 @@ extension TrashVC {
     
     private func setLayout() {
         trashCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(50)
+            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.leading.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.trailing.equalTo(self.view.safeAreaLayoutGuide).offset(0)

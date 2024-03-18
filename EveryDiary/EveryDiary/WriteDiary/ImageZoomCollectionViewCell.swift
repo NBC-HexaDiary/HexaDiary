@@ -1,84 +1,90 @@
 //
-//  ImageZoomViewController.swift
+//  ImageZoomCollectionViewCell.swift
 //  EveryDiary
 //
-//  Created by t2023-m0026 on 3/13/24.
+//  Created by t2023-m0026 on 3/15/24.
 //
 
 import UIKit
 
-import SnapKit
+protocol ImageZoomCollectionViewCellDelegate: AnyObject {
+    func cellDidRequestDismiss(_ cell: ImageZoomCollectionViewCell)
+}
 
-class ImageZoomViewController: UIViewController, UIScrollViewDelegate, UIGestureRecognizerDelegate {
+class ImageZoomCollectionViewCell: UICollectionViewCell, UIScrollViewDelegate, UIGestureRecognizerDelegate {
+    weak var delegate: ImageZoomCollectionViewCellDelegate?
     
-    var image: UIImage!
+    static let reuseIdentifier = "ImageZoomCollectionViewCell"
+    
     private var initialTouchPoint: CGPoint = CGPoint(x: 0, y: 0)
     private var originalImageCenter: CGPoint? // 이미지의 중심 위치를 저장
     
     private lazy var scrollView: UIScrollView = {
-        let view = UIScrollView(frame: view.bounds)
+        let view = UIScrollView(frame: bounds)
         view.minimumZoomScale = 1.0
         view.maximumZoomScale = 5.0
+        view.zoomScale = 1.0
         view.delegate = self
         return view
     }()
     
     private lazy var imageView: UIImageView = {
-        let view = UIImageView(image: self.image)
+        let view = UIImageView()
         view.contentMode = .scaleAspectFit
         return view
     }()
     
-    init(image: UIImage) {
-        super.init(nibName: nil, bundle: nil)
-        self.image = image
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupViews()
+        addGesture()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .black
-        addSubViews()
-        setLayout()
-        addGesture()
-        originalImageCenter = view.center
-    }
-    
-    private func addSubViews() {
-        view.addSubview(scrollView)
+    private func setupViews() {
+        addSubview(scrollView)
         scrollView.addSubview(imageView)
     }
-    private func setLayout() {
-        scrollView.snp.makeConstraints { make in
-            make.edges.equalTo(view)
-        }
-        imageView.snp.makeConstraints { make in
-            // 이미지의 가로 세로 비율에 맞게 imageView의 높이를 설정
-            let imageAspectRitio = image.size.height / image.size.width
-            make.center.equalToSuperview()
-            make.edges.equalToSuperview()
-//            make.width.equalToSuperview()
-//            make.height.equalTo(imageView.snp.width).multipliedBy(imageAspectRitio)
-        }
+    func configure(with image: UIImage) {
+        imageView.image = image
+        resetZoomScale()
     }
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        return imageView
+    }
+    private func resetZoomScale() {
+        scrollView.zoomScale = 1.0
+    }
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        scrollView.frame = bounds
+        imageView.frame = bounds
+        originalImageCenter = imageView.center
+    }
+    
     private func addGesture() {
         // 아래로 내렸을 때, ViewController를 dismiss시키는 panGesture
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_ :)))
         panGesture.delegate = self
-        imageView.isUserInteractionEnabled = true
-        imageView.addGestureRecognizer(panGesture)
+        self.addGestureRecognizer(panGesture)
         
         let doubletap = UITapGestureRecognizer(target: self, action: #selector(doubleTapToZoom))
         doubletap.numberOfTapsRequired = 2
         doubletap.numberOfTouchesRequired = 1
+        doubletap.delegate = self
         scrollView.addGestureRecognizer(doubletap)
+        
+    }
+    // 확대 상태에서 panGesture가 가능하도록하는 메서드
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        true
     }
     
     @objc func handlePanGesture(_ sender: UIPanGestureRecognizer) {
-        let touchPoint = sender.location(in: self.view.window)
+        let touchPoint = sender.location(in: self.window)
         
         switch sender.state {
         case .began:
@@ -95,14 +101,14 @@ class ImageZoomViewController: UIViewController, UIScrollViewDelegate, UIGesture
                 
                 // 이미지를 아래로 드래그 했을 때
                 if touchPoint.y - initialTouchPoint.y > 100 {   // 아래로 100포인트 이상 드래그 했을 때
-                    self.dismiss(animated: true, completion: nil)
+                    delegate?.cellDidRequestDismiss(self)
                 }
             }
         case .ended, .cancelled:
             // 드래그가 끝나면 이미지를 원래 위치로 복원
             if scrollView.zoomScale == 1.0 {
                 UIView.animate(withDuration: 0.3, animations: {
-                    self.imageView.center = self.originalImageCenter ?? CGPoint(x: self.view.frame.size.width / 2, y: self.view.frame.size.height / 2)
+                    self.imageView.center = self.originalImageCenter ?? CGPoint(x: self.bounds.size.width / 2, y: self.bounds.size.height / 2)
                 })
             }
         default:
@@ -128,23 +134,5 @@ class ImageZoomViewController: UIViewController, UIScrollViewDelegate, UIGesture
         
         // rectToZoomTo 영역으로 확대
         scrollView.zoom(to: rectToZoomTo, animated: true)
-        
-        // FIXME: 더블탭 했을 때 중앙으로만 확대 되는 메서드
-        // 더블탭이 인식되었을 때 호출. 현재 줌 비율에 따라서 다른 반응
-//        switch scrollView.zoomScale {
-//        case 1.0 ... scrollView.maximumZoomScale: // 확대된 상태인 경우
-//            scrollView.setZoomScale(1.0, animated: true)
-//        default: // 확대되지 않은 경우
-//            scrollView.setZoomScale(4.0, animated: true)
-//        }
-    }
-    
-    // 리턴한 view를 핀치 줌이 가능하도록 하는 메서드
-    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return imageView
-    }
-    // 확대 상태에서 panGesture가 가능하도록하는 메서드
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        true
     }
 }
