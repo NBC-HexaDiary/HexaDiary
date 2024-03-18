@@ -123,14 +123,18 @@ extension CalendarListVC : UICollectionViewDataSource,  UICollectionViewDelegate
         cell.setDailyListCell(title: diary.title, content: diary.content, weather: diary.weather, emotion: diary.emotion, date: formattedDateString)
         }
         
-        if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
+        // 이미지 배열에서 첫 번째 URL을 사용하여 셀의 이미지 뷰 설정
+        if let firstImageUrlString = diary.imageURL?.first, let imageUrl = URL(string: firstImageUrlString) {
             cell.imageView.isHidden = false
-            URLSession.shared.dataTask(with: imageUrl) { data, response, error in
-                guard let data = data, error == nil else { return }
+            
+            // ImageCacheManager를 이용해 이미지 캐싱
+            ImageCacheManager.shared.loadImage(from: imageUrl) { image in
                 DispatchQueue.main.async {
-                        cell.imageView.image = UIImage(data: data)
+                    if collectionView.indexPath(for: cell) == indexPath {
+                        cell.imageView.image = image
+                    }
                 }
-            }.resume()
+            }
         } else {
             // 이미지 URL이 없을 경우 imageView를 숨김
             cell.imageView.isHidden = true

@@ -70,11 +70,11 @@ class DiaryListVC: UIViewController {
         return button
     }()
     
-    private lazy var trashButton : UIButton = {
+    private lazy var loadDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
-        button.setImage(UIImage(systemName: "trash"), for: .normal)
-        button.addTarget(self, action: #selector(tabtrashButton), for: .touchUpInside)
+        button.setImage(UIImage(systemName: "arrow.clockwise"), for: .normal)
+        button.addTarget(self, action: #selector(tabLoadDiaryButton), for: .touchUpInside)
         return button
     }()
     
@@ -108,7 +108,7 @@ class DiaryListVC: UIViewController {
         addSubviews()
         setLayout()
         setNavigationBar()
-//        loadDiaries()
+        loadDiaries()
         
         NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
     }
@@ -182,12 +182,12 @@ extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
                 // diary.id와 diary.imageURL을 올바르게 참조하여 삭제
                 if let diaryID = diary.id {
                     let imageURL = diary.imageURL
-                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: imageURL) { error in
-                        if let error = error {
-                            print("Error deleting diary: \(error.localizedDescription)")
-                        } else {
-                        }
-                    }
+//                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: imageURL) { error in
+//                        if let error = error {
+//                            print("Error deleting diary: \(error.localizedDescription)")
+//                        } else {
+//                        }
+//                    }
                 }
             }))
             alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
@@ -226,7 +226,7 @@ extension DiaryListVC {
     }
     
     private func loadDiaries() {
-        diaryManager.fetchDiaries { [weak self] (diaries, error) in
+        diaryManager.getDiary { [weak self] (diaries, error) in
             guard let self = self else { return }
             if let diaries = diaries {
                 // 삭제하지 않은 일기만 필터링
@@ -290,9 +290,10 @@ extension DiaryListVC {
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
     }
-    @objc private func tabtrashButton() {
-        let trashVC = TrashVC()
-        navigationController?.pushViewController(trashVC, animated: true)
+    @objc private func tabLoadDiaryButton() {
+        loadDiaries()
+        journalCollectionView.reloadData()
+        print("Load Diaries")
     }
     @objc private func loginStatusChanged() {
         loadDiaries()
@@ -339,9 +340,8 @@ extension DiaryListVC: UICollectionViewDataSource {
                     date: formattedDateString   // 변경된 날짜 형식 사용
                 )
                 
-                // 이미지 URL이 있는 경우 이미지 다운로드 및 설정
-                if let imageUrlString = diary.imageURL, let imageUrl = URL(string: imageUrlString) {
-                    cell.imageView.isHidden = false
+                // 여러 이미지 중 첫번째 이미지로 셀 설정
+                if let firstImageUrlString = diary.imageURL?.first, let imageUrl = URL(string: firstImageUrlString) {
                     
                     // ImageCacheManager를 사용하여 이미지 로드
                     ImageCacheManager.shared.loadImage(from: imageUrl) { image in
@@ -692,7 +692,7 @@ extension DiaryListVC {
         view.addSubview(themeLabel)
         view.addSubview(journalCollectionView)
         view.addSubview(writeDiaryButton)
-        view.addSubview(trashButton)
+        view.addSubview(loadDiaryButton)
     }
     
     private func setLayout() {
@@ -711,7 +711,7 @@ extension DiaryListVC {
             make.left.equalTo(view).offset(16)
             make.size.equalTo(CGSize(width:120, height: 50))
         }
-        trashButton.snp.makeConstraints { make in
+        loadDiaryButton.snp.makeConstraints { make in
             make.top.equalTo(themeLabel.snp.bottom).offset(10)
             make.leading.equalTo(themeLabel.snp.leading).offset(0)
             make.height.width.equalTo(20)

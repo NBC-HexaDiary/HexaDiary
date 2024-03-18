@@ -180,34 +180,37 @@ class DiaryManager {
     }
     
     //MARK: 다이어리 삭제
-    func deleteDiary(diaryID: String, imageURL: String?, completion: @escaping (Error?) -> Void) {
-        guard let userID = getUserID() else {
-            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
-            return
-        }
-        
-        // Firebase Firestore에서 일기 삭제
-        db.collection("users").document(userID).collection("diaries").document(diaryID).delete { error in
-            if let error = error {
-                print("Error deleting document: \(error)")
-                completion(error)
-            } else {
-                // 일기 삭제에 성공하면 이미지를 Firebase Storage에서 삭제
-                if let imageURL = imageURL {
-                    FirebaseStorageManager.deleteImage(urlString: imageURL) { error in
-                        if let error = error {
-                            print("Error deleting image from Firebase Storage: \(error)")
-                        }
-                        // 이미지 삭제 성공 또는 실패에 관계없이 일기 삭제 완료 메시지를 반환
-                        completion(nil)
-                    }
-                } else {
-                    // 이미지 URL이 없으면 이미지를 삭제할 필요가 없으므로 완료 메시지를 반환
-                    completion(nil)
-                }
-            }
-        }
-    }
+      func deleteDiary(diaryID: String, imageURL: [String], completion: @escaping (Error?) -> Void) {
+          guard let userID = getUserID() else {
+              completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+              return
+          }
+          
+          let dispatchGroup = DispatchGroup()
+          
+          for url in imageURL {
+              dispatchGroup.enter()
+              FirebaseStorageManager.deleteImage(urlString: url) { error in
+                  if let error = error {
+                      print("Error deleting image from Firebase Storage: \(error)")
+                  }
+                  dispatchGroup.leave()
+              }
+          }
+          
+          // 모든 이미지 삭제 작업이 완료된 후 Firestore에서 일기 데이터 삭제
+          dispatchGroup.notify(queue: .main) {
+              self.db.collection("users").document(userID).collection("diaries").document(diaryID).delete { error in
+                  if let error = error {
+                      print("Error deleting document: \(error)")
+                      completion(error)
+                  } else {
+                      print("Diary document successfully deleted.")
+                      completion(nil)
+                  }
+              }
+          }
+      }
     
     //MARK: 회원탈퇴시 데이터 삭제
     func deleteUserData(for userID: String) {
