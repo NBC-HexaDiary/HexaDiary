@@ -226,7 +226,7 @@ extension DiaryListVC {
     }
     
     private func loadDiaries() {
-        diaryManager.fetchDiaries { [weak self] (diaries, error) in
+        diaryManager.getDiary { [weak self] (diaries, error) in
             guard let self = self else { return }
             if let diaries = diaries {
                 // 삭제하지 않은 일기만 필터링
