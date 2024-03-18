@@ -42,7 +42,7 @@ enum CellModel {
     case signOutItem(title: String, iconImage: String, number:Int, isLoggedIn: Bool)
 }
 
-enum AlertCellModel {
+enum AlertCellModel : Equatable {
     case switchItem(title: String, image: String, switchStatus: Bool)
     case dateItem(title: String, image: String, label: String, switchStatus: Bool, isExpanded: Bool)
     case timePicker
