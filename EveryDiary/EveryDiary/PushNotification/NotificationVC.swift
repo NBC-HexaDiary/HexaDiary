@@ -11,15 +11,17 @@ import UserNotifications
 import SnapKit
 
 class NotificationVC: UIViewController {
-        
+    
+    var switchValueChanged: ((Bool) -> Void)?
+    
+    private var dataSource = [AlertCellModel]()
+
     private var isSwitchOn = false
     private var isDatePickerVisible = false
     private var isDayPickerVisible = false
     private var selectedDays: [Bool] = Array(repeating: false, count: 7)
     private var selectedTime: Date?
     private var selectedDaysString: String?
-    
-    private var dataSource = [AlertCellModel]()
     
     private lazy var alertTableView : UITableView = {
         let tableView = UITableView()
@@ -99,8 +101,23 @@ class NotificationVC: UIViewController {
                 }
             }
         }
+        
+        // 셀 추가/삭제 애니메이션 적용을 위한 IndexPath 배열 계산
+        let differences = newDataSource.difference(from: dataSource)
+        
+        alertTableView.performBatchUpdates({
+            dataSource = newDataSource
+            
+            for change in differences {
+                switch change {
+                case let .remove(offset, _, _):
+                    alertTableView.deleteRows(at: [IndexPath(row: offset, section: 0)], with: .fade)
+                case let .insert(offset, _, _):
+                    alertTableView.insertRows(at: [IndexPath(row: offset, section: 0)], with: .fade)
+                }
+            }
+        }, completion: nil)
         self.dataSource = newDataSource
-        alertTableView.reloadData()
     }
 }
 
@@ -114,8 +131,9 @@ extension NotificationVC : UITableViewDelegate, UITableViewDataSource {
             
         case let .switchItem(title, image, isSwitchOn):
             let cell = tableView.dequeueReusableCell(withIdentifier: NotificationCell.id, for: indexPath) as! NotificationCell
+            cell.alarmSwtich.addTarget(self, action: #selector(switchChanged), for: .valueChanged)
             cell.prepare(title: title, iconImage: image, switchStatus: isSwitchOn)
-            cell.switchValueChanged = { [weak self] isOn in
+            self.switchValueChanged = { [weak self] isOn in
                 self?.isSwitchOn = isOn
                 UserDefaults.standard.set(isOn, forKey: "isSwitchOn")
                 UserDefaults.standard.synchronize()
@@ -285,6 +303,72 @@ extension NotificationVC: TimePickerCellDelegate, DayPickerCellDelegate {
             
             if requests.isEmpty {
                 print("보류 중인 알림이 없습니다.")
+            }
+        }
+    }
+}
+
+//MARK: -
+extension NotificationVC {
+    @objc func switchChanged(_ sender: UISwitch) {
+        // 스위치 상태 변경을 바로 적용하지 않고, 권한을 요청
+        // 권한 상태를 확인하고, 필요한 경우 권한을 요청
+        let center = UNUserNotificationCenter.current()
+        center.getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                if settings.authorizationStatus == .authorized {
+                    // 권한이 이미 승인된 경우, 스위치 상태를 변경
+                    self.switchValueChanged?(sender.isOn)
+                } else if settings.authorizationStatus == .denied {
+                    // 권한이 거부된 경우, 사용자에게 UIAlert 표시
+                    self.showPermissionDeniedAlert()
+                    // 스위치 상태를 false
+                    sender.setOn(false, animated: true)
+                } else {
+                    // 권한이 아직 요청되지 않은 경우, 권한을 요청
+                    self.requestNotificationPermission { granted in
+                        if granted {
+                            // 권한 요청이 승인된 경우
+                            self.switchValueChanged?(sender.isOn)
+                        } else {
+                            // 권한 요청이 거부된 경우
+                            sender.setOn(false, animated: true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // UIAlert 띄우기
+    private func showPermissionDeniedAlert() {
+        let authorizationAlert = UIAlertController(title: "알림", message: "알림 기능을 사용하려면 설정에서 알림 권한을 허용해주세요", preferredStyle: .alert)
+
+        let settingsAction = UIAlertAction(title: "설정", style: .default) { (_) -> Void in
+            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+                return
+            }
+            // EveryDiary 앱 설정 내의 알림 창을 호출
+            if UIApplication.shared.canOpenURL(settingsUrl) {
+                UIApplication.shared.open(settingsUrl, completionHandler: nil)
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .default, handler: nil)
+
+        authorizationAlert.addAction(settingsAction)
+        authorizationAlert.addAction(cancelAction)
+
+        DispatchQueue.main.async { [weak self] in
+            self?.present(authorizationAlert, animated: true, completion: nil)
+        }
+    }
+    
+    // 알림권한을 받아오는 메서드
+    private func requestNotificationPermission(completion: @escaping (Bool) -> Void) {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
+            DispatchQueue.main.async {
+                completion(granted)
             }
         }
     }
