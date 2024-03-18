@@ -180,7 +180,7 @@ class DiaryManager {
     }
     
     //MARK: 다이어리 삭제
-    func deleteDiary(diaryID: String, imageURL: String?, completion: @escaping (Error?) -> Void) {
+    func deleteDiary(diaryID: String, imageURL: [String], completion: @escaping (Error?) -> Void) {
         guard let userID = getUserID() else {
             completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
             return
@@ -193,7 +193,7 @@ class DiaryManager {
                 completion(error)
             } else {
                 // 일기 삭제에 성공하면 이미지를 Firebase Storage에서 삭제
-                if let imageURL = imageURL {
+                for imageURL in imageURL {
                     FirebaseStorageManager.deleteImage(urlString: imageURL) { error in
                         if let error = error {
                             print("Error deleting image from Firebase Storage: \(error)")
@@ -201,9 +201,6 @@ class DiaryManager {
                         // 이미지 삭제 성공 또는 실패에 관계없이 일기 삭제 완료 메시지를 반환
                         completion(nil)
                     }
-                } else {
-                    // 이미지 URL이 없으면 이미지를 삭제할 필요가 없으므로 완료 메시지를 반환
-                    completion(nil)
                 }
             }
         }

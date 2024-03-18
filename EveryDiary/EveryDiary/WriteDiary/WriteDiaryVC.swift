@@ -249,7 +249,7 @@ extension WriteDiaryVC {
         // 이미지가 선택되었을 때 이미지 업로드 과정을 진행
         if let image = newImage {
             // FirebaseStorageManager를 사용해 이미지 업로드
-            FirebaseStorageManager.uploadImage(image: image, pathRoot: "diary_images") { [weak self] imageUrl in
+            FirebaseStorageManager.uploadImage(image: [image], pathRoot: "diary_images") { [weak self] imageUrl in
                 guard let imageUrl = imageUrl else {
                     self?.isSavingDiary = false // 저장 실패하면, 변수 초기화
                     print("Image upload failed")
