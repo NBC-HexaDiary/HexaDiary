@@ -11,6 +11,7 @@ class PaginationManager {
     private var query: Query? = nil
     private var lastDocumentSnapshot: DocumentSnapshot?
     private var listener: ListenerRegistration?
+    var isDeleted: Bool = false
     
     func getNextPage(completion: @escaping ([DiaryEntry]?) -> Void) {
         guard let userID = DiaryManager.shared.getUserID() else {
@@ -22,8 +23,7 @@ class PaginationManager {
             .document(userID)
             .collection("diaries")
             .order(by: "dateString", descending: true)
-            .whereField("isDeleted", isEqualTo: false) // isDeleted가 false인 문서만 가져오기
-
+            .whereField("isDeleted", isEqualTo: isDeleted) // isDeleted에 따라 데이터 호출
         
         if let lastDocumentSnapshot = lastDocumentSnapshot {
             // 이전 페이지의 마지막 문서 다음부터 쿼리
