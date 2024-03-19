@@ -20,21 +20,27 @@ struct LocationInfo {
     var longitude: CLLocationDegrees
 }
 
+protocol MapCollectionViewCellDelegate: AnyObject {
+    func mapViewCell(_ cell: MapCollectionViewCell, didTapAnnotationWithLatitude latitude: CLLocationDegrees, longitude: CLLocationDegrees)
+}
+
 class MapCollectionViewCell: UICollectionViewCell {
     static let reuseIdentifier = "MapCollectionViewCell"
+    weak var delegate: MapCollectionViewCellDelegate?
     
     var mapView: MKMapView = {
         let view = MKMapView()
         view.mapType = .mutedStandard
-        view.isZoomEnabled = false
+        view.isZoomEnabled = true
         view.isScrollEnabled = false
-        view.isUserInteractionEnabled = false
+        view.isUserInteractionEnabled = true
         return view
     }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupMapView()
+        mapView.delegate = self
     }
     
     required init?(coder: NSCoder) {
@@ -59,5 +65,14 @@ class MapCollectionViewCell: UICollectionViewCell {
         
         // 모든 annotation이 보이도록 지도의 영역 조절
         mapView.showAnnotations(annotations, animated: false)
+    }
+}
+
+extension MapCollectionViewCell: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        guard let annotation = view.annotation else { return }
+        delegate?.mapViewCell(self, didTapAnnotationWithLatitude: annotation.coordinate.latitude, longitude: annotation.coordinate.longitude)
+        print(annotation.coordinate.latitude)
+        print(annotation.coordinate.longitude)
     }
 }
