@@ -18,6 +18,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     weak var delegate: DiaryUpdateDelegate?     // Delegate 프로토콜을 통한 데이터 업데이트 각 VC 통지
     private var diaryManager = DiaryManager()
     private var imagePickerManager = ImagePickerManager()
+    private var mapManager = MapManager()
     
     private var selectedEmotion = "happy"
     private var selectedWeather = "Vector"
@@ -836,15 +837,16 @@ extension WriteDiaryVC: MapCollectionViewCellDelegate {
         
         // 애플 맵 액션
         let openInAppleMaps = UIAlertAction(title: "Apple Maps에서 열기", style: .default) { [weak self] _ in
-            self?.getPlaceName(latitude: latitude, longitude: longitude) { placeName in
+            self?.mapManager.getPlaceName(latitude: latitude, longitude: longitude) { placeName in
                 DispatchQueue.main.async {
-                    self?.openAppleMapsForPlace(placeName: placeName)
+                    // `getPlaceName` 메서드를 통해 얻은 `placeName`을 사용하여 Apple Maps 열기
+                    self?.mapManager.openAppleMaps(latitude: latitude, longitude: longitude, placeName: placeName)
                 }
             }
         }
         // 구글 앱 액션
         let openInGoogleMaps = UIAlertAction(title: "Google Maps에서 열기", style: .default) { [weak self] _ in
-            self?.openGoogleMapsForPlace(latitude: latitude, longitude: longitude)
+            self?.mapManager.openGoogleMapsForPlace(latitude: latitude, longitude: longitude)
         }
         // 취소 액션
         let cancelAction = UIAlertAction(title: "취소", style: .cancel)
@@ -854,71 +856,6 @@ extension WriteDiaryVC: MapCollectionViewCellDelegate {
         alert.addAction(openInGoogleMaps)
         alert.addAction(cancelAction)
         present(alert, animated: true)
-    }
-    private func openGoogleMapsForPlace(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
-        // 구글 맵스 앱 URL 스키마 정의
-        let googleMapsAppURL = URL(string: "comgooglemaps://?q=\(latitude),\(longitude)&center=\(latitude),\(longitude)&zoom=14&map_action=pin")
-
-        // 웹에서 구글 맵스 열기 위한 URL 정의
-        let googleMapsWebURL = URL(string: "https://www.google.com/maps/search/?api=1&query=\(latitude),\(longitude)")
-
-        // 앱이 설치되어 있는지 확인 후 앱으로 열기
-        if let googleMapsAppURL = googleMapsAppURL, UIApplication.shared.canOpenURL(googleMapsAppURL) {
-            UIApplication.shared.open(googleMapsAppURL, options: [:], completionHandler: nil)
-        }
-        // 앱이 설치되어 있지 않은 경우 웹 URL로 대체
-        else if let googleMapsWebURL = googleMapsWebURL {
-            UIApplication.shared.open(googleMapsWebURL, options: [:], completionHandler: nil)
-        }
-    }
-    
-    private func openAppleMapsForPlace(placeName: String) {
-        let geocoder = CLGeocoder()
-        geocoder.geocodeAddressString(placeName) { (placemarks, error) in
-            guard let placemark = placemarks?.first, let location = placemark.location else {
-                print("장소를 찾을 수 없습니다.")
-                return
-            }
-            let regionDistance: CLLocationDistance = 1000
-            let coordinates = location.coordinate
-            let regionSpan = MKCoordinateRegion(center: coordinates, latitudinalMeters: regionDistance, longitudinalMeters: regionDistance)
-            let options = [
-                MKLaunchOptionsMapCenterKey: NSValue(mkCoordinate: regionSpan.center),
-                MKLaunchOptionsMapSpanKey: NSValue(mkCoordinateSpan: regionSpan.span)
-            ]
-            
-            let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinates, addressDictionary: nil))
-            mapItem.name = placeName
-            mapItem.openInMaps(launchOptions: options)
-        
-        }
-    }
-    
-    private func getPlaceName(latitude: CLLocationDegrees, longitude: CLLocationDegrees, completion: @escaping (String) -> Void) {
-        let location = CLLocation(latitude: latitude, longitude: longitude)
-        let geocoder = CLGeocoder()
-
-        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
-            guard let placemark = placemarks?.first else {
-                print("장소 정보를 찾을 수 없습니다.")
-                completion("Unknown Location")
-                return
-            }
-
-            // 장소명이 있는 경우 우선 사용
-            if let placeName = placemark.name {
-                completion(placeName)
-            }
-            // 장소명이 없는 경우, 포맷된 주소 사용
-            else if let addressDictionary = placemark.postalAddress {
-                    let formattedAddress = CNPostalAddressFormatter.string(from: addressDictionary, style: .mailingAddress)
-                completion(formattedAddress)
-            }
-            // 둘 다 없는 경우, 알 수 없는 위치 처리
-            else {
-                completion("Unknown Location")
-            }
-        }
     }
 }
 
