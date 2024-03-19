@@ -14,14 +14,34 @@ import FirebaseAuth
 import Firebase
 import GoogleSignIn
 
+#Preview{
+    LoginVC()
+}
+
 class LoginVC: UIViewController {
-        
+    
     fileprivate var currentNonce: String?
     
-    private lazy var backgroundImage : UIImageView = {
-        let image = UIImageView()
-        image.image = UIImage(named: "View.Background2")
-        return image
+//    private lazy var backgroundImage : UIImageView = {
+//        let image = UIImageView()
+//        image.image = UIImage(named: "View.Background2")
+//        return image
+//    }()
+    
+    private lazy var topLabel : UILabel = {
+        let label = UILabel()
+        label.text = "마음 놓고"
+        label.font = UIFont(name: "SFProDisplay-Bold", size: 50)
+        label.textColor = UIColor(named: "mainCell")
+        return label
+    }()
+    
+    private lazy var bottomLabel : UILabel = {
+        let label = UILabel()
+        label.text = "일기 쓰기"
+        label.font = UIFont(name: "SFProDisplay-Bold", size: 50)
+        label.textColor = UIColor(named: "subBackground")
+        return label
     }()
     
     private lazy var signGoogleButton : UIButton = {
@@ -42,7 +62,7 @@ class LoginVC: UIViewController {
         let closeButton = UIButton()
         closeButton.setImage(UIImage(systemName:"xmark"), for: .normal)
         closeButton.sizeToFit()
-        closeButton.tintColor = .mainTheme
+        closeButton.tintColor = .mainCell
         closeButton.addTarget(self, action: #selector(tapCloseButton), for: .touchUpInside)
         return closeButton
     }()
@@ -128,11 +148,14 @@ extension LoginVC {
     }
     
     private func addSubViewsLoginVC() {
-        view.addSubview(backgroundImage)
-        view.sendSubviewToBack(backgroundImage)
+//        view.addSubview(backgroundImage)
+//        view.sendSubviewToBack(backgroundImage)
         view.addSubview(signGoogleButton)
         view.addSubview(signAppleButton)
         view.addSubview(closeButton)
+        view.addSubview(topLabel)
+        view.addSubview(bottomLabel)
+        view.backgroundColor = .loginBackground
     }
     
     private func autoLayoutLoginVC() {
@@ -146,18 +169,28 @@ extension LoginVC {
         }
         signGoogleButton.snp.makeConstraints { make in
             make.centerX.equalTo(view.safeAreaLayoutGuide)
-            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(40)
-            make.width.equalTo(view.safeAreaLayoutGuide).offset(-32)
+            make.width.equalTo(view.safeAreaLayoutGuide).offset(-50)
             make.height.equalTo(60)
         }
-        backgroundImage.snp.makeConstraints { make in
-            make.edges.equalTo(view).inset(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0))
-        }
+//        backgroundImage.snp.makeConstraints { make in
+//            make.edges.equalTo(view).inset(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0))
+//        }
         signAppleButton.snp.makeConstraints { make in
             make.centerX.equalTo(view.safeAreaLayoutGuide)
-            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-40)
-            make.width.equalTo(view.safeAreaLayoutGuide).offset(-32)
+            make.top.equalTo(signGoogleButton.snp.bottom).offset(20)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(50)
+            make.width.equalTo(view.safeAreaLayoutGuide).offset(-50)
             make.height.equalTo(60)
+        }
+        topLabel.snp.makeConstraints { make in
+            make.centerX.equalTo(view.safeAreaLayoutGuide)
+            make.width.equalTo(view.safeAreaLayoutGuide).offset(-100)
+        }
+        bottomLabel.snp.makeConstraints { make in
+            make.centerX.equalTo(view.safeAreaLayoutGuide)
+            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-75)
+            make.width.equalTo(view.safeAreaLayoutGuide).offset(-100)
+            make.top.equalTo(topLabel.snp.bottom).offset(10)
         }
     }
 }
@@ -254,6 +287,9 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                         return
                     }
                     let changeRequest = currentUser.createProfileChangeRequest()
+                    if let fullName = appleIDCredential.fullName {
+                        changeRequest.displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
+                    }
                     changeRequest.commitChanges { error in
                         if let error = error {
                             print("Error updating user profile: \(error)")
@@ -274,21 +310,6 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                     self.dismiss(animated: true, completion: nil)
                 }
             }
-            print("identityToken: \(idTokenString)")
-            if let email = appleIDCredential.email {
-                print("Email: \(email)")
-            } else {
-                print("Email not provided")
-            }
-            
-            if let fullName = appleIDCredential.fullName {
-                let displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
-                print("Full Name: \(displayName)")
-            } else {
-                print("Full Name not provided")
-            }
-            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-            self.dismiss(animated: true, completion: nil)
             // Apple 로그인을 통한 Firebase 로그인 성공 & SettingVC로 자동 전환
             
             

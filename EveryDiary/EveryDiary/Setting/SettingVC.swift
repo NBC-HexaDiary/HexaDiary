@@ -48,6 +48,7 @@ class SettingVC: UIViewController {
         tableView.selectRow(at: .none,
                             animated: true,
                             scrollPosition: .top)
+        print("\(String(describing: Auth.auth().currentUser?.displayName))")
     }
     
     deinit {
@@ -106,7 +107,7 @@ extension SettingVC {
                 ]
             } else if currentUser.isEmailVerified == true {
                 self.dataSource = [
-                    .profileItem(email: currentUser.email ?? "일기를 저장하려면 로그인해주세요", name: currentUser.displayName ?? "Error", image: "profile", isLoggedIn: true),
+                    .profileItem(email: currentUser.email ?? "인증 완료", name: currentUser.displayName ?? "사용자", image: "profile", isLoggedIn: true),
                     .settingItem(title: "알림", iconImage: "notification", number: 1),
                     .settingItem(title: "잠금", iconImage: "lock", number: 2),
                     .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
