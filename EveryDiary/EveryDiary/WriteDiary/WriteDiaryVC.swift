@@ -4,7 +4,8 @@
 //
 //  Created by t2023-m0044 on 2/21/24.
 //
-
+import Contacts
+import CoreLocation
 import MapKit
 import PhotosUI
 import UIKit
@@ -115,7 +116,6 @@ class WriteDiaryVC: UIViewController {
     }()
     private let textViewPlaceHolder = "텍스트를 입력하세요."
     
-    private var imagesLocationInfo: [ImageLocationInfo] = []                // 이미지와 meta정보를 저장하는 배열
     // 여러개의 이미지를 보여주기 위한 배열과 collectionView
     private lazy var imagesCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -137,6 +137,7 @@ class WriteDiaryVC: UIViewController {
         collectionView.register(MapCollectionViewCell.self, forCellWithReuseIdentifier: MapCollectionViewCell.reuseIdentifier)
         return collectionView
     }()
+    private var imagesLocationInfo: [ImageLocationInfo] = []                // 이미지와 meta정보를 저장하는 배열
     private var imageCollectionViewHeightConstraint: NSLayoutConstraint?    // collectionView의 높이
     
     // 날씨 정보 라벨
@@ -197,13 +198,16 @@ extension WriteDiaryVC {
         
         // 이미지와 메타데이터 업로드
         for imageLocationInfo in self.imagesLocationInfo {
+            guard let assetIdentifier = imageLocationInfo.assetIdentifier else { continue }
             dispatchGroup.enter()
             // 촬영 시간과 위치 정보를 포함하여 업로드
             FirebaseStorageManager.uploadImage(
                 image: [imageLocationInfo.image],
-                pathRoot: "diary_images",
+                pathRoot: "diary_images", 
+                assetIdentifier: assetIdentifier,
                 captureTime: imageLocationInfo.captureTime,
-                location: imageLocationInfo.location) { urls in
+                location: imageLocationInfo.location
+            ) { urls in
                 guard let urls = urls, !urls.isEmpty else {
                     dispatchGroup.leave()
                     return
@@ -228,40 +232,41 @@ extension WriteDiaryVC {
         guard let diaryID = self.diaryID else { return }
         
         let formattedDateString =  DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
-        let imagesToUpload = imagesLocationInfo.map { $0.image }
+        var uploadedImageURLs = [String]()
         
-        if !imagesToUpload.isEmpty {
-            FirebaseStorageManager.uploadImage(image: imagesToUpload, pathRoot: "diary_images") { [weak self] imageUrls in
-                guard let self = self, let imageUrls = imageUrls else {
-                    print("Image update failed")
-                    return
-                }
-                
-                // 이미지 URL 배열을 이용해 DiaryEntry 생성
-                let updatedDiaryEntry = DiaryEntry(
-                    id: diaryID,
-                    title: self.titleTextField.text ?? "",
-                    content: self.contentTextView.text ?? "",
-                    dateString: formattedDateString,
-                    emotion: self.selectedEmotion,
-                    weather: self.selectedWeather,
-                    imageURL: imageUrls.map { $0.absoluteString }
-                )
-                
-                // Firestore에 업데이트
-                self.updateDiaryInFirestore(diaryID: diaryID, diaryEntry: updatedDiaryEntry)
+        // 이미지 업로드 작업을 관리하기 위한 DispatchGroup
+        let dispatchGroup = DispatchGroup()
+        
+        for imagesLocationInfo in self.imagesLocationInfo {
+            guard let assetIdentifier = imagesLocationInfo.assetIdentifier else { continue }
+            dispatchGroup.enter()
+            
+            FirebaseStorageManager.uploadImage(
+                image: [imagesLocationInfo.image],
+                pathRoot: "diary_images",
+                assetIdentifier: assetIdentifier,
+                captureTime: imagesLocationInfo.captureTime,
+                location: imagesLocationInfo.location
+            ) { urls in
+            if let urls = urls, !urls.isEmpty {
+                uploadedImageURLs.append(contentsOf: urls.map { $0.absoluteString })
             }
-        } else {
+            dispatchGroup.leave()
+        }
+    }
+        dispatchGroup.notify(queue: .main) { [weak self] in
+            guard let self = self else { return }
+            // 이미지 URL 배열을 이용해 DiaryEntry 업데이트
             let updatedDiaryEntry = DiaryEntry(
                 id: diaryID,
-                title: titleTextField.text ?? "",
-                content: contentTextView.text ?? "",
+                title: self.titleTextField.text ?? "",
+                content: self.contentTextView.text ?? "",
                 dateString: formattedDateString,
-                emotion: selectedEmotion,
-                weather: selectedWeather,
-                imageURL: []
+                emotion: self.selectedEmotion,
+                weather: self.selectedWeather,
+                imageURL: uploadedImageURLs
             )
-            updateDiaryInFirestore(diaryID: diaryID, diaryEntry: updatedDiaryEntry)
+            self.updateDiaryInFirestore(diaryID: diaryID, diaryEntry: updatedDiaryEntry)
         }
     }
     // 일기 편집 가능 상태로 변경
@@ -335,7 +340,9 @@ extension WriteDiaryVC {
         self.emotionButton.setImage(UIImage(named: diary.emotion)?.withRenderingMode(.alwaysOriginal), for: .normal)
         self.weatherButton.setImage(UIImage(named: diary.weather)?.withRenderingMode(.alwaysOriginal), for: .normal)
         
-        self.imagesLocationInfo.removeAll() // 기존 이미지 정보 초기화
+        // 기존 이미지 정보 초기화
+        self.selectedPhotoIdentifiers.removeAll()
+        self.imagesLocationInfo.removeAll()
         
         // 이미지 URL 배열에서 각 이미지와 메타데이터를 다운로드
         let group = DispatchGroup()
@@ -347,9 +354,13 @@ extension WriteDiaryVC {
                 guard let self = self, let image = downloadedImage else { return }
                 let captureTime = metadata?["captureTime"] ?? "Unknown"
                 let locationInfoString = metadata?["location"] ?? "Unknown"
+                let assetIdentifier = metadata?["assetIdentifier"]
+                if let assetIdentifier = assetIdentifier {
+                    self.selectedPhotoIdentifiers.append(assetIdentifier)
+                }
                 let locationInfo = self.locationInfoFromString(locationInfoString)
                 // 메타데이터를 포함한 ImageLocationInfo 객체 생성
-                let imageLocationInfo = ImageLocationInfo(image: image, locationInfo: locationInfo, assetIdentifier: nil, captureTime: captureTime, location: locationInfoString)
+                let imageLocationInfo = ImageLocationInfo(image: image, locationInfo: locationInfo, assetIdentifier: assetIdentifier, captureTime: captureTime, location: locationInfoString)
                 self.imagesLocationInfo.append(imageLocationInfo)
                 print("imageLocationInfo: \(imageLocationInfo)")
                 print("locationInfo: \(locationInfo)")

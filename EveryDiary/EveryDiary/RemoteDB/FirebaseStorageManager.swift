@@ -10,7 +10,7 @@ import Firebase
 import FirebaseStorage
 
 class FirebaseStorageManager {
-    static func uploadImage(image: [UIImage], pathRoot: String, captureTime: String? = nil, location: String? = nil, completion: @escaping ([URL]?) -> Void) {
+    static func uploadImage(image: [UIImage], pathRoot: String, assetIdentifier: String, captureTime: String? = nil, location: String? = nil, completion: @escaping ([URL]?) -> Void) {
         var uploadedURL: [URL] = []
         let dispatchGroup = DispatchGroup()
 
@@ -30,10 +30,11 @@ class FirebaseStorageManager {
             if let location = location {
                 customMetadata["location"] = location
             }
+            customMetadata["assetIdentifier"] = assetIdentifier
             metaData.customMetadata = customMetadata
-            print("captureTime: \(captureTime)")
-            print("location: \(location)")
-            print("custoMetaData: \(customMetadata)")
+            print("captureTime: \(customMetadata["captureTime"])")
+            print("location: \(customMetadata["location"])")
+            print("custoMetaData: \(customMetadata["assetIdentifier"])")
             
             let imageName = "\(UUID().uuidString)_\(Date().timeIntervalSince1970)"
             let firebaseReference = Storage.storage().reference().child("\(pathRoot)/\(imageName)")
