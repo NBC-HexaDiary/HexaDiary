@@ -55,18 +55,10 @@ class JournalCollectionViewCell: UICollectionViewCell {
     lazy var imageView: UIImageView = {
         let view = UIImageView()
         view.layer.cornerRadius = 10
+        view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
         return view
     }()
-    
-//    private lazy var deleteButton: UIButton = {
-//        let button = UIButton(type: .system)
-//        button.setImage(UIImage(systemName: "trash"), for: .normal)
-//        button.tintColor = .red
-//        button.isHidden = true
-//        button.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
-//        return button
-//    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)

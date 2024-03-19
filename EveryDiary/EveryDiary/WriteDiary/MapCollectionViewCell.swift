@@ -30,10 +30,12 @@ class MapCollectionViewCell: UICollectionViewCell {
     
     var mapView: MKMapView = {
         let view = MKMapView()
-        view.mapType = .mutedStandard
+        view.mapType = .standard
         view.isZoomEnabled = true
         view.isScrollEnabled = false
         view.isUserInteractionEnabled = true
+        view.layer.cornerRadius = 10
+        view.clipsToBounds = true
         return view
     }()
     
