@@ -70,14 +70,6 @@ class DiaryListVC: UIViewController {
         return button
     }()
     
-    private lazy var loadDiaryButton : UIButton = {
-        var config = UIButton.Configuration.plain()
-        let button = UIButton(configuration: config)
-        button.setImage(UIImage(systemName: "arrow.clockwise"), for: .normal)
-        button.addTarget(self, action: #selector(tabLoadDiaryButton), for: .touchUpInside)
-        return button
-    }()
-    
     private lazy var journalCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -513,12 +505,11 @@ extension DiaryListVC {
         view.addSubview(themeLabel)
         view.addSubview(journalCollectionView)
         view.addSubview(writeDiaryButton)
-        view.addSubview(loadDiaryButton)
     }
     
     private func setLayout() {
         journalCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(50)
+            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.leading.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.trailing.equalTo(self.view.safeAreaLayoutGuide).offset(0)
@@ -531,11 +522,6 @@ extension DiaryListVC {
             make.top.equalTo(view).offset(50)
             make.left.equalTo(view).offset(16)
             make.size.equalTo(CGSize(width:120, height: 50))
-        }
-        loadDiaryButton.snp.makeConstraints { make in
-            make.top.equalTo(themeLabel.snp.bottom).offset(10)
-            make.leading.equalTo(themeLabel.snp.leading).offset(0)
-            make.height.width.equalTo(20)
         }
     }
 }
