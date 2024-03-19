@@ -19,6 +19,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     private var diaryManager = DiaryManager()
     private var imagePickerManager = ImagePickerManager()
     private var mapManager = MapManager()
+    private var keyboardManager: KeyboardManager?
     
     private var selectedEmotion = "happy"
     private var selectedWeather = "Vector"
@@ -170,14 +171,14 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
         view.backgroundColor = .mainBackground
         addSubView()
         setLayout()
-        registerKeyboardNotifications()
+        setupKeyboardManager()
         loadWeatherData()
         setupToolbar()
         setTapGesture()
         imagePickerManager.delegate = self
     }
     deinit {
-        unregisterKeyboardNotifications()
+        keyboardManager?.unregisterKeyboardNotifications()
     }
 }
 
@@ -488,16 +489,7 @@ extension WriteDiaryVC {
     private func addSubView() {
         self.view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-        contentView.addSubview(datePickingButton)
-        contentView.addSubview(completeButton)
-        contentView.addSubview(updateButton)
-        contentView.addSubview(allowEditButton)
-        contentView.addSubview(photoButton)
-        contentView.addSubview(emotionButton)
-        contentView.addSubview(weatherButton)
-        contentView.addSubview(titleTextField)
-        contentView.addSubview(contentTextView)
-        contentView.addSubview(imagesCollectionView)
+        contentView.addSubViews([datePickingButton, completeButton, updateButton, allowEditButton, photoButton, emotionButton, weatherButton, titleTextField, contentTextView, imagesCollectionView])
     }
     private func setLayout() {
         scrollView.snp.makeConstraints { make in
@@ -506,9 +498,7 @@ extension WriteDiaryVC {
         }
         
         contentView.snp.makeConstraints { make in
-            make.top.bottom.equalTo(scrollView)
-            make.leading.trailing.equalTo(scrollView)
-            make.width.equalTo(scrollView)
+            make.edges.width.equalTo(scrollView)
             // contentView의 높이는 최소 scrollView의 높이와 같거아 더 크도록 설정
             make.height.greaterThanOrEqualTo(scrollView).priority(.low)
         }
@@ -581,28 +571,10 @@ extension WriteDiaryVC {
 
 // MARK: NotificationCenter(키보드 높이 조절) & 키보드 return 기능
 extension WriteDiaryVC: UITextFieldDelegate {
-    private func registerKeyboardNotifications() {
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-    private func unregisterKeyboardNotifications() {
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-    @objc func keyboardWillShow(notification: NSNotification) {
-        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-            let keyboardHeight = keyboardSize.height
-            UIView.animate(withDuration: 0.3) {
-                self.scrollViewBottomConstraint?.update(inset: keyboardHeight - self.view.safeAreaInsets.bottom)
-                self.view.layoutIfNeeded()
-            }
-        }
-    }
-    @objc func keyboardWillHide(notification: NSNotification) {
-        UIView.animate(withDuration: 0.3) {
-            self.scrollViewBottomConstraint?.update(inset: 0)
-            self.view.layoutIfNeeded()
-        }
+    private func setupKeyboardManager() {
+        guard let scrollViewBottomConstraint = scrollViewBottomConstraint else { return }
+        keyboardManager = KeyboardManager(scrollView: scrollView, bottomConstraint: scrollViewBottomConstraint, viewController: self)
+        keyboardManager?.registerKeyboardNotifications()
     }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField == self.titleTextField {
@@ -715,7 +687,7 @@ extension WriteDiaryVC {
                     let weatherDescription = weatherResponce.weather.first?.description ?? "날씨정보 없음"
                     let temperature = weatherResponce.main.temp
                     self?.weatherDescriptionLabel.text = "\(weatherDescription)"
-                    self?.weatherTempLabel.text = "\(String(format: "%.1f", temperature))℃"
+                    self?.weatherTempLabel.text = "\(Int(round(temperature)))℃"
                 case .failure(let error):
                     print("Load weather failed: \(error)")
                     self?.weatherDescriptionLabel.text = "일기를 불러오지 못했습니다."
@@ -897,5 +869,10 @@ extension WriteDiaryVC {
             let indexPath = IndexPath(item: index, section: 0)
             imagesCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
         }
+    }
+}
+extension UIView{
+    func addSubViews(_ views : [UIView]){
+        _ = views.map{self.addSubview($0)}
     }
 }

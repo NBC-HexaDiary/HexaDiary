@@ -44,13 +44,9 @@ class DateSelectVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-//        datePicker.backgroundColor = .white
-
         addSubViews()
         makeConstraints()
         deliverDate()
-        
-//        tapGustureCheck()
     }
     private func deliverDate() {
         if let selectedDate = selectedDate {
@@ -62,34 +58,11 @@ class DateSelectVC: UIViewController {
         delegate?.didSelectDate(sender.date)
     }
     
-//    private func tapGustureCheck() {
-//        // contentView로 구현했을때, contentView 밖을 선택하는 gesture를 추적
-//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapOutsideContentView))
-//        view.addGestureRecognizer(tapGesture)
-//        contentView.isUserInteractionEnabled = true
-//    }
-//    
-//    // gesture가 감지되면, dismiss시키는 메서드
-//    @objc private func handleTapOutsideContentView(_ sender: UITapGestureRecognizer) {
-//        let location = sender.location(in: view)
-//        if !contentView.frame.contains(location) {
-//            dismiss(animated: false, completion: nil)
-//        }
-//    }
-    
     private func addSubViews() {
-//        self.view.addSubview(contentView)
-//        contentView.addSubview(dateView)
         self.view.addSubview(datePicker)
     }
     
     private func makeConstraints() {
-//        contentView.snp.makeConstraints { make in
-//            make.center.equalToSuperview()
-//            make.width.equalTo(250)
-//            make.height.equalTo(250)
-//        }
-        
         datePicker.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
