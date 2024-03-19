@@ -186,10 +186,17 @@ extension SettingVC {
     private func signOutConfirmAlert() {
         let okAlert = UIAlertController(title: "확인", message: "로그아웃이 완료되었습니다.", preferredStyle: .alert)
         let okClick = UIAlertAction(title: "확인", style: .default) { _ in
+            self.showMainScreen()
         }
         okAlert.addAction(okClick)
             
         self.present(okAlert, animated: true, completion: nil)
+    }
+    
+    func showMainScreen() {
+        let loginVC = LoginVC()
+        loginVC.modalPresentationStyle = .fullScreen
+        self.present(loginVC, animated: true)
     }
 }
 
