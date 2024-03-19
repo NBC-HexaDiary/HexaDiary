@@ -34,6 +34,7 @@ class NotificationVC: UIViewController {
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .mainBackground
         tableView.separatorStyle = .singleLine
+        tableView.clipsToBounds = true
         tableView.layer.cornerRadius = 20
         return tableView
     }()
@@ -58,7 +59,8 @@ class NotificationVC: UIViewController {
             make.top.equalTo(view.safeAreaLayoutGuide).offset(10)
             make.leading.equalTo(view.safeAreaLayoutGuide).offset(10)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-10)
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(10)        }
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(10)
+        }
     }
     
     private func setNavigationBar() {
@@ -183,6 +185,8 @@ extension NotificationVC : UITableViewDelegate, UITableViewDataSource {
                     printAllPendingNotifications()
                 }
             }
+            tableView.deselectRow(at: indexPath, animated: true)
+
             refreshdata()
         case .dayItem(let title, _):
             if let dayIndex = ["일요일" ,"월요일", "화요일", "수요일", "목요일", "금요일", "토요일"].firstIndex(of: title) {
@@ -191,6 +195,40 @@ extension NotificationVC : UITableViewDelegate, UITableViewDataSource {
             }
         default:
             print("no action")
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        // 마지막 셀인지 확인
+        let firstRow = 0
+        let lastRow = tableView.numberOfRows(inSection: 0) - 1
+        if indexPath.row == lastRow {
+            // 셀의 높이와 경계를 가져옴
+            let cellHeight = cell.frame.size.height
+            let maskLayer = CAShapeLayer()
+            
+            // 셀의 모서리를 둥글게 처리하는 패스 생성
+            let cornerRadius: CGFloat = 20
+            let path = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: cell.frame.width, height: cellHeight), byRoundingCorners: [.bottomLeft, .bottomRight], cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
+            maskLayer.path = path.cgPath
+            
+            // 셀의 마지막 셀이므로 둥근 모서리를 적용
+            cell.layer.mask = maskLayer
+        } else if indexPath.row == 4 {
+            // 셀의 높이와 경계를 가져옴
+            let cellHeight = cell.frame.size.height
+            let maskLayer = CAShapeLayer()
+            
+            // 셀의 모서리를 둥글게 처리하는 패스 생성
+            let cornerRadius: CGFloat = 20
+            let path = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: cell.frame.width, height: cellHeight), byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
+            maskLayer.path = path.cgPath
+            
+            // 셀의 마지막 셀이므로 둥근 모서리를 적용
+            cell.layer.mask = maskLayer
+        } else {
+            // 다른 셀에는 둥근 모서리를 적용하지 않음
+            cell.layer.mask = nil
         }
     }
 }
