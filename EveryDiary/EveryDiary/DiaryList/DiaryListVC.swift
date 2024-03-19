@@ -283,7 +283,8 @@ extension DiaryListVC {
         navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
         searchBar.text = ""
         searchBar.resignFirstResponder() // 키보드 숨김
-        loadDiaries() // 원래의 일기목록 로드
+//        loadDiaries() // 원래의 일기목록 로드
+        refreshDiaryData()
     }
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
@@ -292,7 +293,7 @@ extension DiaryListVC {
         self.present(writeDiaryVC, animated: true)
     }
     @objc private func tabLoadDiaryButton() {
-        loadDiaries()
+//        loadDiaries()
         journalCollectionView.reloadData()
         print("Load Diaries")
     }
@@ -476,7 +477,8 @@ extension DiaryListVC: UICollectionViewDelegateFlowLayout {
 extension DiaryListVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
-            loadDiaries()
+//            loadDiaries()
+            refreshDiaryData()
         } else {
             var filteredDiaries: [String: [DiaryEntry]] = [:]
             
@@ -500,7 +502,8 @@ extension DiaryListVC: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
         searchBar.resignFirstResponder() // 키보드 숨김
-        loadDiaries() // 원래의 일기목록 로드
+//        loadDiaries() // 원래의 일기목록 로드
+        refreshDiaryData()
     }
 }
 
@@ -565,7 +568,6 @@ extension DiaryListVC: UICollectionViewDelegate {
         let contentHeight = scrollView.contentSize.height
         let height = scrollView.frame.size.height
         
-        // 스크롤이 컬렉션 뷰의 전체 contentHeight의 80% 정도로 내려갔을 때 데이터를 요청
         let triggerPoint = contentHeight - height
         
         if offsetY > triggerPoint {
@@ -583,9 +585,9 @@ extension DiaryListVC: UICollectionViewDelegate {
                 return
             }
             
-            // 중복된 데이터를 제거하고 새로운 데이터만 추가
+            // 중복된 데이터를 제거
             let uniqueNewDiaries = newDiaries.filter { newDiary in
-                !self.diaries.contains { $0.id == newDiary.id } // 기존 데이터와 중복되지 않는 경우만 필터링
+                !self.diaries.contains { $0.id == newDiary.id }
             }
             
             guard !uniqueNewDiaries.isEmpty else {
