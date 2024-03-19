@@ -76,7 +76,7 @@ class SignOutCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 10, left: 4, bottom: 10, right: 4))
+        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 7, left: 4, bottom: 7, right: 4))
     }
     
     func prepare(title: String, iconImage: String, isLoggedIn: Bool) {

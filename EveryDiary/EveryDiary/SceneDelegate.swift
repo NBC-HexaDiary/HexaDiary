@@ -13,22 +13,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        //        guard let windowScene = (scene as? UIWindowScene) else { return }
-        //        window = UIWindow(windowScene: windowScene)
-        //
-        //        let startVC = StartVC() // 최초 실행 시 보여줄 화면
-        //        let mainVC = TabBarController() // 앱의 메인 화면
-        //        var navigationController = UINavigationController(rootViewController: startVC) // Onboarding 화면을 네비게이션 컨트롤러에 넣어줍니다.
-        //
-        //        // UserDefaults를 사용하여 최초 실행 여부를 확인합니다.
-        //        if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
-        //            // 최초 실행이 아니라면 메인 화면을 보여줍니다.
-        //            navigationController = UINavigationController(rootViewController: mainVC)
-        //        }
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
-        let mainVC = TabBarController()
-        let navigationController = UINavigationController(rootViewController: mainVC)
+        
+        let startVC = StartVC() // 최초 실행 시 보여줄 화면
+        let mainVC = TabBarController() // 앱의 메인 화면
+        var navigationController = UINavigationController(rootViewController: startVC) // Onboarding 화면을 네비게이션 컨트롤러에 넣어줍니다.
+        
+        // UserDefaults를 사용하여 최초 실행 여부를 확인합니다.
+        if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+            // 최초 실행이 아니라면 메인 화면을 보여줍니다.
+            navigationController = UINavigationController(rootViewController: mainVC)
+        }
+//        guard let windowScene = (scene as? UIWindowScene) else { return }
+//        window = UIWindow(windowScene: windowScene)
+//        let mainVC = TabBarController()
+//        let navigationController = UINavigationController(rootViewController: mainVC)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
 
