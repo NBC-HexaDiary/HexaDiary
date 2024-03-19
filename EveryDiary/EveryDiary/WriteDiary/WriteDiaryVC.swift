@@ -118,18 +118,11 @@ class WriteDiaryVC: UIViewController {
     
     // 여러개의 이미지를 보여주기 위한 배열과 collectionView
     private lazy var imagesCollectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.itemSize = CGSize(width: self.view.bounds.width - 50, height: self.view.bounds.width - 50)
-        layout.minimumLineSpacing = 50
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 25, bottom: 0, right: 25)
-        layout.scrollDirection = .horizontal
+        let carouselLayout = CarouselFlowLayout()
         
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: carouselLayout)
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
-        
-        collectionView.decelerationRate = .fast
-        collectionView.isPagingEnabled = false
         
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -178,6 +171,7 @@ class WriteDiaryVC: UIViewController {
         registerKeyboardNotifications()
         loadWeatherData()
         setupToolbar()
+        setTapGesture()
     }
     deinit {
         unregisterKeyboardNotifications()
@@ -744,8 +738,8 @@ extension WriteDiaryVC: PHPickerViewControllerDelegate {
     }
 }
 
-// MARK: CollectioinView DataSource, Delegate
-extension WriteDiaryVC: UICollectionViewDataSource, UICollectionViewDelegate {
+// MARK: CollectioinView DataSource, Delegate, FlowLayout
+extension WriteDiaryVC: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return imagesLocationInfo.count + 1
     }
@@ -1033,6 +1027,47 @@ extension WriteDiaryVC: MapCollectionViewCellDelegate {
             else {
                 completion("Unknown Location")
             }
+        }
+    }
+}
+
+extension WriteDiaryVC {
+    private func setTapGesture() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(collectionViewEdgeTapped(_:)))
+        imagesCollectionView.addGestureRecognizer(tapGestureRecognizer)
+    }
+    
+    @objc func collectionViewEdgeTapped(_ recognizer: UITapGestureRecognizer) {
+        let tapLocation = recognizer.location(in: imagesCollectionView)
+        
+        // collectionView의 중앙 지점을 찾고 그 지점에 있는 cell의 indexPath를 찾는다.
+        let centerPoint = CGPoint(x: imagesCollectionView.frame.size.width / 2 + imagesCollectionView.contentOffset.x, y: imagesCollectionView.frame.size.height / 2)
+        guard let centerIndexPath = imagesCollectionView.indexPathForItem(at: centerPoint) else { return }
+        
+        // 중앙에 있는 cell의 frame을 구한다.
+        if let centerCellFrame = imagesCollectionView.layoutAttributesForItem(at: centerIndexPath)?.frame {
+            
+            // cell의 frame과 비교해 각 조건에 맞는 메서드 호출
+            if tapLocation.x < centerCellFrame.minX {
+                // 왼쪽 영역을 탭했다면, 이전 셀로 스크롤
+                let previousIndex = max(0, centerIndexPath.item - 1)
+                scrollToItem(at: previousIndex, animated: true)
+            } else if tapLocation.x > centerCellFrame.maxX {
+                // 오른쪽 영역을 탭했다면, 다음 셀로 스크롤
+                let nextIndex = min(imagesCollectionView.numberOfItems(inSection: 0) - 1, centerIndexPath.item + 1)
+                scrollToItem(at: nextIndex, animated: true)
+            } else {
+                // 탭한 위치가 중앙 셀의 내부인 경우, didSelectItemAt을 호출.
+                collectionView(imagesCollectionView, didSelectItemAt: centerIndexPath)
+            }
+        }
+    }
+    private func scrollToItem(at index: Int, animated: Bool) {
+        print(#function)
+        // 범위 확인을 통해 인덱스 유효성 테스트
+        if index >= 0 && index < imagesCollectionView.numberOfItems(inSection: 0) {
+            let indexPath = IndexPath(item: index, section: 0)
+            imagesCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
         }
     }
 }
