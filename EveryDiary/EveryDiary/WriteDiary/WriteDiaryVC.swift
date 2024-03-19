@@ -13,10 +13,11 @@ import UIKit
 import Firebase
 import SnapKit
 
-class WriteDiaryVC: UIViewController {
+class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     
     weak var delegate: DiaryUpdateDelegate?     // Delegate 프로토콜을 통한 데이터 업데이트 각 VC 통지
     private var diaryManager = DiaryManager()
+    private var imagePickerManager = ImagePickerManager()
     
     private var selectedEmotion = "happy"
     private var selectedWeather = "Vector"
@@ -172,6 +173,7 @@ class WriteDiaryVC: UIViewController {
         loadWeatherData()
         setupToolbar()
         setTapGesture()
+        imagePickerManager.delegate = self
     }
     deinit {
         unregisterKeyboardNotifications()
@@ -350,7 +352,7 @@ extension WriteDiaryVC {
                 let locationInfoString = metadata?["location"] ?? "Unknown"
                 let assetIdentifier = metadata?["assetIdentifier"]
                 if let assetIdentifier = assetIdentifier {
-                    self.selectedPhotoIdentifiers.append(assetIdentifier)
+                    self.imagePickerManager.selectedPhotoIdentifiers.append(assetIdentifier)
                 }
                 let locationInfo = self.locationInfoFromString(locationInfoString)
                 // 메타데이터를 포함한 ImageLocationInfo 객체 생성
@@ -610,131 +612,20 @@ extension WriteDiaryVC: UITextFieldDelegate {
 }
 
 // MARK: PHPickerControllerDelegate
-extension WriteDiaryVC: PHPickerViewControllerDelegate {
+extension WriteDiaryVC {
     // 사진 접근 권한 요청 로직
     @objc func photoButtonTapped() {
-        // 사진첩에 대해 읽고 쓰기가 가능하도록 권한 확인 및 요청
-        PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
-            switch status {
-            case .notDetermined:    // 사용자가 아직 권한을 부여하지 않은 상태
-                DispatchQueue.main.async {
-                    // FIXME: UIAlert로 수정(취소 or 설정으로 보내기)
-                    print("갤러리를 불러올 수 없습니다. 핸드폰 설정에서 사진 접근 허용을 모든 사진으로 변경해주세요.")
-                }
-            case .denied, .restricted:  // 접근권한이 거부되었거나 제한된 상타
-                DispatchQueue.main.async {
-                    // FIXME: UIAlert로 수정(취소 or 설정으로 보내기)
-                    print("갤러리를 불러올 수 없습니다. 핸드폰 설정에서 사진 접근 허용을 모든 사진으로 변경해주세요.")
-                }
-            case .authorized, .limited: // 모두 허용, 일부 허용
-                // 허용된 상태라면 PHPickerController 호출
-                self.loadPHPickerViewController()
-            @unknown default:   // 알 수 없는 상태
-                print("PHPhotoLibrary::execute - \"Unkown case\"")
-            }
-        }
+        print("selectedPhotoIdentifiers: \(self.selectedPhotoIdentifiers)")
+        imagePickerManager.requestPhotoLibraryAccess(from: self)
     }
-    // 접근 권한 획득 시, PHPickerViewController를 호출하는 메서드
-    private func loadPHPickerViewController() {
-        var configuration = PHPickerConfiguration(photoLibrary: .shared())
-        configuration.selectionLimit = 3    // 사용자가 선택할 수 있는 이미지의 최대 개수
-        configuration.selection = .ordered  // 선택 순서 지정
-        configuration.filter = .images  // 이미지만 선택할 수 있도록 필터링
-        
-        // 이미 선택한 이미지가 있을 경우, 이를 picker에서 사전 선택된 상태로 설정
-        configuration.preselectedAssetIdentifiers = selectedPhotoIdentifiers
-        
-        DispatchQueue.main.async {
-            let picker = PHPickerViewController(configuration: configuration)
-            picker.delegate = self
-            self.present(picker, animated: true)
-        }
-    }
-    
-    // didFinishPicking 메서드(사진 선택 완료시 호출되는 메서드). 선택한 이미지를 처리.
-    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true)  // 선택완료 -> picker dimiss
-        
-        var newImagesLocationInfo: [ImageLocationInfo] = []
-        
-        // 새로운 결과에 가빈한 identifier 목록을 생성합니다.
-        let newResultsIdentifiers = results.compactMap { $0.assetIdentifier}
-        
-        // 기존에 선택된 이미지 중에서 새로운 결과에 포함되지 않은 항목을 제외합니다.
-        let retainedImages = imagesLocationInfo.filter { newResultsIdentifiers.contains($0.assetIdentifier ?? "") }
-        
-        // 신규 선택된 사진 식별자를 기반으로 새로운 ImageLocationInfo 배열을 구성
-        newImagesLocationInfo.append(contentsOf: retainedImages)
-        
-        let group = DispatchGroup() // 모든 비동기작업을 추적하기 위한 DispatchGroup
-        
-        for result in results {
-            // 새로 선택된 이미지의 assetIdentifier 저장
-            guard let assetIdentifier = result.assetIdentifier, !retainedImages.contains(where: { $0.assetIdentifier == assetIdentifier}) else { continue }
-            let itemProvider = result.itemProvider
-            group.enter()   // 그룹에 작업 추가
-            
-            // itemProver를 통해 선택한 이미지에 대한 처리 시작
-            if itemProvider.canLoadObject(ofClass: UIImage.self) {  // itemProvider가 UIImage 객체를 로드할 수 있는지 확인
-                itemProvider.loadObject(ofClass: UIImage.self) { [weak self] (image, error) in
-                    defer { group.leave() }
-                    guard let self = self, let image = image as? UIImage else {
-                        return
-                    }
-                    
-                    // PHAsset에서 assetIdentifier로 촬영시간과 location을 추출
-                    let assets = PHAsset.fetchAssets(withLocalIdentifiers: [assetIdentifier], options: nil)
-                    
-                    if let asset = assets.firstObject {
-                        let captureTime = asset.creationDate
-                        let location = asset.location
-                        
-                        // 위치 정보가 있을 경우에만 locationInfo생성
-                        if let location = location {
-                            let imageLocationInfo = ImageLocationInfo(
-                                image: image,
-                                locationInfo: LocationInfo(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude),
-                                assetIdentifier: assetIdentifier,
-                                captureTime: captureTime?.description ?? "Unknown",
-                                location: "\(location.coordinate.latitude), \(location.coordinate.longitude)"
-                            )
-                            
-                            DispatchQueue.main.async {
-                                newImagesLocationInfo.append(imageLocationInfo)
-                            }
-                        } else {
-                            // 위치 정보가 없는 경우
-                            let imageLocationInfo = ImageLocationInfo(
-                                image: image,
-                                locationInfo: nil,
-                                assetIdentifier: assetIdentifier,
-                                captureTime: "Unknown",
-                                location: "Unknown"
-                            )
-                            
-                            DispatchQueue.main.async {
-                                newImagesLocationInfo.append(imageLocationInfo)
-                            }
-                        }
-                    }
-                }
-            } else {
-                group.leave()
-            }
-        }
-        // 모든 선택된 사진에 대한 처리 수행 후 변수 및 UI 업데이트 실행
-        group.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            // imagesLocationInfo 배열을 새로운 정보로 업데이트
-            self.imagesLocationInfo = newImagesLocationInfo
-            // 선택된 사진 identifier 배열 업데이트
-            self.selectedPhotoIdentifiers = newResultsIdentifiers
-            // UI 업데이트
-            self.imagesCollectionView.reloadData()
-            self.updateImageCollectionViewHeight()
-            print("newImagesLocationInfo: \(newImagesLocationInfo)")
-            print("newSelectedIdentifiers: \(newResultsIdentifiers)")
-        }
+    func didPickImages(_ imagesLocationInfo: [ImageLocationInfo], retainedIdentifiers: [String]) {
+        // 선택된 이미지와 메타데이터를 처리하는 로직
+        self.imagesLocationInfo = imagesLocationInfo
+        self.selectedPhotoIdentifiers = retainedIdentifiers
+        self.imagesCollectionView.reloadData()
+        self.updateImageCollectionViewHeight()
+        print("imagesLocationInfo: \(self.imagesLocationInfo)")
+        print("selectedPhotoIdentifiers: \(self.selectedPhotoIdentifiers)")
     }
 }
 
