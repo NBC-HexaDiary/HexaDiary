@@ -53,6 +53,7 @@ class TimePickerCell: UITableViewCell {
     }
 }
 
+//MARK: - 시간 선택 시, delegate 패턴 사용하여 데이터 전달
 protocol TimePickerCellDelegate: AnyObject {
     func selectTime(_ cell: TimePickerCell, didPickTime date: Date)
 }

@@ -12,6 +12,7 @@ import SnapKit
 
 class NotificationVC: UIViewController {
     
+    // 클로저를 통해 스위치의 상태 변화 감지
     var switchValueChanged: ((Bool) -> Void)?
     
     private var dataSource = [AlertCellModel]()
@@ -123,6 +124,7 @@ class NotificationVC: UIViewController {
     }
 }
 
+//MARK: - TableView Delegate, DataSource 구성
 extension NotificationVC : UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
@@ -233,6 +235,7 @@ extension NotificationVC : UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+//MARK: - 시간 설정, 요일 설정 시 데이터 전달
 extension NotificationVC: TimePickerCellDelegate, DayPickerCellDelegate {
     func selectTime(_ cell: TimePickerCell, didPickTime date: Date) {
         print("선택된 시간: \(date)")
@@ -251,102 +254,9 @@ extension NotificationVC: TimePickerCellDelegate, DayPickerCellDelegate {
         // 데이터 새로고침
         refreshdata()
     }
-    
-    private func updateSelectedDaysString() {
-        let daysOfWeek = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"]
-        let selectedDayNames = selectedDays.enumerated().compactMap { index, isSelected -> String? in
-            isSelected ? daysOfWeek[index] : nil
-        }
-
-        let weekdayCount = selectedDays[1...5].filter({ $0 }).count // 월요일부터 금요일까지 선택된 요일의 수
-        let weekendCount = [selectedDays[0], selectedDays[6]].filter({ $0 }).count // 일요일과 토요일이 선택된 요일의 수
-        
-        // 모든 요일, 주중, 주말 또는 개별 요일을 기반으로 라벨 업데이트
-        if selectedDayNames.count == 7 {
-            selectedDaysString = "매일"
-        } else if weekdayCount == 5 && weekendCount == 0 {
-            selectedDaysString = "주중"
-        } else if weekdayCount == 0 && weekendCount == 2 {
-            selectedDaysString = "주말"
-        } else {
-            selectedDaysString = selectedDayNames.isEmpty ? "선택된 요일 없음" : selectedDayNames.joined(separator: ", ")
-        }
-    }
-    
-    
-    func scheduleNotification() {
-        guard let selectedTime = selectedTime else { return }
-        
-        UserDefaults.standard.set(selectedTime, forKey: "selectedTime")
-        UserDefaults.standard.set(selectedDays, forKey: "selectedDays")
-        UserDefaults.standard.set(selectedDaysString, forKey: "selectedDaysString")
-        
-        let content = UNMutableNotificationContent()
-        content.title = NSString.localizedUserNotificationString(forKey: "오늘의 여정을 기록해보세요", arguments: nil)
-        content.body = NSString.localizedUserNotificationString(forKey: "오늘 하루를 되돌아 보며, 얻은 경험들을 기록해보는 건 어떨까요?", arguments: nil)
-        content.sound = UNNotificationSound.default
-        
-        let calendar = Calendar.current
-        var dateComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
-        
-        let daysofWeek = [1,2,3,4,5,6,7] // 1 = 일요일, 7 = 토요일
-        for (index, isSelected) in selectedDays.enumerated() where isSelected {
-            dateComponents.weekday = daysofWeek[index]
-            
-            let uniqueIdentifier = "\(daysofWeek[index])" // 각 요일별 고유한 identifier 생성
-            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-            let request = UNNotificationRequest(identifier: uniqueIdentifier, content: content, trigger: trigger)
-            
-            UNUserNotificationCenter.current().add(request) { error in
-                if error != nil {
-                    print("알람 스케쥴링 실패")
-                } else {
-                    print("알람 스케줄링 성공")
-                }
-            }
-        }
-    }
-    
-    func updateAndRescheduleNotification() {
-        // 기존의 모든 알림 취소
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-        
-        scheduleNotification() // 새로운 설정으로 알림을 재스케줄링하는 메서드 호출
-    }
-    
-    func printAllPendingNotifications() {
-        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
-            for request in requests {
-                // 각 알림 요청의 식별자
-                print("알림 ID: \(request.identifier)")
-                
-                // 알림의 콘텐츠 세부 사항
-                print("알림 제목: \(request.content.title)")
-                print("알림 본문: \(request.content.body)")
-                
-                // 알림 예정 시간 및 요일 확인
-                if let trigger = request.trigger as? UNCalendarNotificationTrigger, let nextTriggerDate = trigger.nextTriggerDate() {
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                    print("알림 예정 시간: \(dateFormatter.string(from: nextTriggerDate))")
-                    
-                    if let weekday = trigger.dateComponents.weekday {
-                        // Calendar.current.weekdaySymbols는 요일을 문자열 배열로 반환합니다. 0은 일요일, 1은 월요일을 나타냅니다.
-                        let weekdaySymbol = Calendar.current.weekdaySymbols[weekday - 1]
-                        print("알림 예정 요일: \(weekdaySymbol)")
-                    }
-                }
-                print("--------------------------------")
-            }
-            
-            if requests.isEmpty {
-                print("보류 중인 알림이 없습니다.")
-            }
-        }
-    }
 }
 
-//MARK: -
+//MARK: - 알림 권한 승인 & 알림 설정, 데이터 CRUD 구성
 extension NotificationVC {
     @objc func switchChanged(_ sender: UISwitch) {
         // 스위치 상태 변경을 바로 적용하지 않고, 권한을 요청
@@ -382,7 +292,7 @@ extension NotificationVC {
     private func showPermissionDeniedAlert() {
         let authorizationAlert = UIAlertController(title: "알림", message: "알림 기능을 사용하려면 설정에서 알림 권한을 허용해주세요", preferredStyle: .alert)
 
-        let settingsAction = UIAlertAction(title: "설정", style: .default) { (_) -> Void in
+        let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { (_) -> Void in
             guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
                 return
             }
@@ -407,6 +317,99 @@ extension NotificationVC {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
             DispatchQueue.main.async {
                 completion(granted)
+            }
+        }
+    }
+    
+    private func updateSelectedDaysString() {
+        let daysOfWeek = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"]
+        let selectedDayNames = selectedDays.enumerated().compactMap { index, isSelected -> String? in
+            isSelected ? daysOfWeek[index] : nil
+        }
+
+        let weekdayCount = selectedDays[1...5].filter({ $0 }).count // 월요일부터 금요일까지 선택된 요일의 수
+        let weekendCount = [selectedDays[0], selectedDays[6]].filter({ $0 }).count // 일요일과 토요일이 선택된 요일의 수
+        
+        // 모든 요일, 주중, 주말 또는 개별 요일을 기반으로 라벨 업데이트
+        if selectedDayNames.count == 7 {
+            selectedDaysString = "매일"
+        } else if weekdayCount == 5 && weekendCount == 0 {
+            selectedDaysString = "주중"
+        } else if weekdayCount == 0 && weekendCount == 2 {
+            selectedDaysString = "주말"
+        } else {
+            selectedDaysString = selectedDayNames.isEmpty ? "선택된 요일 없음" : selectedDayNames.joined(separator: ", ")
+        }
+    }
+    
+    
+    private func scheduleNotification() {
+        guard let selectedTime = selectedTime else { return }
+        
+        UserDefaults.standard.set(selectedTime, forKey: "selectedTime")
+        UserDefaults.standard.set(selectedDays, forKey: "selectedDays")
+        UserDefaults.standard.set(selectedDaysString, forKey: "selectedDaysString")
+        
+        let content = UNMutableNotificationContent()
+        content.title = NSString.localizedUserNotificationString(forKey: "오늘의 여정을 기록해보세요", arguments: nil)
+        content.body = NSString.localizedUserNotificationString(forKey: "오늘 하루를 되돌아 보며, 얻은 경험들을 기록해보는 건 어떨까요?", arguments: nil)
+        content.sound = UNNotificationSound.default
+        
+        let calendar = Calendar.current
+        var dateComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+        
+        let daysofWeek = [1,2,3,4,5,6,7] // 1 = 일요일, 7 = 토요일
+        for (index, isSelected) in selectedDays.enumerated() where isSelected {
+            dateComponents.weekday = daysofWeek[index]
+            
+            let uniqueIdentifier = "\(daysofWeek[index])" // 각 요일별 고유한 identifier 생성
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+            let request = UNNotificationRequest(identifier: uniqueIdentifier, content: content, trigger: trigger)
+            
+            UNUserNotificationCenter.current().add(request) { error in
+                if error != nil {
+                    print("알람 스케쥴링 실패")
+                } else {
+                    print("알람 스케줄링 성공")
+                }
+            }
+        }
+    }
+    
+    private func updateAndRescheduleNotification() {
+        // 기존의 모든 알림 취소
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        
+        scheduleNotification() // 새로운 설정으로 알림을 재스케줄링하는 메서드 호출
+    }
+    
+    private func printAllPendingNotifications() {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            for request in requests {
+                // 각 알림 요청의 식별자
+                print("알림 ID: \(request.identifier)")
+                
+                // 알림의 콘텐츠 세부 사항
+                print("알림 제목: \(request.content.title)")
+                print("알림 본문: \(request.content.body)")
+                
+                // 알림 예정 시간 및 요일 확인
+                if let trigger = request.trigger as? UNCalendarNotificationTrigger, let nextTriggerDate = trigger.nextTriggerDate() {
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                    print("알림 예정 시간: \(dateFormatter.string(from: nextTriggerDate))")
+                    
+                    if let weekday = trigger.dateComponents.weekday {
+                        // Calendar.current.weekdaySymbols는 요일을 문자열 배열로 반환합니다. 0은 일요일, 1은 월요일을 나타냅니다.
+                        let weekdaySymbol = Calendar.current.weekdaySymbols[weekday - 1]
+                        print("알림 예정 요일: \(weekdaySymbol)")
+                    }
+                }
+                print("--------------------------------")
+            }
+            
+            if requests.isEmpty {
+                print("보류 중인 알림이 없습니다.")
             }
         }
     }
