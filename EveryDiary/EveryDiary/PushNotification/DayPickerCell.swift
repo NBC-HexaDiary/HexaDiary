@@ -70,22 +70,6 @@ class DayPickerCell: UITableViewCell {
 
     }
     
-    func applyRoundedCorner(top: Bool, bottom: Bool) {
-        let cornerRadius: CGFloat = 20
-        var corners: UIRectCorner = []
-        
-        if top {
-            corners.insert([.topLeft, .topRight])
-        }
-        if bottom {
-            corners.insert([.bottomLeft, .bottomRight])
-        }
-        
-        let maskLayer = CAShapeLayer()
-        maskLayer.path = UIBezierPath(roundedRect: self.bounds, byRoundingCorners: corners, cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)).cgPath
-        self.layer.mask = maskLayer
-    }
-    
     func prepare(title: String, isSelected: Bool) {
         dayLabel.text = title
         checkImageView.isHidden = !isSelected
@@ -94,6 +78,7 @@ class DayPickerCell: UITableViewCell {
     }
 }
 
+//MARK: - 요일 선택 시, delegate 패턴 사용하여 데이터 전달
 protocol DayPickerCellDelegate: AnyObject {
     func selectDay(_ cell: DayPickerCell, didPickDay day: String, isSelected: Bool)
 }

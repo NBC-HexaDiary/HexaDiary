@@ -38,7 +38,7 @@ class LoginVC: UIViewController {
     
     private lazy var bottomLabel : UILabel = {
         let label = UILabel()
-        label.text = "일기 쓰기"
+        label.text = "일기 쓰자"
         label.font = UIFont(name: "SFProDisplay-Bold", size: 50)
         label.textColor = UIColor(named: "subBackground")
         return label
