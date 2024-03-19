@@ -943,6 +943,7 @@ extension WriteDiaryVC: UITextViewDelegate {
     func formattedDateString(for date: Date) -> String {
         return DateFormatter.yyyyMMddHHmmss.string(from: date)
     }
+}
 extension WriteDiaryVC: MapCollectionViewCellDelegate {
     func mapViewCell(_ cell: MapCollectionViewCell, didTapAnnotationWithLatitude latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
         // 알림 컨트롤러 생성
