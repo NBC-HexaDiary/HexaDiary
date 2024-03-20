@@ -65,12 +65,12 @@ class StartVC: UIViewController {
     
     @objc private func startButtonTouchOutside() {
         startButton.layer.backgroundColor = UIColor(named: "loginBackground")?.cgColor
-        DiaryManager.shared.authenticateAnonymouslyIfNeeded { error in
-            if let error = error {
-                print("Error authenticating anonymously: \(error)")
-                return
-            }
-        }
+//        DiaryManager.shared.authenticateAnonymouslyIfNeeded { error in
+//            if let error = error {
+//                print("Error authenticating anonymously: \(error)")
+//                return
+//            }
+//        }
         UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
         showMainScreen()
     }
