@@ -26,6 +26,7 @@ class LoginVC: UIViewController {
         let label = UILabel()
         label.text = "마음 놓고"
         label.font = UIFont(name: "SFProDisplay-Bold", size: 50)
+        label.textAlignment = .left
         label.textColor = UIColor(named: "mainCell")
         return label
     }()
@@ -34,6 +35,7 @@ class LoginVC: UIViewController {
         let label = UILabel()
         label.text = "일기 쓰자"
         label.font = UIFont(name: "SFProDisplay-Bold", size: 50)
+        label.textAlignment = .left
         label.textColor = UIColor(named: "subBackground")
         return label
     }()
@@ -173,13 +175,13 @@ extension LoginVC {
         }
         topLabel.snp.makeConstraints { make in
             make.centerX.equalTo(view.safeAreaLayoutGuide)
-            make.width.equalTo(view.safeAreaLayoutGuide).offset(-100)
+            make.width.equalTo(view.safeAreaLayoutGuide).offset(-50)
         }
         bottomLabel.snp.makeConstraints { make in
             make.centerX.equalTo(view.safeAreaLayoutGuide)
             make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-120)
             make.width.equalTo(view.safeAreaLayoutGuide).offset(-100)
-            make.top.equalTo(topLabel.snp.bottom).offset(10)
+            make.top.equalTo(topLabel.snp.bottom).offset(5)
         }
     }
 }
