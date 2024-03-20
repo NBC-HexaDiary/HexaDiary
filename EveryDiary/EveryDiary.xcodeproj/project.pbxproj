@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1A03BDA12B92F910008C13DC /* FirebaseStorage */; };
 		1AF880D32B8DB5A2004076EB /* Api.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880D22B8DB5A2004076EB /* Api.plist */; };
+		3F78315E2BAB076900354211 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3F78315D2BAB076900354211 /* GoogleService-Info.plist */; };
+		3F7831602BAB0B3D00354211 /* calendar.json in Resources */ = {isa = PBXBuildFile; fileRef = 3F78315F2BAB0B3D00354211 /* calendar.json */; };
 		3F9E0A532BA352E5004BF1CB /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F9E0A522BA352E4004BF1CB /* MapKit.framework */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
 		6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */; };
@@ -22,7 +24,6 @@
 		6BABC37E2B85D142009267B3 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6BABC37D2B85D142009267B3 /* SnapKit */; };
 		6BB3CE462B8619D0005BC3E1 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE452B8619D0005BC3E1 /* FirebaseFirestore */; };
 		6BB3CE482B8619D5005BC3E1 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE472B8619D5005BC3E1 /* FirebaseFirestoreSwift */; };
-		6BEA05F82BAAB2CB000E47D4 /* calendar.json in Resources */ = {isa = PBXBuildFile; fileRef = 6BEA05F72BAAB2CB000E47D4 /* calendar.json */; };
 		D2F0EEFE2BA9F7FE008736F1 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = D2F0EEFD2BA9F7FE008736F1 /* Lottie */; };
 		D2F0EF332BAAAD51008736F1 /* DiaryDataDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */; };
 		D2F0EF342BAAAD51008736F1 /* NotificationName.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B342BA14A6600508230 /* NotificationName.swift */; };
@@ -101,6 +102,8 @@
 		3F7831532BA9D2C700354211 /* ImagePickerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerManager.swift; sourceTree = "<group>"; };
 		3F7831552BA9EC0700354211 /* MapManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapManager.swift; sourceTree = "<group>"; };
 		3F7831572BA9FE4C00354211 /* KeyboardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardManager.swift; sourceTree = "<group>"; };
+		3F78315D2BAB076900354211 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		3F78315F2BAB0B3D00354211 /* calendar.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = calendar.json; sourceTree = "<group>"; };
 		3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F9E0A522BA352E4004BF1CB /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCollectionViewCell.swift; sourceTree = "<group>"; };
@@ -131,7 +134,6 @@
 		6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationVC.swift; sourceTree = "<group>"; };
 		6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryListVC.swift; sourceTree = "<group>"; };
 		6BE7C99E2BA07D2700374A2A /* MotivationImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationImageCache.swift; sourceTree = "<group>"; };
-		6BEA05F72BAAB2CB000E47D4 /* calendar.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = calendar.json; path = ../../../../../Desktop/calendar.json; sourceTree = "<group>"; };
 		D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryDataDelegate.swift; sourceTree = "<group>"; };
 		D2094B342BA14A6600508230 /* NotificationName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationName.swift; sourceTree = "<group>"; };
 		D26829EF2B99A16F00A1F0E5 /* DailyListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyListCell.swift; sourceTree = "<group>"; };
@@ -274,6 +276,7 @@
 				6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */,
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
+				3F78315D2BAB076900354211 /* GoogleService-Info.plist */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
 				1AF880D22B8DB5A2004076EB /* Api.plist */,
 			);
@@ -348,7 +351,7 @@
 		6BEA05F62BAAB2AC000E47D4 /* lottie */ = {
 			isa = PBXGroup;
 			children = (
-				6BEA05F72BAAB2CB000E47D4 /* calendar.json */,
+				3F78315F2BAB0B3D00354211 /* calendar.json */,
 			);
 			path = lottie;
 			sourceTree = "<group>";
@@ -449,13 +452,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				6B95C0512B8C7A5A00DBB175 /* SFProRounded-Regular.otf in Resources */,
-				6BEA05F82BAAB2CB000E47D4 /* calendar.json in Resources */,
+				3F78315E2BAB076900354211 /* GoogleService-Info.plist in Resources */,
 				1AF880D32B8DB5A2004076EB /* Api.plist in Resources */,
 				6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */,
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
 				6BABC3722B85D109009267B3 /* Assets.xcassets in Resources */,
 				6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */,
 				6B95C04C2B8C7A5A00DBB175 /* SFProDisplay-Regular.otf in Resources */,
+				3F7831602BAB0B3D00354211 /* calendar.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

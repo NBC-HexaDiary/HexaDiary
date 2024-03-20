@@ -117,7 +117,7 @@ extension DiaryListVC {
     // searchBar 설정 및 searchButtonTapped 전까지 hidden처리.
     private func setNavigationBar() {
         searchBar.becomeFirstResponder()
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: searchBar)
+//        self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: searchBar)
         self.navigationItem.leftBarButtonItem?.isHidden = true
         self.navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
         self.navigationController?.navigationBar.tintColor = .mainTheme
@@ -178,8 +178,8 @@ extension DiaryListVC {
     }
     
     @objc private func magnifyingButtonTapped() {
-        themeLabel.isHidden = true
-        self.navigationItem.leftBarButtonItem?.isHidden = false
+        adjustSearchBarWidth()  // searchBar 크기 조절
+        navigationItem.leftBarButtonItems = [UIBarButtonItem(customView: searchBar)]
         navigationItem.rightBarButtonItems = [settingButton, cancelButton]
         searchBar.becomeFirstResponder()
     }
@@ -190,7 +190,7 @@ extension DiaryListVC {
     }
     @objc private func cancelButtonTapped() {
         themeLabel.isHidden = false
-        self.navigationItem.leftBarButtonItem?.isHidden = true
+        navigationItem.leftBarButtonItems = [UIBarButtonItem(customView: themeLabel)]
         navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
         searchBar.text = ""
         searchBar.resignFirstResponder() // 키보드 숨김
@@ -415,6 +415,33 @@ extension DiaryListVC: UISearchBarDelegate {
         searchBar.resignFirstResponder() // 키보드 숨김
 //        loadDiaries() // 원래의 일기목록 로드
         refreshDiaryData()
+    }
+    // searchBar의 적절한 사이즈 조절하는 메서드
+    private func adjustSearchBarWidth() {
+        let screenWidth = UIScreen.main.bounds.width
+        var rightItemsWidth: CGFloat = 0
+        let spaceBetweenItem: CGFloat = 16  // 버튼 사이의 여백
+        let horizontalPadding:CGFloat = 32  // 화면 가장자리에서 searchBar까지의 여잭
+        
+        // rightNarButtonItems의 너비 계산
+        if let rightItems = self.navigationItem.rightBarButtonItems {
+            for item in rightItems {
+                if let customView = item.customView {
+                    rightItemsWidth += customView.frame.width
+                } else {
+                    // 커스텀 뷰가 없는 경우 기본 너비 추정치 추가
+                    rightItemsWidth += 44   // UIBarButtonItem의 추정 평균 너비
+                }
+            }
+            // 버튼 사이의 여백 추가
+            rightItemsWidth += CGFloat(rightItems.count - 1) * spaceBetweenItem
+        }
+        // searchBar의 새로운 너비 계산
+        let searchBarWidth = screenWidth - rightItemsWidth - horizontalPadding
+        
+        // searchBar의 frame 업데이트
+        self.searchBar.frame = CGRect(x: 0, y: 0, width: searchBarWidth, height: 0)
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: searchBar)
     }
 }
 
