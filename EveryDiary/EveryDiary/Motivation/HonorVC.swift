@@ -123,7 +123,7 @@ class HonorVC: UIViewController {
                 continue
             }
             
-            if days.isEmpty {
+            if days.isEmpty || monthlyDiaries == [:] {
                 imageView.image = UIImage(named: "button0")
             } else {
                 switch days.count {

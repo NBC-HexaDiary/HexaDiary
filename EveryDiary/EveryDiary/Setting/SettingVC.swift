@@ -244,7 +244,7 @@ extension SettingVC {
     func showDeleteAccountConfirmAlert() {
         let confirmAlert = UIAlertController(title: "회원 탈퇴", message: "회원 탈퇴가 완료되었습니다.", preferredStyle: .alert)
         let confirmAction = UIAlertAction(title: "확인", style: .default)
-        
+        self.showMainScreen()
         confirmAlert.addAction(confirmAction)
         
         present(confirmAlert, animated: true, completion: nil)
