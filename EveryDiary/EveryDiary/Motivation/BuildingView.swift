@@ -315,6 +315,7 @@ extension BuildingView {
                         diaries.append(diary)
                     }
                 }
+                diaries = diaries.filter { !$0.isDeleted }
                 DispatchQueue.main.async { // 메인 스레드에서 로그를 출력합니다.
                     print("Fetched diaries: \(diaries)")
                 }
