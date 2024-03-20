@@ -35,8 +35,12 @@ class LaunchViewController: UIViewController {
     private func navigateToMainScreen() {
         // 탭 바 컨트롤러를 생성하여 메인 화면으로 이동합니다.
         let mainVC = TabBarController()
-        navigationController?.pushViewController(mainVC, animated: true)
-        self.dismiss(animated: true, completion: nil)
+        mainVC.modalPresentationStyle = .fullScreen
+        self.present(mainVC, animated: true)
+        
+        if let navigationController = mainVC.navigationController {
+            navigationController.popToRootViewController(animated: false)
+        }
     }
     
     private func authenticateWithBiometrics() {

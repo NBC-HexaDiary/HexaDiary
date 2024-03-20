@@ -12,7 +12,6 @@ import SnapKit
 class SettingCell: UITableViewCell {
     static let id = "SettingCell"
 
-    
     private lazy var iconImageView : UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -24,13 +23,6 @@ class SettingCell: UITableViewCell {
         label.font = UIFont(name: "SFProRounded-Regular", size: 20)
         label.textColor = .mainTheme
         return label
-    }()
-    
-    private lazy var rightArrowImage : UIImageView = {
-        let arrowView = UIImageView()
-        arrowView.image = UIImage(systemName: "chevron.right")
-        arrowView.tintColor = .mainTheme
-        return arrowView
     }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -53,7 +45,6 @@ class SettingCell: UITableViewCell {
     private func addSubViewSettingCell() {
         addSubview(titleLabel)
         addSubview(iconImageView)
-        addSubview(rightArrowImage)
     }
     
     private func autoLayoutSettingCell() {
@@ -65,13 +56,8 @@ class SettingCell: UITableViewCell {
         titleLabel.snp.makeConstraints { make in
             make.leading.equalTo(iconImageView.snp.trailing).offset(16)
             make.centerY.equalToSuperview()
-            make.trailing.equalTo(rightArrowImage.snp.leading).inset(8)
+            make.trailing.equalToSuperview().inset(8)
             make.height.equalTo(30)
-        }
-        rightArrowImage.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().inset(16)
-            make.centerY.equalToSuperview()
-            make.width.height.equalTo(16)
         }
     }
     override func setSelected(_ selected: Bool, animated: Bool) {

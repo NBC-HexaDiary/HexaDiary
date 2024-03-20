@@ -28,7 +28,7 @@ class DiaryListVC: UIViewController {
     private lazy var themeLabel : UILabel = {
         let label = UILabel()
         label.text = "하루일기"
-        label.font = UIFont(name: "SFProDisplay-Bold", size: 33)
+        label.font = UIFont(name: "SFProDisplay-Bold", size: 25)
         label.textColor = .mainTheme
         return label
     }()
@@ -455,7 +455,7 @@ extension DiaryListVC {
     
     private func setLayout() {
         journalCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(0)
+            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(32)
             make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.leading.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.trailing.equalTo(self.view.safeAreaLayoutGuide).offset(0)

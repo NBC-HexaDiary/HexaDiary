@@ -16,7 +16,7 @@ class DayPickerCell: UITableViewCell {
 
     private lazy var dayLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "SFProRounded-Regular", size: 20)
+        label.font = UIFont(name: "SFProRounded-Regular", size: 18)
         label.textColor = .mainTheme
         label.textAlignment = .left
         return label
@@ -48,7 +48,7 @@ class DayPickerCell: UITableViewCell {
     private func autoLayoutDayPickerCell() {
         dayLabel.snp.makeConstraints { make in
             make.centerY.equalToSuperview()
-            make.leading.equalToSuperview().inset(32)
+            make.leading.equalToSuperview().inset(16)
             make.trailing.equalTo(checkImageView.snp.trailing).inset(16)
         }
         checkImageView.snp.makeConstraints { make in
