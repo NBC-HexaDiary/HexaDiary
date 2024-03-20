@@ -9,10 +9,6 @@ import UIKit
 
 import SnapKit
 
-#Preview{
-    LockVC()
-}
-
 class LockVC: UIViewController {
     private let biometricsSwitch: UISwitch = {
         let switchControl = UISwitch()
