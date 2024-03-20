@@ -78,9 +78,9 @@ class HonorVC: UIViewController {
                 make.width.equalTo(leftView.snp.width)
             }
             
-            let button = UIButton()
-            button.tag = month
-            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+            let imageView = UIImageView()
+            imageView.tag = month
+//            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
             
             let label = UILabel()
             label.text = "\(month)월"
@@ -88,22 +88,22 @@ class HonorVC: UIViewController {
             
             if month % 2 != 0 {
                 // 홀수 월: 왼쪽 뷰에 버튼과 라벨 추가
-                leftView.addSubview(button)
+                leftView.addSubview(imageView)
                 leftView.addSubview(label)
             } else {
                 // 짝수 월: 오른쪽 뷰에 버튼과 라벨 추가
-                rightView.addSubview(button)
+                rightView.addSubview(imageView)
                 rightView.addSubview(label)
             }
             
-            button.snp.makeConstraints { make in
+            imageView.snp.makeConstraints { make in
                 make.top.equalToSuperview().offset(10)
                 make.centerX.equalToSuperview()
                 //make.centerY.equalToSuperview()
             }
             label.snp.makeConstraints { make in
-                make.top.equalTo(button.snp.bottom).offset(20)
-                make.centerX.equalTo(button)
+                make.top.equalTo(imageView.snp.bottom).offset(20)
+                make.centerX.equalTo(imageView)
             }
         }
     }
@@ -112,50 +112,51 @@ class HonorVC: UIViewController {
         print("setupButton() called")
         for (month, days) in monthlyDiaries {
             let containerView = self.honorStackView.arrangedSubviews[month - 1]
-            var button: UIButton?
+            var imageView: UIImageView?
             for subview in containerView.subviews {
-                if let btn = subview.subviews.first(where: { $0 is UIButton }) as? UIButton {
-                    button = btn
+                if let imgView = subview.subviews.first(where: { $0 is UIImageView }) as? UIImageView {
+                    imageView = imgView
                     break
                 }
             }
             
-            guard let button = button else {
+            guard let imageView = imageView else {
                 continue
             }
+            
             if days.isEmpty {
-                button.setImage(UIImage(named: "button0"), for: .normal)
+                imageView.image = UIImage(named: "button0")
             } else {
                 switch days.count {
                 case 1...7:
-                    button.setImage(UIImage(named: "button1"), for: .normal)
+                    imageView.image = UIImage(named: "button1")
                 case 8...14:
-                    button.setImage(UIImage(named: "button2"), for: .normal)
+                    imageView.image = UIImage(named: "button2")
                 case 15...21:
-                    button.setImage(UIImage(named: "button3"), for: .normal)
+                    imageView.image = UIImage(named: "button3")
                 case 22...27:
-                    button.setImage(UIImage(named: "button4"), for: .normal)
+                    imageView.image = UIImage(named: "button4")
                 default:
-                    button.setImage(UIImage(named: "button5"), for: .normal)
+                    imageView.image = UIImage(named: "button5")
                 }
             }
         }
     }
-    @objc private func buttonTapped(sender: UIButton) {
-        //버튼의 tag로 월을 식별
-        let month = sender.tag
-        //해당 월의 일자 데이터
-        
-        let detailVC = DetailVC()
-        detailVC.daysSet = monthlyDiaries[month]
-        
-        if let daysSet = detailVC.daysSet, !daysSet.isEmpty {
-            print("daysSet 배열에 데이터가 있습니다.")
-        } else {
-            print("daysSet 배열이 비어 있습니다.")
-        }
-        navigationController?.pushViewController(detailVC, animated: true)
-    }
+//    @objc private func buttonTapped(sender: UIButton) {
+//        //버튼의 tag로 월을 식별
+//        let month = sender.tag
+//        //해당 월의 일자 데이터
+//        
+//        let detailVC = DetailVC()
+//        detailVC.daysSet = monthlyDiaries[month]
+//        
+//        if let daysSet = detailVC.daysSet, !daysSet.isEmpty {
+//            print("daysSet 배열에 데이터가 있습니다.")
+//        } else {
+//            print("daysSet 배열이 비어 있습니다.")
+//        }
+//        navigationController?.pushViewController(detailVC, animated: true)
+//    }
 }
 //MARK: - UI 설정
 extension HonorVC {
