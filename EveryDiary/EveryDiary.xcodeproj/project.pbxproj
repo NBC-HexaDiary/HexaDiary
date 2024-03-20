@@ -10,6 +10,7 @@
 		1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1A03BDA12B92F910008C13DC /* FirebaseStorage */; };
 		1AF880D32B8DB5A2004076EB /* Api.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880D22B8DB5A2004076EB /* Api.plist */; };
 		3F9E0A532BA352E5004BF1CB /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F9E0A522BA352E4004BF1CB /* MapKit.framework */; };
+		6B2C2AFD2BAAEACD00B6983B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6B2C2AFC2BAAEACD00B6983B /* GoogleService-Info.plist */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
 		6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */; };
 		6B95C04C2B8C7A5A00DBB175 /* SFProDisplay-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0412B8C7A5900DBB175 /* SFProDisplay-Regular.otf */; };
@@ -106,6 +107,7 @@
 		3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F9E0A562BA44CE2004BF1CB /* ImageZoomCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomCollectionViewController.swift; sourceTree = "<group>"; };
 		3F9E0A582BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomCollectionViewCell.swift; sourceTree = "<group>"; };
+		6B2C2AFC2BAAEACD00B6983B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Desktop/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		6B3C4CCC2B8EDACD00C53005 /* SettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingCell.swift; sourceTree = "<group>"; };
 		6B3C4CCE2B8EE80700C53005 /* NotificationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationVC.swift; sourceTree = "<group>"; };
@@ -274,6 +276,7 @@
 				6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */,
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
+				6B2C2AFC2BAAEACD00B6983B /* GoogleService-Info.plist */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
 				1AF880D22B8DB5A2004076EB /* Api.plist */,
 			);
@@ -450,6 +453,7 @@
 			files = (
 				6B95C0512B8C7A5A00DBB175 /* SFProRounded-Regular.otf in Resources */,
 				6BEA05F82BAAB2CB000E47D4 /* calendar.json in Resources */,
+				6B2C2AFD2BAAEACD00B6983B /* GoogleService-Info.plist in Resources */,
 				1AF880D32B8DB5A2004076EB /* Api.plist in Resources */,
 				6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */,
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
