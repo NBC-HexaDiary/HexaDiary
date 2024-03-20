@@ -16,15 +16,15 @@ import SnapKit
 class LockVC: UIViewController {
     private let biometricsSwitch: UISwitch = {
         let switchControl = UISwitch()
-        switchControl.translatesAutoresizingMaskIntoConstraints = false
+        switchControl.onTintColor = .mainTheme
         return switchControl
     }()
     
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "생체 인식 잠금"
-        label.font = UIFont.systemFont(ofSize: 20, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont(name: "SFProRounded-Regular", size: 20)
+        label.textColor = .mainTheme
         return label
     }()
     
@@ -33,7 +33,6 @@ class LockVC: UIViewController {
         view.backgroundColor = .white
         view.layer.cornerRadius = 20
         view.layer.masksToBounds = true
-        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
@@ -61,10 +60,11 @@ class LockVC: UIViewController {
         backgroundView.addSubview(stackView)
         
         backgroundView.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview()
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(10)
+            make.leading.equalTo(view.safeAreaLayoutGuide).offset(10)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-10)
             make.width.equalTo(350)
-            make.height.equalTo(80)
+            make.height.equalTo(55)
         }
         
         stackView.snp.makeConstraints { make in
@@ -75,18 +75,12 @@ class LockVC: UIViewController {
 
         let isEnabled = UserDefaults.standard.bool(forKey: "BiometricsEnabled")
         biometricsSwitch.isOn = isEnabled
-        
-        // If biometrics is enabled, request Face ID authentication immediately
-        if isEnabled {
-            requestFaceIDAuthentication()
-        }
     }
 
     @objc private func switchValueChanged(_ sender: UISwitch) {
         let isEnabled = sender.isOn
         UserDefaults.standard.set(isEnabled, forKey: "BiometricsEnabled")
         
-        // If biometrics is enabled, request Face ID authentication
         if isEnabled {
             requestFaceIDAuthentication()
         }
@@ -94,7 +88,7 @@ class LockVC: UIViewController {
     
     private func requestFaceIDAuthentication() {
         biometricsAuth.authenticateWithBiometrics { [weak self] success in
-            guard let self = self else { return }
+            guard self != nil else { return }
             if success {
                 print("인증 성공")
             } else {

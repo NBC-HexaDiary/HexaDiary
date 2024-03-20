@@ -6,6 +6,7 @@
 //
 
 import UIKit
+
 import LocalAuthentication
 
 class LaunchViewController: UIViewController {
@@ -54,26 +55,3 @@ class LaunchViewController: UIViewController {
         }
     }
 }
-//
-//    func promptForPassword() {
-//        let context = LAContext()
-//        context.localizedFallbackTitle = "Enter Passcode"
-//        
-//        var error: NSError?
-//        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-//            let reason = "Authenticate with Face ID"
-//            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { [weak self] success, error in
-//                if success {
-//                    // Face ID 인증 성공
-//                    self?.dismiss(animated: true, completion: nil)
-//                } else {
-//                    // Face ID 인증 실패
-//                    print(error?.localizedDescription ?? "Failed to authenticate")
-//                }
-//            }
-//        } else {
-//            // Face ID를 사용할 수 없는 경우
-//            print(error?.localizedDescription ?? "Can't evaluate policy")
-//        }
-//    }
-//}

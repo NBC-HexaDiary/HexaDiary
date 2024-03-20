@@ -8,10 +8,10 @@ import UIKit
 import LocalAuthentication
 
 class BiometricsAuth {
-
+    
     func authenticateWithBiometrics(completion: @escaping (Bool) -> Void) {
         let context = LAContext()
-
+        
         var error: NSError?
         if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
             let reason = "Authenticate with Face ID"

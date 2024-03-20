@@ -9,7 +9,6 @@ import Foundation
 struct WeatherResponse: Decodable {
     let weather: [Weather]
     let main: Main
-    let name: String
 }
 
 struct Main: Decodable {
@@ -17,8 +16,5 @@ struct Main: Decodable {
 }
 
 struct Weather: Decodable {
-    let id: Int
-    let main: String
     let description: String
-    let icon: String
 }
