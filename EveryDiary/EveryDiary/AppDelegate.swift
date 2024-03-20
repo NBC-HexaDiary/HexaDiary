@@ -7,6 +7,7 @@
 
 import UIKit
 
+import CoreLocation
 import FirebaseCore
 import FirebaseFirestore
 import GoogleSignIn
@@ -17,11 +18,13 @@ import UserNotifications
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var userNotificationCenter: UNUserNotificationCenter?
+    let locationManager = CLLocationManager()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         
-        
+        locationManager.requestWhenInUseAuthorization()
+
         FirebaseApp.configure()
         GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
             if error != nil || user == nil {

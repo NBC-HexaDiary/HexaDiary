@@ -70,14 +70,6 @@ class DiaryListVC: UIViewController {
         return button
     }()
     
-    private lazy var loadDiaryButton : UIButton = {
-        var config = UIButton.Configuration.plain()
-        let button = UIButton(configuration: config)
-        button.setImage(UIImage(systemName: "arrow.clockwise"), for: .normal)
-        button.addTarget(self, action: #selector(tabLoadDiaryButton), for: .touchUpInside)
-        return button
-    }()
-    
     private lazy var journalCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -116,88 +108,6 @@ class DiaryListVC: UIViewController {
     
     deinit {
         NotificationCenter.default.removeObserver(self)
-    }
-}
-
-// FIXME: 삭제예정 - Edit Table View(일기수정 및 일기삭제 선택지 제공)
-extension DiaryListVC: UITableViewDelegate, UITableViewDataSource {
-    private func setupEditTableView() {
-        editTableView.delegate = self
-        editTableView.dataSource = self
-        editTableView.register(UITableViewCell.self, forCellReuseIdentifier: "EditTableViewCell")
-        editTableView.isScrollEnabled = false
-    }
-    private func setLayoutEditTableView(basedOn cellFrame: CGRect) {
-        let cellFrameInSuperview = journalCollectionView.convert(cellFrame, to: view)
-        view.window?.addSubview(editTableView)
-        editTableView.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.width.equalTo(200)
-            make.height.equalTo(100)
-            make.bottom.equalTo(cellFrameInSuperview.minY).offset(-10)
-        }
-        view.layoutIfNeeded()
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "EditTableViewCell", for: indexPath)
-        switch indexPath.row {
-        case 0: cell.textLabel?.text = "수정"
-        case 1: cell.textLabel?.text = "삭제"
-        default:
-            break
-        }
-        return cell
-    }
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let selectedIndexPath = self.selectedIndexPath else { return }
-        let month = months[selectedIndexPath.section]
-        guard let diary = monthlyDiaries[month]?[selectedIndexPath.row] else { return }
-        tableView.isHidden = true
-        
-        //         삭제필요 : UILongPressGestureRecognizer 관련 메서드
-        //        removeBlurEffect()
-        
-        print("\(indexPath)")
-        print("\(selectedIndexPath)")
-        switch indexPath.row {
-        case 0: // "수정" 선택 시
-            print("Edit")
-            let writeDiaryVC = WriteDiaryVC()
-            writeDiaryVC.showsDiary(with: diary)
-            writeDiaryVC.modalPresentationStyle = .automatic
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                self.present(writeDiaryVC, animated: true, completion: nil)
-            }
-            
-        case 1: // "삭제" 선택 시
-            print("Delete")
-            let alert = UIAlertController(
-                title: "일기 삭제", message: "이 일기를 삭제하시겠습니까?", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { [weak self] _ in
-                guard let self = self else { return }
-                // diary.id와 diary.imageURL을 올바르게 참조하여 삭제
-                if let diaryID = diary.id {
-                    let imageURL = diary.imageURL
-//                    self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: imageURL) { error in
-//                        if let error = error {
-//                            print("Error deleting diary: \(error.localizedDescription)")
-//                        } else {
-//                        }
-//                    }
-                }
-            }))
-            alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
-            present(alert, animated: true, completion: nil)
-        default:
-            break
-        }
-        // 선택 처리 후 변수 초기화
-        self.selectedIndexPath = nil
     }
 }
 
@@ -513,12 +423,11 @@ extension DiaryListVC {
         view.addSubview(themeLabel)
         view.addSubview(journalCollectionView)
         view.addSubview(writeDiaryButton)
-        view.addSubview(loadDiaryButton)
     }
     
     private func setLayout() {
         journalCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(50)
+            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.leading.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.trailing.equalTo(self.view.safeAreaLayoutGuide).offset(0)
@@ -531,11 +440,6 @@ extension DiaryListVC {
             make.top.equalTo(view).offset(50)
             make.left.equalTo(view).offset(16)
             make.size.equalTo(CGSize(width:120, height: 50))
-        }
-        loadDiaryButton.snp.makeConstraints { make in
-            make.top.equalTo(themeLabel.snp.bottom).offset(10)
-            make.leading.equalTo(themeLabel.snp.leading).offset(0)
-            make.height.width.equalTo(20)
         }
     }
 }

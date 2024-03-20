@@ -13,7 +13,7 @@ class FirebaseStorageManager {
     static func uploadImage(image: [UIImage], pathRoot: String, assetIdentifier: String, captureTime: String? = nil, location: String? = nil, completion: @escaping ([URL]?) -> Void) {
         var uploadedURL: [URL] = []
         let dispatchGroup = DispatchGroup()
-
+        
         for image in image {
             guard let imageData = image.jpegData(compressionQuality: 0.4) else {
                 completion(nil)
@@ -32,9 +32,6 @@ class FirebaseStorageManager {
             }
             customMetadata["assetIdentifier"] = assetIdentifier
             metaData.customMetadata = customMetadata
-            print("captureTime: \(customMetadata["captureTime"])")
-            print("location: \(customMetadata["location"])")
-            print("custoMetaData: \(customMetadata["assetIdentifier"])")
             
             let imageName = "\(UUID().uuidString)_\(Date().timeIntervalSince1970)"
             let firebaseReference = Storage.storage().reference().child("\(pathRoot)/\(imageName)")
@@ -47,7 +44,7 @@ class FirebaseStorageManager {
                     }
                     dispatchGroup.leave()
                 }
-
+                
             }
         }
         

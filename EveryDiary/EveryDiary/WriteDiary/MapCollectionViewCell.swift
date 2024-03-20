@@ -42,6 +42,7 @@ class MapCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupMapView()
+        setupShadow()
         mapView.delegate = self
     }
     
@@ -54,6 +55,13 @@ class MapCollectionViewCell: UICollectionViewCell {
         mapView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+    }
+    private func setupShadow() {
+        self.layer.shadowColor = UIColor.black.cgColor
+        self.layer.shadowOpacity = 0.1
+        self.layer.shadowOffset = CGSize(width: 0, height: 2)
+        self.layer.shadowRadius = 8.0
+        self.layer.masksToBounds = false
     }
     func configureMapWith(locationsInfo: [LocationInfo]) {
         var annotations = [MKPointAnnotation]()

@@ -19,6 +19,14 @@ class ImageCollectionViewCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        setupContentView()
+        setupShadow()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    private func setupContentView() {
         contentView.layer.cornerRadius = 10
         contentView.clipsToBounds = true
         contentView.addSubview(imageView)
@@ -27,9 +35,14 @@ class ImageCollectionViewCell: UICollectionViewCell {
         }
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    private func setupShadow() {
+        self.layer.shadowColor = UIColor.black.cgColor
+        self.layer.shadowOpacity = 0.1
+        self.layer.shadowOffset = CGSize(width: 0, height: 2)
+        self.layer.shadowRadius = 8.0
+        self.layer.masksToBounds = false
     }
+    
     func configure(with image: UIImage) {
         imageView.image = image
     }

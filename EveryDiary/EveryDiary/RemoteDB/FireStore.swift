@@ -15,11 +15,11 @@ class DiaryManager {
     let db = Firestore.firestore()
     var listener: ListenerRegistration?
     private let paginationManager = PaginationManager()
-
+    
     deinit {
         listener?.remove()
     }
-        
+    
     //MARK: 사용자 ID 가져오기
     func getUserID() -> String? {
         if let currentUser = Auth.auth().currentUser {
@@ -57,77 +57,68 @@ class DiaryManager {
     
     //MARK: 일기 추가
     func addDiary(diary: DiaryEntry, completion: @escaping (Error?) -> Void) {
-        // 익명으로 사용자 인증하기
-//        authenticateAnonymouslyIfNeeded { error in
-//            if let error = error {
-//                print("Error authenticating anonymously: \(error)")
-//                completion(error)
-//                return
-//            }
+        guard let userID = self.getUserID() else {
+            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            return
+        }
+        
+        let weatherService = WeatherService()
+        
+        // 날씨 정보 가져오기
+        weatherService.getWeather { result in
             
-            guard let userID = self.getUserID() else {
-                completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
-                return
+            // 날씨 정보 가져오기에 실패하더라도 일기는 추가됩니다.
+            // 날씨 정보를 가져올 수 없는 경우에 대비하여 기본값을 "Unknown"으로 설정
+            var weatherDescription = "Unknown"
+            var weatherTemp = 0.0
+            
+            if case .success(let weatherResponse) = result {
+                // 날씨 정보에서 날씨 설명 가져오기
+                weatherDescription = weatherResponse.weather.first?.description ?? "Unknown"
+                weatherTemp = weatherResponse.main.temp
             }
             
-            let weatherService = WeatherService()
+            // 다이어리에 날씨 정보 추가
+            var diaryWithWeather = diary
             
-            // 날씨 정보 가져오기
-            weatherService.getWeather { result in
-                
-                // 날씨 정보 가져오기에 실패하더라도 일기는 추가됩니다.
-                // 날씨 정보를 가져올 수 없는 경우에 대비하여 기본값을 "Unknown"으로 설정
-                var weatherDescription = "Unknown"
-                var weatherTemp = 0.0
-                
-                if case .success(let weatherResponse) = result {
-                    // 날씨 정보에서 날씨 설명 가져오기
-                    weatherDescription = weatherResponse.weather.first?.description ?? "Unknown"
-                    weatherTemp = weatherResponse.main.temp
-                }
-                
-                // 다이어리에 날씨 정보 추가
-                var diaryWithWeather = diary
-                
-                diaryWithWeather.weatherDescription = weatherDescription
-                diaryWithWeather.weatherTemp = weatherTemp
-                
-                // 현재 날짜 가져오기
-                let currentDate = Date()
-                
-                // 날짜가 현재 날짜와 다르다면 날씨를 비어 있도록 설정
-                if !Calendar.current.isDate(diary.date, inSameDayAs: currentDate) {
-                    diaryWithWeather.weatherDescription = "Unknown"
-                    diaryWithWeather.weatherTemp = 0
-                }
-                
-                // 다이어리 추가
-                var newDiaryWithUserID = diaryWithWeather
-                newDiaryWithUserID.userID = userID
-                let documentReference = DiaryManager.shared.db.collection("users").document(userID).collection("diaries").document()
-                newDiaryWithUserID.id = documentReference.documentID
-                
-                do {
-                    try documentReference.setData(from: newDiaryWithUserID) { error in
-                        if let error = error {
-                            print("Error adding document: \(error)")
-                            completion(error)
-                        } else {
-                            // 일기가 추가된 후에는 일기 리스트를 업데이트합니다.
-                            self.fetchDiaries { (diaries, error) in
-                                if let error = error {
-                                    print("Error fetching diaries after adding a new diary: \(error)")
-                                }
+            diaryWithWeather.weatherDescription = weatherDescription
+            diaryWithWeather.weatherTemp = weatherTemp
+            
+            // 현재 날짜 가져오기
+            let currentDate = Date()
+            
+            // 날짜가 현재 날짜와 다르다면 날씨를 비어 있도록 설정
+            if !Calendar.current.isDate(diary.date, inSameDayAs: currentDate) {
+                diaryWithWeather.weatherDescription = "Unknown"
+                diaryWithWeather.weatherTemp = 0
+            }
+            
+            // 다이어리 추가
+            var newDiaryWithUserID = diaryWithWeather
+            newDiaryWithUserID.userID = userID
+            let documentReference = DiaryManager.shared.db.collection("users").document(userID).collection("diaries").document()
+            newDiaryWithUserID.id = documentReference.documentID
+            
+            do {
+                try documentReference.setData(from: newDiaryWithUserID) { error in
+                    if let error = error {
+                        print("Error adding document: \(error)")
+                        completion(error)
+                    } else {
+                        // 일기가 추가된 후에는 일기 리스트를 업데이트합니다.
+                        self.fetchDiaries { (diaries, error) in
+                            if let error = error {
+                                print("Error fetching diaries after adding a new diary: \(error)")
                             }
-                            completion(nil)
                         }
+                        completion(nil)
                     }
-                } catch {
-                    print("Error adding document: \(error)")
-                    completion(error)
                 }
+            } catch {
+                print("Error adding document: \(error)")
+                completion(error)
             }
-//        }
+        }
     }
     
     //MARK: 다이어리 조회
@@ -180,37 +171,37 @@ class DiaryManager {
     }
     
     //MARK: 다이어리 삭제
-      func deleteDiary(diaryID: String, imageURL: [String], completion: @escaping (Error?) -> Void) {
-          guard let userID = getUserID() else {
-              completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
-              return
-          }
-          
-          let dispatchGroup = DispatchGroup()
-          
-          for url in imageURL {
-              dispatchGroup.enter()
-              FirebaseStorageManager.deleteImage(urlString: url) { error in
-                  if let error = error {
-                      print("Error deleting image from Firebase Storage: \(error)")
-                  }
-                  dispatchGroup.leave()
-              }
-          }
-          
-          // 모든 이미지 삭제 작업이 완료된 후 Firestore에서 일기 데이터 삭제
-          dispatchGroup.notify(queue: .main) {
-              self.db.collection("users").document(userID).collection("diaries").document(diaryID).delete { error in
-                  if let error = error {
-                      print("Error deleting document: \(error)")
-                      completion(error)
-                  } else {
-                      print("Diary document successfully deleted.")
-                      completion(nil)
-                  }
-              }
-          }
-      }
+    func deleteDiary(diaryID: String, imageURL: [String], completion: @escaping (Error?) -> Void) {
+        guard let userID = getUserID() else {
+            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            return
+        }
+        
+        let dispatchGroup = DispatchGroup()
+        
+        for url in imageURL {
+            dispatchGroup.enter()
+            FirebaseStorageManager.deleteImage(urlString: url) { error in
+                if let error = error {
+                    print("Error deleting image from Firebase Storage: \(error)")
+                }
+                dispatchGroup.leave()
+            }
+        }
+        
+        // 모든 이미지 삭제 작업이 완료된 후 Firestore에서 일기 데이터 삭제
+        dispatchGroup.notify(queue: .main) {
+            self.db.collection("users").document(userID).collection("diaries").document(diaryID).delete { error in
+                if let error = error {
+                    print("Error deleting document: \(error)")
+                    completion(error)
+                } else {
+                    print("Diary document successfully deleted.")
+                    completion(nil)
+                }
+            }
+        }
+    }
     
     //MARK: 회원탈퇴시 데이터 삭제
     func deleteUserData(for userID: String) {
