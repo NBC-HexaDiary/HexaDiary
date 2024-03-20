@@ -188,7 +188,7 @@ extension HonorVC {
             return
         }
         // 현재 년도 가져오기
-        let currentYear = Calendar.current.component(.year, from: Date())
+        _ = Calendar.current.component(.year, from: Date())
         // 데이터가 있는 월을 저장할 집합
         var existingMonths = Set<Int>()
         
