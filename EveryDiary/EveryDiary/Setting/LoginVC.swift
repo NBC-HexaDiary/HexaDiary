@@ -104,7 +104,12 @@ class LoginVC: UIViewController {
                 currentUser.link(with: credential) { authResult, error in
                     if let error = error {
                         print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
-                        // 유저링크를 하는데 오류가 발생한 경우에는 그냥 로그인을 시도합니다.
+                        // 유저링크를 하는데 오류가 발생한 경우에는 존재하는 익명계정을 삭제하고 그냥 로그인을 시도합니다.
+                        Auth.auth().currentUser?.delete { error in
+                            if let error = error {
+                                print("익명 계정 삭제 오류: \(error.localizedDescription)")
+                            }
+                        }
                         Auth.auth().signIn(with: credential) { authResult, error in
                             if let error = error {
                                 // 로그인 중 오류가 발생한 경우
@@ -140,10 +145,17 @@ class LoginVC: UIViewController {
                     }
                 }
             } else {
-                // 익명 사용자가 아닌 경우에는 이미 병합된 계정이거나 일반 계정입니다.
-                print("이미 병합된 계정이거나 일반 계정입니다.")
-                NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                self.dismiss(animated: true, completion: nil)
+                Auth.auth().signIn(with: credential) { authResult, error in
+                    if let error = error {
+                        // 로그인 중 오류가 발생한 경우
+                        print("로그인 중 오류 발생: \(error.localizedDescription)")
+                        return
+                    }
+                    // 익명 사용자가 아닌 경우에는 이미 병합된 계정이거나 일반 계정입니다.
+                    print("비로그인 상태에서 로그인 시도 성공")
+                    NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                    self.dismiss(animated: true, completion: nil)
+                }
             }
         }
     }
@@ -306,12 +318,19 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                             self.dismiss(animated: true, completion: nil)
                         }
                     }
+                    Auth.auth().currentUser?.delete { error in
+                        if let error = error {
+                            print("익명 계정 삭제 오류: \(error.localizedDescription)")
+                        }
+                    }
                     Auth.auth().signIn(with: credential) { authResult, error in
                         if let error = error {
                             // 로그인 중 오류가 발생한 경우
                             print("로그인 중 오류 발생: \(error.localizedDescription)")
                             return
                         }
+                        NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                        self.dismiss(animated: true, completion: nil)
                     }
                 } else {
                     // 익명 사용자가 아닌 경우에는 이미 병합된 계정이거나 일반 계정입니다.
@@ -322,9 +341,9 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                             print("로그인 중 오류 발생: \(error.localizedDescription)")
                             return
                         }
+                        NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                        self.dismiss(animated: true, completion: nil)
                     }
-                    NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                    self.dismiss(animated: true, completion: nil)
                 }
                 
                 // 사용자의 authorizationCode를 로그인 시 미리 가져온다. 회원 탈퇴 시, 필요하기 때문이다.
