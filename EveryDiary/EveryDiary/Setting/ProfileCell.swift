@@ -36,7 +36,7 @@ class ProfileCell: UITableViewCell {
     
     lazy var loginButton : UIButton = {
         let loginButton = UIButton()
-        loginButton.layer.backgroundColor = UIColor(named: "mainTheme")?.cgColor
+        loginButton.layer.backgroundColor = UIColor(named: "loginBackground")?.cgColor
         loginButton.layer.shadowOpacity = 0.1
         loginButton.layer.shadowColor = UIColor(named: "mainTheme")?.cgColor
         loginButton.layer.shadowOffset = CGSize(width: 0, height: 0)
@@ -71,7 +71,7 @@ class ProfileCell: UITableViewCell {
     }
     
     @objc private func loginButtonTouchOutside() {
-        loginButton.layer.backgroundColor = UIColor(named: "mainTheme")?.cgColor
+        loginButton.layer.backgroundColor = UIColor(named: "loginBackground")?.cgColor
     }
     
     private func addSubViewProfileCell() {

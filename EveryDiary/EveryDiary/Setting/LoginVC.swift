@@ -22,12 +22,6 @@ class LoginVC: UIViewController {
     
     fileprivate var currentNonce: String?
     
-//    private lazy var backgroundImage : UIImageView = {
-//        let image = UIImageView()
-//        image.image = UIImage(named: "View.Background2")
-//        return image
-//    }()
-    
     private lazy var topLabel : UILabel = {
         let label = UILabel()
         label.text = "마음 놓고"
@@ -148,8 +142,6 @@ extension LoginVC {
     }
     
     private func addSubViewsLoginVC() {
-//        view.addSubview(backgroundImage)
-//        view.sendSubviewToBack(backgroundImage)
         view.addSubview(signGoogleButton)
         view.addSubview(signAppleButton)
         view.addSubview(closeButton)
@@ -172,9 +164,6 @@ extension LoginVC {
             make.width.equalTo(view.safeAreaLayoutGuide).offset(-50)
             make.height.equalTo(60)
         }
-//        backgroundImage.snp.makeConstraints { make in
-//            make.edges.equalTo(view).inset(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0))
-//        }
         signAppleButton.snp.makeConstraints { make in
             make.centerX.equalTo(view.safeAreaLayoutGuide)
             make.top.equalTo(signGoogleButton.snp.bottom).offset(20)
@@ -188,7 +177,7 @@ extension LoginVC {
         }
         bottomLabel.snp.makeConstraints { make in
             make.centerX.equalTo(view.safeAreaLayoutGuide)
-            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-75)
+            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-120)
             make.width.equalTo(view.safeAreaLayoutGuide).offset(-100)
             make.top.equalTo(topLabel.snp.bottom).offset(10)
         }

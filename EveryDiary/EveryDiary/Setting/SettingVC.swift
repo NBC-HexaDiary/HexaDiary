@@ -75,7 +75,7 @@ class SettingVC: UIViewController {
     
     @objc func didTapLoginButton() {
         let loginVC = LoginVC()
-        loginVC.modalPresentationStyle = .automatic
+        loginVC.modalPresentationStyle = .fullScreen
         self.present(loginVC, animated: true)
     }
     
