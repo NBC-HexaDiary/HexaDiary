@@ -202,7 +202,6 @@ extension NotificationVC : UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         // 마지막 셀인지 확인
-        let firstRow = 0
         let lastRow = tableView.numberOfRows(inSection: 0) - 1
         if indexPath.row == lastRow {
             // 셀의 높이와 경계를 가져옴
