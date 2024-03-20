@@ -98,7 +98,7 @@ extension SettingVC {
         if let currentUser = Auth.auth().currentUser {
             if currentUser.isEmailVerified == false {
                 self.dataSource = [
-                    .profileItem(email: "일기를 저장하려면 로그인해주세요", name: "Guest", image: "profile", isLoggedIn: false),
+                    .profileItem(email: "일기를 저장하려면 로그인하세요", name: "Guest", image: "profile", isLoggedIn: false),
                     .settingItem(title: "알림", iconImage: "notification", number: 1),
                     .settingItem(title: "잠금", iconImage: "lock", number: 2),
                     .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
@@ -117,7 +117,7 @@ extension SettingVC {
             }
         } else {
             self.dataSource = [
-                .profileItem(email: "일기를 저장하려면 로그인해주세요", name: "손님", image: "profile", isLoggedIn: false),
+                .profileItem(email: "일기를 저장하려면 로그인하세요", name: "손님", image: "profile", isLoggedIn: false),
                 .settingItem(title: "알림", iconImage: "notification", number: 1),
                 .settingItem(title: "잠금", iconImage: "lock", number: 2),
                 .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),

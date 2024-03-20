@@ -21,7 +21,7 @@ class CalendarVC: UIViewController {
     private lazy var calendarLabel : UILabel = {
         let calendarLabel = UILabel()
         calendarLabel.text = "캘린더"
-        calendarLabel.font = UIFont(name: "SFProDisplay-Bold", size: 33)
+        calendarLabel.font = UIFont(name: "SFProDisplay-Bold", size: 25)
         calendarLabel.textColor = UIColor(named: "mainTheme")
         return calendarLabel
     }()
