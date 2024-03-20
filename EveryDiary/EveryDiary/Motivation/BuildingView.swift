@@ -91,38 +91,38 @@ class BuildingView: UIView {
         let path = UIBezierPath()
         
         // black 첫 번째 건물
-        path.move(to: CGPoint(x: 0, y: backgroundLayer.bounds.height))
-        path.addLine(to: CGPoint(x: 0, y: backgroundLayer.bounds.height * 0.65))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.0875, y: backgroundLayer.bounds.height * 0.65))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.0875, y: backgroundLayer.bounds.height * 0.7))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.14, y: backgroundLayer.bounds.height * 0.7))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.14, y: backgroundLayer.bounds.height))
+        path.move(to: CGPoint(x: 0, y: buildingLayer.bounds.height))
+        path.addLine(to: CGPoint(x: 0, y: buildingLayer.bounds.height * 0.65))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.0875, y: buildingLayer.bounds.height * 0.65))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.0875, y: buildingLayer.bounds.height * 0.7))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.14, y: buildingLayer.bounds.height * 0.7))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.14, y: buildingLayer.bounds.height))
         
         // black 두 번째 건물
-        path.move(to: CGPoint(x: backgroundLayer.bounds.width * 0.1575, y: backgroundLayer.bounds.height))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.1575, y: backgroundLayer.bounds.height * 0.75))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.245, y: backgroundLayer.bounds.height * 0.65))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.38, y: backgroundLayer.bounds.height * 0.65))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.38, y: backgroundLayer.bounds.height * 0.7))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.42, y: backgroundLayer.bounds.height * 0.7))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.42, y: backgroundLayer.bounds.height))
+        path.move(to: CGPoint(x: buildingLayer.bounds.width * 0.1575, y: buildingLayer.bounds.height))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.1575, y: buildingLayer.bounds.height * 0.75))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.245, y: buildingLayer.bounds.height * 0.65))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.38, y: buildingLayer.bounds.height * 0.65))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.38, y: buildingLayer.bounds.height * 0.7))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.42, y: buildingLayer.bounds.height * 0.7))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.42, y: buildingLayer.bounds.height))
         
         // black 세 번째 건물
-        path.move(to: CGPoint(x: backgroundLayer.bounds.width * 0.455, y: backgroundLayer.bounds.height))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.455, y: backgroundLayer.bounds.height * 0.8))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.525, y: backgroundLayer.bounds.height * 0.8))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.525, y: backgroundLayer.bounds.height * 0.75))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.665, y: backgroundLayer.bounds.height * 0.75))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.665, y: backgroundLayer.bounds.height))
+        path.move(to: CGPoint(x: buildingLayer.bounds.width * 0.455, y: buildingLayer.bounds.height))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.455, y: buildingLayer.bounds.height * 0.8))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.525, y: buildingLayer.bounds.height * 0.8))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.525, y: buildingLayer.bounds.height * 0.75))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.665, y: buildingLayer.bounds.height * 0.75))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.665, y: buildingLayer.bounds.height))
         
         // black 네 번째 건물
-        path.move(to: CGPoint(x: backgroundLayer.bounds.width * 0.68, y: backgroundLayer.bounds.height))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.68, y: backgroundLayer.bounds.height * 0.6))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.9, y: backgroundLayer.bounds.height * 0.6))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.9, y: backgroundLayer.bounds.height * 0.65))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.98, y: backgroundLayer.bounds.height * 0.65))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.98, y: backgroundLayer.bounds.height * 0.8))
-        path.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.98, y: backgroundLayer.bounds.height))
+        path.move(to: CGPoint(x: buildingLayer.bounds.width * 0.68, y: buildingLayer.bounds.height))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.68, y: buildingLayer.bounds.height * 0.6))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.9, y: buildingLayer.bounds.height * 0.6))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.9, y: buildingLayer.bounds.height * 0.65))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.98, y: buildingLayer.bounds.height * 0.65))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.98, y: buildingLayer.bounds.height * 0.8))
+        path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.98, y: buildingLayer.bounds.height))
         path.close()
         buildingLayer.path = path.cgPath
         buildingLayer.fillColor = UIColor.black.cgColor
@@ -133,44 +133,44 @@ class BuildingView: UIView {
         print("회색 빌딩 그림")
         let backPath = UIBezierPath()
         // gray 첫 번째 건물
-        backPath.move(to: CGPoint(x: backgroundLayer.bounds.width * 0.01, y: backgroundLayer.bounds.height))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.01, y: backgroundLayer.bounds.height * 0.55))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.04, y: backgroundLayer.bounds.height * 0.55))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.04, y: backgroundLayer.bounds.height * 0.5))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.15, y: backgroundLayer.bounds.height * 0.5))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.15, y: backgroundLayer.bounds.height))
+        backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.01, y: backBuildingLayer.bounds.height))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.01, y: backBuildingLayer.bounds.height * 0.55))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.04, y: backBuildingLayer.bounds.height * 0.55))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.04, y: backBuildingLayer.bounds.height * 0.5))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.15, y: backBuildingLayer.bounds.height * 0.5))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.15, y: backBuildingLayer.bounds.height))
         
         // gray 두 번째 건물
-        backPath.move(to: CGPoint(x: backgroundLayer.bounds.width * 0.18, y: backgroundLayer.bounds.height))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.18, y: backgroundLayer.bounds.height * 0.55))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.3, y: backgroundLayer.bounds.height * 0.55))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.35, y: backgroundLayer.bounds.height * 0.6))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.35, y: backgroundLayer.bounds.height))
+        backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.18, y: backBuildingLayer.bounds.height))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.18, y: backBuildingLayer.bounds.height * 0.55))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.3, y: backBuildingLayer.bounds.height * 0.55))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.35, y: backBuildingLayer.bounds.height * 0.6))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.35, y: backBuildingLayer.bounds.height))
         
         // gray 세 번째 건물
-        backPath.move(to: CGPoint(x: backgroundLayer.bounds.width * 0.355, y: backgroundLayer.bounds.height))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.355, y: backgroundLayer.bounds.height * 0.63))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.45, y: backgroundLayer.bounds.height * 0.63))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.45, y: backgroundLayer.bounds.height * 0.66))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.5, y: backgroundLayer.bounds.height * 0.66))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.5, y: backgroundLayer.bounds.height))
+        backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.355, y: backBuildingLayer.bounds.height))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.355, y: backBuildingLayer.bounds.height * 0.63))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.45, y: backBuildingLayer.bounds.height * 0.63))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.45, y: backBuildingLayer.bounds.height * 0.66))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.5, y: backBuildingLayer.bounds.height * 0.66))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.5, y: backBuildingLayer.bounds.height))
         
         // gray 네 번째 건물
-        backPath.move(to: CGPoint(x: backgroundLayer.bounds.width * 0.5, y: backgroundLayer.bounds.height))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.5, y: backgroundLayer.bounds.height * 0.85))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.671, y: backgroundLayer.bounds.height * 0.85))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.671, y: backgroundLayer.bounds.height * 0.65))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.8, y: backgroundLayer.bounds.height * 0.55))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.8, y: backgroundLayer.bounds.height))
+        backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.5, y: backBuildingLayer.bounds.height))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.5, y: backBuildingLayer.bounds.height * 0.85))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.671, y: backBuildingLayer.bounds.height * 0.85))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.671, y: backBuildingLayer.bounds.height * 0.65))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.8, y: backBuildingLayer.bounds.height * 0.55))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.8, y: backBuildingLayer.bounds.height))
         
         // gray 다섯 번째 건물
-        backPath.move(to: CGPoint(x: backgroundLayer.bounds.width * 0.8, y: backgroundLayer.bounds.height))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.8, y: backgroundLayer.bounds.height * 0.55))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.94, y: backgroundLayer.bounds.height * 0.55))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.94, y: backgroundLayer.bounds.height * 0.5))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width * 0.94, y: backgroundLayer.bounds.height * 0.48))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width, y: backgroundLayer.bounds.height * 0.48))
-        backPath.addLine(to: CGPoint(x: backgroundLayer.bounds.width, y: backgroundLayer.bounds.height))
+        backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.8, y: backBuildingLayer.bounds.height))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.8, y: backBuildingLayer.bounds.height * 0.55))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.94, y: backBuildingLayer.bounds.height * 0.55))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.94, y: backBuildingLayer.bounds.height * 0.5))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.94, y: backBuildingLayer.bounds.height * 0.48))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width, y: backBuildingLayer.bounds.height * 0.48))
+        backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width, y: backBuildingLayer.bounds.height))
         
         backPath.close()
         backBuildingLayer.path = backPath.cgPath
@@ -315,6 +315,7 @@ extension BuildingView {
                         diaries.append(diary)
                     }
                 }
+                diaries = diaries.filter { !$0.isDeleted }
                 DispatchQueue.main.async { // 메인 스레드에서 로그를 출력합니다.
                     print("Fetched diaries: \(diaries)")
                 }

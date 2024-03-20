@@ -141,6 +141,21 @@ class HonorVC: UIViewController {
             }
         }
     }
+    @objc private func buttonTapped(sender: UIButton) {
+        //버튼의 tag로 월을 식별
+        let month = sender.tag
+        //해당 월의 일자 데이터
+        
+        let detailVC = DetailVC()
+        detailVC.daysSet = monthlyDiaries[month]
+        
+        if let daysSet = detailVC.daysSet, !daysSet.isEmpty {
+            print("daysSet 배열에 데이터가 있습니다.")
+        } else {
+            print("daysSet 배열이 비어 있습니다.")
+        }
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
 }
 //MARK: - UI 설정
 extension HonorVC {
@@ -173,7 +188,7 @@ extension HonorVC {
             return
         }
         // 현재 년도 가져오기
-        let currentYear = Calendar.current.component(.year, from: Date())
+        _ = Calendar.current.component(.year, from: Date())
         // 데이터가 있는 월을 저장할 집합
         var existingMonths = Set<Int>()
         
@@ -182,19 +197,19 @@ extension HonorVC {
                 // 에러 처리...
                 return
             }
-            
-            // 월별 다이어리 구분
-            var monthlyDiaries = [Int: Set<Int>]()
-            for diary in diaries {
+            let filteredDiaries = diaries.filter { !$0.isDeleted }
+            for diary in filteredDiaries {
                 let month = Calendar.current.component(.month, from: diary.date)
                 let day = Calendar.current.component(.day, from: diary.date)
                 if monthlyDiaries[month] == nil {
                     monthlyDiaries[month] = Set<Int>()
                 }
+            
                 monthlyDiaries[month]?.insert(day)
                 // 데이터가 있는 월을 추가
                 existingMonths.insert(month)
             }
+            print("Monthly diaries: \(monthlyDiaries)")
             print("Fetched diaries: \(diaries)")
             for month in 1...12 {
                 if !existingMonths.contains(month) {
@@ -204,7 +219,7 @@ extension HonorVC {
                     monthlyDiaries[month] = []
                 }
             }
-            self.sortDiariesByMonth(diaries: diaries ?? [], monthlyDiaries: monthlyDiaries)
+            self.sortDiariesByMonth(diaries: diaries , monthlyDiaries: monthlyDiaries)
         }
     }
     
@@ -224,28 +239,13 @@ extension HonorVC {
             }
             monthlyDiariesWithStrings[month] = stringDays
         }
+        
         DispatchQueue.main.async {
             self.setupHonorStackViewButtonsAndLabels()
             self.setupButton(monthlyDiaries: monthlyDiariesWithStrings)
         }
     }
     
-    @objc private func buttonTapped(sender: UIButton) {
-        //버튼의 tag로 월을 식별
-        let month = sender.tag
-        //해당 월의 일자 데이터
-        
-        let detailVC = DetailVC()
-        detailVC.daysSet = monthlyDiaries[month]
-        
-        if let daysSet = detailVC.daysSet, !daysSet.isEmpty {
-            print("daysSet 배열에 데이터가 있습니다.")
-        } else {
-            print("daysSet 배열이 비어 있습니다.")
-        }
-        
-        navigationController?.pushViewController(detailVC, animated: true)
-    }
     private func setNavigationBar() {
         navigationController?.navigationBar.tintColor = .black
     }
