@@ -24,18 +24,14 @@ class JournalCollectionViewCell: UICollectionViewCell {
     
     private lazy var contentTitle: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "SFProDisplay-Bold", size: 20)
-        return label
-    }()
-    private lazy var contentText: UILabel = {
-        let label = UILabel()
-        label.font = UIFont(name: "SFProDisplay-Regular", size: 16)
+        label.font = UIFont(name: "SFProDisplay-Bold", size: 18)
         return label
     }()
     
     private lazy var contentTextView: UITextView = {
         let view = UITextView()
-        view.font = UIFont(name: "SFProDisplay-Regular", size: 16)
+        view.font = UIFont(name: "SFProDisplay-Regular", size: 14)
+        view.textColor = .darkGray
         view.isEditable = false
         view.backgroundColor = .clear
         view.isScrollEnabled = false
@@ -50,6 +46,7 @@ class JournalCollectionViewCell: UICollectionViewCell {
     private lazy var dateOfWriting: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: "SFProDisplay-Regular", size: 12)
+        label.textColor = .systemGray
         return label
     }()
     lazy var imageView: UIImageView = {
@@ -146,55 +143,9 @@ class JournalCollectionViewCell: UICollectionViewCell {
     }
 }
 
-// MARK: Cell Swipe(삭제 예정)
-//extension JournalCollectionViewCell {
-//    @objc private func deleteButtonTapped() {
-//        
-//    }
-//    private func initializeSwipeGesture() {
-//        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
-//        self.contentView.addGestureRecognizer(panGesture)
-//    }
-//    @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
-//        switch gesture.state {
-//        case .began, .changed:
-//            handleSwipeChange(gesture)
-//        case .ended:
-//            handleSwipeEnd(gesture)
-//        default:
-//            break
-//        }
-//    }
-//    private func handleSwipeChange(_ gesture: UIPanGestureRecognizer) {
-//        let translation = gesture.translation(in: self)
-//        // 사용자가 왼쪽으로 스와이프 했을 때, contentView를 이동
-//        if translation.x < -50 {
-//            UIView.animate(withDuration: 0.2, animations: {
-//                self.contentView.transform = CGAffineTransform(translationX: -100, y: 0)
-//                self.deleteButton.isHidden = false
-//            })
-//        } else {
-//            resetContentViewPosition()
-//        }
-//    }
-//    private func resetContentViewPosition() {
-//        UIView.animate(withDuration: 0.2, animations: {
-//            self.contentView.transform = .identity
-//            self.deleteButton.isHidden = true
-//        })
-//    }
-//    private func handleSwipeEnd(_ gesture: UIPanGestureRecognizer) {
-//        // 스와이프가 끝났을 때, 애니메이션으로 원래대로 복귀
-//        UIView.animate(withDuration: 0.3, animations: {
-//            self.contentView.transform = .identity
-//        })
-//    }
-//}
-
 extension JournalCollectionViewCell {
     private func addSubView() {
         contentView.addSubview(contentTitle)
-        contentView.addSubview(contentText)
         contentView.addSubview(weatherIcon)
         contentView.addSubview(emotionIcon)
         contentView.addSubview(dateOfWriting)
@@ -207,12 +158,6 @@ extension JournalCollectionViewCell {
             make.height.equalTo(24)
             make.leading.equalTo(contentView.snp.leading).offset(15)
             make.trailing.equalTo(imageView.snp.leading).offset(-5)
-        }
-        contentText.snp.makeConstraints { make in
-            make.top.equalTo(contentTitle.snp.bottom).offset(4)
-            make.bottom.equalTo(weatherIcon.snp.top).offset(-4)
-            make.leading.equalTo(contentTitle.snp.leading).offset(0)
-            make.trailing.equalTo(contentTitle.snp.trailing).offset(0)
         }
         contentTextView.snp.makeConstraints { make in
             make.top.equalTo(contentTitle.snp.bottom).offset(4)
