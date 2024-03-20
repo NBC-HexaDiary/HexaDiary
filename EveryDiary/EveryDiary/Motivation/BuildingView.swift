@@ -16,19 +16,12 @@ protocol BuildingViewDelegate: AnyObject {
 }
 
 class BuildingView: UIView {
-    // Singleton 패턴을 사용하여 공유 인스턴스 생성
     static let shared = BuildingView()
     weak var delegate: BuildingViewDelegate?
 
-//    var windowImageCache = [Int: UIImage]()
-    // Firestore 관련 변수
     let db = Firestore.firestore()
     var diaryDays: Set<Int> = []
     
-    
-//    var listener: ListenerRegistration?
-    
-    // 빌딩 구조체 정의
     struct BuildingSize {
         let position: CGPoint
         let size: CGSize

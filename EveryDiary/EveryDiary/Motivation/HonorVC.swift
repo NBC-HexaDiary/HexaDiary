@@ -80,7 +80,6 @@ class HonorVC: UIViewController {
             
             let imageView = UIImageView()
             imageView.tag = month
-//            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
             
             let label = UILabel()
             label.text = "\(month)월"
@@ -142,21 +141,6 @@ class HonorVC: UIViewController {
             }
         }
     }
-//    @objc private func buttonTapped(sender: UIButton) {
-//        //버튼의 tag로 월을 식별
-//        let month = sender.tag
-//        //해당 월의 일자 데이터
-//        
-//        let detailVC = DetailVC()
-//        detailVC.daysSet = monthlyDiaries[month]
-//        
-//        if let daysSet = detailVC.daysSet, !daysSet.isEmpty {
-//            print("daysSet 배열에 데이터가 있습니다.")
-//        } else {
-//            print("daysSet 배열이 비어 있습니다.")
-//        }
-//        navigationController?.pushViewController(detailVC, animated: true)
-//    }
 }
 //MARK: - UI 설정
 extension HonorVC {
@@ -230,7 +214,6 @@ extension HonorVC {
             print("Diaries data is empty.")
             return
         }
-        
         var monthlyDiariesWithStrings = [Int: Set<String>]()
         
         for (month, days) in monthlyDiaries {
@@ -240,7 +223,6 @@ extension HonorVC {
             }
             monthlyDiariesWithStrings[month] = stringDays
         }
-        
         DispatchQueue.main.async {
             self.setupHonorStackViewButtonsAndLabels()
             self.setupButton(monthlyDiaries: monthlyDiariesWithStrings)
