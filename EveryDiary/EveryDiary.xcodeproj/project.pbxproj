@@ -26,6 +26,9 @@
 		3F3DE30F2BA1451600BC2038 /* TrashVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE30E2BA1451600BC2038 /* TrashVC.swift */; };
 		3F3DE3112BA1461200BC2038 /* TrashCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE3102BA1461200BC2038 /* TrashCollectionViewCell.swift */; };
 		3F7831502BA9943E00354211 /* CarouselFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F78314F2BA9943E00354211 /* CarouselFlowLayout.swift */; };
+		3F7831542BA9D2C700354211 /* ImagePickerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7831532BA9D2C700354211 /* ImagePickerManager.swift */; };
+		3F7831562BA9EC0700354211 /* MapManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7831552BA9EC0700354211 /* MapManager.swift */; };
+		3F7831582BA9FE4C00354211 /* KeyboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7831572BA9FE4C00354211 /* KeyboardManager.swift */; };
 		3F9E0A4F2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */; };
 		3F9E0A532BA352E5004BF1CB /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F9E0A522BA352E4004BF1CB /* MapKit.framework */; };
 		3F9E0A552BA35E72004BF1CB /* MapCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */; };
@@ -106,6 +109,9 @@
 		3F3DE30E2BA1451600BC2038 /* TrashVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashVC.swift; sourceTree = "<group>"; };
 		3F3DE3102BA1461200BC2038 /* TrashCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F78314F2BA9943E00354211 /* CarouselFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarouselFlowLayout.swift; sourceTree = "<group>"; };
+		3F7831532BA9D2C700354211 /* ImagePickerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerManager.swift; sourceTree = "<group>"; };
+		3F7831552BA9EC0700354211 /* MapManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapManager.swift; sourceTree = "<group>"; };
+		3F7831572BA9FE4C00354211 /* KeyboardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardManager.swift; sourceTree = "<group>"; };
 		3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F9E0A522BA352E4004BF1CB /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCollectionViewCell.swift; sourceTree = "<group>"; };
@@ -325,6 +331,9 @@
 			isa = PBXGroup;
 			children = (
 				6BB3CE3B2B85F606005BC3E1 /* WriteDiaryVC.swift */,
+				3F7831572BA9FE4C00354211 /* KeyboardManager.swift */,
+				3F7831532BA9D2C700354211 /* ImagePickerManager.swift */,
+				3F7831552BA9EC0700354211 /* MapManager.swift */,
 				3F78314F2BA9943E00354211 /* CarouselFlowLayout.swift */,
 				3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */,
 				3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */,
@@ -466,6 +475,7 @@
 				6B3C4CCA2B8ECF3F00C53005 /* LoginVC.swift in Sources */,
 				1AF880E22B8EC021004076EB /* EveryDiary++Bundle.swift in Sources */,
 				6BB3CE3E2B85F66E005BC3E1 /* SettingVC.swift in Sources */,
+				3F7831582BA9FE4C00354211 /* KeyboardManager.swift in Sources */,
 				D26829F02B99A16F00A1F0E5 /* DailyListCell.swift in Sources */,
 				3F9E0A592BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift in Sources */,
 				1A2BA69E2B90185E0019D1D5 /* LaunchViewController.swift in Sources */,
@@ -486,6 +496,7 @@
 				1A6D90682BA05B8600DEBB12 /* PaginationManager.swift in Sources */,
 				6B3C4CCF2B8EE80700C53005 /* NotificationVC.swift in Sources */,
 				6BABC36B2B85D107009267B3 /* SceneDelegate.swift in Sources */,
+				3F7831562BA9EC0700354211 /* MapManager.swift in Sources */,
 				3F0FEFED2B8DFDB2001539AE /* DateSelectVC.swift in Sources */,
 				3F7831502BA9943E00354211 /* CarouselFlowLayout.swift in Sources */,
 				3F0BD0072BA1A034000DD35B /* ImageZoomViewController.swift in Sources */,
@@ -497,6 +508,7 @@
 				6B42613D2B8C579F00F12CE3 /* BuildingView.swift in Sources */,
 				6BB3CE352B85EFB1005BC3E1 /* TabBarController.swift in Sources */,
 				D26E2F9F2B90239A0083FEAC /* SignOutCell.swift in Sources */,
+				3F7831542BA9D2C700354211 /* ImagePickerManager.swift in Sources */,
 				D26E2F9D2B9023400083FEAC /* ProfileCell.swift in Sources */,
 				6B3C4CCD2B8EDACD00C53005 /* SettingCell.swift in Sources */,
 				3F0FEFEB2B8D88B9001539AE /* HeaderView.swift in Sources */,

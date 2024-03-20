@@ -4,19 +4,20 @@
 //
 //  Created by t2023-m0044 on 2/21/24.
 //
-import Contacts
 import CoreLocation
-import MapKit
-import PhotosUI
 import UIKit
 
 import Firebase
 import SnapKit
 
-class WriteDiaryVC: UIViewController {
+class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     
     weak var delegate: DiaryUpdateDelegate?     // Delegate 프로토콜을 통한 데이터 업데이트 각 VC 통지
     private var diaryManager = DiaryManager()
+    private var imagePickerManager = ImagePickerManager()
+    private var mapManager = MapManager()
+    private var keyboardManager: KeyboardManager?
+    let weatherService = WeatherService()
     
     private var selectedEmotion = "happy"
     private var selectedWeather = "Vector"
@@ -132,9 +133,6 @@ class WriteDiaryVC: UIViewController {
     }()
     private var imagesLocationInfo: [ImageLocationInfo] = []                // 이미지와 meta정보를 저장하는 배열
     private var imageCollectionViewHeightConstraint: NSLayoutConstraint?    // collectionView의 높이
-    
-    // 날씨 정보 라벨
-    let weatherService = WeatherService()
     private let weatherDescriptionLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
@@ -168,13 +166,14 @@ class WriteDiaryVC: UIViewController {
         view.backgroundColor = .mainBackground
         addSubView()
         setLayout()
-        registerKeyboardNotifications()
+        setupKeyboardManager()
         loadWeatherData()
         setupToolbar()
         setTapGesture()
+        imagePickerManager.delegate = self
     }
     deinit {
-        unregisterKeyboardNotifications()
+        keyboardManager?.unregisterKeyboardNotifications()
     }
 }
 
@@ -341,7 +340,7 @@ extension WriteDiaryVC {
         // 이미지 URL 배열에서 각 이미지와 메타데이터를 다운로드
         let group = DispatchGroup()
         diary.imageURL?.forEach { urlString in
-            guard let imageURL = URL(string: urlString) else { return }
+            guard URL(string: urlString) != nil else { return }
             group.enter()
             FirebaseStorageManager.downloadImage(urlString: urlString) { [weak self] downloadedImage, metadata in
                 defer { group.leave() }
@@ -350,14 +349,12 @@ extension WriteDiaryVC {
                 let locationInfoString = metadata?["location"] ?? "Unknown"
                 let assetIdentifier = metadata?["assetIdentifier"]
                 if let assetIdentifier = assetIdentifier {
-                    self.selectedPhotoIdentifiers.append(assetIdentifier)
+                    self.imagePickerManager.selectedPhotoIdentifiers.append(assetIdentifier)
                 }
                 let locationInfo = self.locationInfoFromString(locationInfoString)
                 // 메타데이터를 포함한 ImageLocationInfo 객체 생성
                 let imageLocationInfo = ImageLocationInfo(image: image, locationInfo: locationInfo, assetIdentifier: assetIdentifier, captureTime: captureTime, location: locationInfoString)
                 self.imagesLocationInfo.append(imageLocationInfo)
-                print("imageLocationInfo: \(imageLocationInfo)")
-                print("locationInfo: \(locationInfo)")
             }
         }
         
@@ -485,16 +482,7 @@ extension WriteDiaryVC {
     private func addSubView() {
         self.view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-        contentView.addSubview(datePickingButton)
-        contentView.addSubview(completeButton)
-        contentView.addSubview(updateButton)
-        contentView.addSubview(allowEditButton)
-        contentView.addSubview(photoButton)
-        contentView.addSubview(emotionButton)
-        contentView.addSubview(weatherButton)
-        contentView.addSubview(titleTextField)
-        contentView.addSubview(contentTextView)
-        contentView.addSubview(imagesCollectionView)
+        contentView.addSubViews([datePickingButton, completeButton, updateButton, allowEditButton, photoButton, emotionButton, weatherButton, titleTextField, contentTextView, imagesCollectionView])
     }
     private func setLayout() {
         scrollView.snp.makeConstraints { make in
@@ -503,9 +491,7 @@ extension WriteDiaryVC {
         }
         
         contentView.snp.makeConstraints { make in
-            make.top.bottom.equalTo(scrollView)
-            make.leading.trailing.equalTo(scrollView)
-            make.width.equalTo(scrollView)
+            make.edges.width.equalTo(scrollView)
             // contentView의 높이는 최소 scrollView의 높이와 같거아 더 크도록 설정
             make.height.greaterThanOrEqualTo(scrollView).priority(.low)
         }
@@ -578,28 +564,10 @@ extension WriteDiaryVC {
 
 // MARK: NotificationCenter(키보드 높이 조절) & 키보드 return 기능
 extension WriteDiaryVC: UITextFieldDelegate {
-    private func registerKeyboardNotifications() {
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-    private func unregisterKeyboardNotifications() {
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-    @objc func keyboardWillShow(notification: NSNotification) {
-        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-            let keyboardHeight = keyboardSize.height
-            UIView.animate(withDuration: 0.3) {
-                self.scrollViewBottomConstraint?.update(inset: keyboardHeight - self.view.safeAreaInsets.bottom)
-                self.view.layoutIfNeeded()
-            }
-        }
-    }
-    @objc func keyboardWillHide(notification: NSNotification) {
-        UIView.animate(withDuration: 0.3) {
-            self.scrollViewBottomConstraint?.update(inset: 0)
-            self.view.layoutIfNeeded()
-        }
+    private func setupKeyboardManager() {
+        guard let scrollViewBottomConstraint = scrollViewBottomConstraint else { return }
+        keyboardManager = KeyboardManager(scrollView: scrollView, bottomConstraint: scrollViewBottomConstraint, viewController: self)
+        keyboardManager?.registerKeyboardNotifications()
     }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField == self.titleTextField {
@@ -610,131 +578,20 @@ extension WriteDiaryVC: UITextFieldDelegate {
 }
 
 // MARK: PHPickerControllerDelegate
-extension WriteDiaryVC: PHPickerViewControllerDelegate {
+extension WriteDiaryVC {
     // 사진 접근 권한 요청 로직
     @objc func photoButtonTapped() {
-        // 사진첩에 대해 읽고 쓰기가 가능하도록 권한 확인 및 요청
-        PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
-            switch status {
-            case .notDetermined:    // 사용자가 아직 권한을 부여하지 않은 상태
-                DispatchQueue.main.async {
-                    // FIXME: UIAlert로 수정(취소 or 설정으로 보내기)
-                    print("갤러리를 불러올 수 없습니다. 핸드폰 설정에서 사진 접근 허용을 모든 사진으로 변경해주세요.")
-                }
-            case .denied, .restricted:  // 접근권한이 거부되었거나 제한된 상타
-                DispatchQueue.main.async {
-                    // FIXME: UIAlert로 수정(취소 or 설정으로 보내기)
-                    print("갤러리를 불러올 수 없습니다. 핸드폰 설정에서 사진 접근 허용을 모든 사진으로 변경해주세요.")
-                }
-            case .authorized, .limited: // 모두 허용, 일부 허용
-                // 허용된 상태라면 PHPickerController 호출
-                self.loadPHPickerViewController()
-            @unknown default:   // 알 수 없는 상태
-                print("PHPhotoLibrary::execute - \"Unkown case\"")
-            }
-        }
+        print("selectedPhotoIdentifiers: \(self.selectedPhotoIdentifiers)")
+        imagePickerManager.requestPhotoLibraryAccess(from: self)
     }
-    // 접근 권한 획득 시, PHPickerViewController를 호출하는 메서드
-    private func loadPHPickerViewController() {
-        var configuration = PHPickerConfiguration(photoLibrary: .shared())
-        configuration.selectionLimit = 3    // 사용자가 선택할 수 있는 이미지의 최대 개수
-        configuration.selection = .ordered  // 선택 순서 지정
-        configuration.filter = .images  // 이미지만 선택할 수 있도록 필터링
-        
-        // 이미 선택한 이미지가 있을 경우, 이를 picker에서 사전 선택된 상태로 설정
-        configuration.preselectedAssetIdentifiers = selectedPhotoIdentifiers
-        
-        DispatchQueue.main.async {
-            let picker = PHPickerViewController(configuration: configuration)
-            picker.delegate = self
-            self.present(picker, animated: true)
-        }
-    }
-    
-    // didFinishPicking 메서드(사진 선택 완료시 호출되는 메서드). 선택한 이미지를 처리.
-    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true)  // 선택완료 -> picker dimiss
-        
-        var newImagesLocationInfo: [ImageLocationInfo] = []
-        
-        // 새로운 결과에 가빈한 identifier 목록을 생성합니다.
-        let newResultsIdentifiers = results.compactMap { $0.assetIdentifier}
-        
-        // 기존에 선택된 이미지 중에서 새로운 결과에 포함되지 않은 항목을 제외합니다.
-        let retainedImages = imagesLocationInfo.filter { newResultsIdentifiers.contains($0.assetIdentifier ?? "") }
-        
-        // 신규 선택된 사진 식별자를 기반으로 새로운 ImageLocationInfo 배열을 구성
-        newImagesLocationInfo.append(contentsOf: retainedImages)
-        
-        let group = DispatchGroup() // 모든 비동기작업을 추적하기 위한 DispatchGroup
-        
-        for result in results {
-            // 새로 선택된 이미지의 assetIdentifier 저장
-            guard let assetIdentifier = result.assetIdentifier, !retainedImages.contains(where: { $0.assetIdentifier == assetIdentifier}) else { continue }
-            let itemProvider = result.itemProvider
-            group.enter()   // 그룹에 작업 추가
-            
-            // itemProver를 통해 선택한 이미지에 대한 처리 시작
-            if itemProvider.canLoadObject(ofClass: UIImage.self) {  // itemProvider가 UIImage 객체를 로드할 수 있는지 확인
-                itemProvider.loadObject(ofClass: UIImage.self) { [weak self] (image, error) in
-                    defer { group.leave() }
-                    guard let self = self, let image = image as? UIImage else {
-                        return
-                    }
-                    
-                    // PHAsset에서 assetIdentifier로 촬영시간과 location을 추출
-                    let assets = PHAsset.fetchAssets(withLocalIdentifiers: [assetIdentifier], options: nil)
-                    
-                    if let asset = assets.firstObject {
-                        let captureTime = asset.creationDate
-                        let location = asset.location
-                        
-                        // 위치 정보가 있을 경우에만 locationInfo생성
-                        if let location = location {
-                            let imageLocationInfo = ImageLocationInfo(
-                                image: image,
-                                locationInfo: LocationInfo(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude),
-                                assetIdentifier: assetIdentifier,
-                                captureTime: captureTime?.description ?? "Unknown",
-                                location: "\(location.coordinate.latitude), \(location.coordinate.longitude)"
-                            )
-                            
-                            DispatchQueue.main.async {
-                                newImagesLocationInfo.append(imageLocationInfo)
-                            }
-                        } else {
-                            // 위치 정보가 없는 경우
-                            let imageLocationInfo = ImageLocationInfo(
-                                image: image,
-                                locationInfo: nil,
-                                assetIdentifier: assetIdentifier,
-                                captureTime: "Unknown",
-                                location: "Unknown"
-                            )
-                            
-                            DispatchQueue.main.async {
-                                newImagesLocationInfo.append(imageLocationInfo)
-                            }
-                        }
-                    }
-                }
-            } else {
-                group.leave()
-            }
-        }
-        // 모든 선택된 사진에 대한 처리 수행 후 변수 및 UI 업데이트 실행
-        group.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            // imagesLocationInfo 배열을 새로운 정보로 업데이트
-            self.imagesLocationInfo = newImagesLocationInfo
-            // 선택된 사진 identifier 배열 업데이트
-            self.selectedPhotoIdentifiers = newResultsIdentifiers
-            // UI 업데이트
-            self.imagesCollectionView.reloadData()
-            self.updateImageCollectionViewHeight()
-            print("newImagesLocationInfo: \(newImagesLocationInfo)")
-            print("newSelectedIdentifiers: \(newResultsIdentifiers)")
-        }
+    func didPickImages(_ imagesLocationInfo: [ImageLocationInfo], retainedIdentifiers: [String]) {
+        // 선택된 이미지와 메타데이터를 처리하는 로직
+        self.imagesLocationInfo = imagesLocationInfo
+        self.selectedPhotoIdentifiers = retainedIdentifiers
+        self.imagesCollectionView.reloadData()
+        self.updateImageCollectionViewHeight()
+        print("imagesLocationInfo: \(self.imagesLocationInfo)")
+        print("selectedPhotoIdentifiers: \(self.selectedPhotoIdentifiers)")
     }
 }
 
@@ -823,7 +680,7 @@ extension WriteDiaryVC {
                     let weatherDescription = weatherResponce.weather.first?.description ?? "날씨정보 없음"
                     let temperature = weatherResponce.main.temp
                     self?.weatherDescriptionLabel.text = "\(weatherDescription)"
-                    self?.weatherTempLabel.text = "\(String(format: "%.1f", temperature))℃"
+                    self?.weatherTempLabel.text = "\(Int(round(temperature)))℃"
                 case .failure(let error):
                     print("Load weather failed: \(error)")
                     self?.weatherDescriptionLabel.text = "일기를 불러오지 못했습니다."
@@ -945,15 +802,16 @@ extension WriteDiaryVC: MapCollectionViewCellDelegate {
         
         // 애플 맵 액션
         let openInAppleMaps = UIAlertAction(title: "Apple Maps에서 열기", style: .default) { [weak self] _ in
-            self?.getPlaceName(latitude: latitude, longitude: longitude) { placeName in
+            self?.mapManager.getPlaceName(latitude: latitude, longitude: longitude) { placeName in
                 DispatchQueue.main.async {
-                    self?.openAppleMapsForPlace(placeName: placeName)
+                    // `getPlaceName` 메서드를 통해 얻은 `placeName`을 사용하여 Apple Maps 열기
+                    self?.mapManager.openAppleMaps(latitude: latitude, longitude: longitude, placeName: placeName)
                 }
             }
         }
         // 구글 앱 액션
         let openInGoogleMaps = UIAlertAction(title: "Google Maps에서 열기", style: .default) { [weak self] _ in
-            self?.openGoogleMapsForPlace(latitude: latitude, longitude: longitude)
+            self?.mapManager.openGoogleMapsForPlace(latitude: latitude, longitude: longitude)
         }
         // 취소 액션
         let cancelAction = UIAlertAction(title: "취소", style: .cancel)
@@ -963,71 +821,6 @@ extension WriteDiaryVC: MapCollectionViewCellDelegate {
         alert.addAction(openInGoogleMaps)
         alert.addAction(cancelAction)
         present(alert, animated: true)
-    }
-    private func openGoogleMapsForPlace(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
-        // 구글 맵스 앱 URL 스키마 정의
-        let googleMapsAppURL = URL(string: "comgooglemaps://?q=\(latitude),\(longitude)&center=\(latitude),\(longitude)&zoom=14&map_action=pin")
-
-        // 웹에서 구글 맵스 열기 위한 URL 정의
-        let googleMapsWebURL = URL(string: "https://www.google.com/maps/search/?api=1&query=\(latitude),\(longitude)")
-
-        // 앱이 설치되어 있는지 확인 후 앱으로 열기
-        if let googleMapsAppURL = googleMapsAppURL, UIApplication.shared.canOpenURL(googleMapsAppURL) {
-            UIApplication.shared.open(googleMapsAppURL, options: [:], completionHandler: nil)
-        }
-        // 앱이 설치되어 있지 않은 경우 웹 URL로 대체
-        else if let googleMapsWebURL = googleMapsWebURL {
-            UIApplication.shared.open(googleMapsWebURL, options: [:], completionHandler: nil)
-        }
-    }
-    
-    private func openAppleMapsForPlace(placeName: String) {
-        let geocoder = CLGeocoder()
-        geocoder.geocodeAddressString(placeName) { (placemarks, error) in
-            guard let placemark = placemarks?.first, let location = placemark.location else {
-                print("장소를 찾을 수 없습니다.")
-                return
-            }
-            let regionDistance: CLLocationDistance = 1000
-            let coordinates = location.coordinate
-            let regionSpan = MKCoordinateRegion(center: coordinates, latitudinalMeters: regionDistance, longitudinalMeters: regionDistance)
-            let options = [
-                MKLaunchOptionsMapCenterKey: NSValue(mkCoordinate: regionSpan.center),
-                MKLaunchOptionsMapSpanKey: NSValue(mkCoordinateSpan: regionSpan.span)
-            ]
-            
-            let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinates, addressDictionary: nil))
-            mapItem.name = placeName
-            mapItem.openInMaps(launchOptions: options)
-        
-        }
-    }
-    
-    private func getPlaceName(latitude: CLLocationDegrees, longitude: CLLocationDegrees, completion: @escaping (String) -> Void) {
-        let location = CLLocation(latitude: latitude, longitude: longitude)
-        let geocoder = CLGeocoder()
-
-        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
-            guard let placemark = placemarks?.first else {
-                print("장소 정보를 찾을 수 없습니다.")
-                completion("Unknown Location")
-                return
-            }
-
-            // 장소명이 있는 경우 우선 사용
-            if let placeName = placemark.name {
-                completion(placeName)
-            }
-            // 장소명이 없는 경우, 포맷된 주소 사용
-            else if let addressDictionary = placemark.postalAddress {
-                    let formattedAddress = CNPostalAddressFormatter.string(from: addressDictionary, style: .mailingAddress)
-                completion(formattedAddress)
-            }
-            // 둘 다 없는 경우, 알 수 없는 위치 처리
-            else {
-                completion("Unknown Location")
-            }
-        }
     }
 }
 
@@ -1069,5 +862,10 @@ extension WriteDiaryVC {
             let indexPath = IndexPath(item: index, section: 0)
             imagesCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
         }
+    }
+}
+extension UIView{
+    func addSubViews(_ views : [UIView]){
+        _ = views.map{self.addSubview($0)}
     }
 }
