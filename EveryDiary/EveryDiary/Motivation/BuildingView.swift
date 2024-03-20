@@ -175,7 +175,7 @@ class BuildingView: UIView {
     //창문 이미지로 랜더링하여 반환
     func cacheWindowImageIfNeeded(windowIndex: Int, color: UIColor, windowSize: CGSize) {
         if MotivationImageCache.shared.getImage(forKey: "window_\(windowIndex)") != nil {
-            print("Image for window \(windowIndex) is cached.")
+//            print("Image for window \(windowIndex) is cached.")
             return
         } else {
             let renderer = UIGraphicsImageRenderer(size: windowSize)
@@ -267,13 +267,13 @@ class BuildingView: UIView {
                 cacheWindowImageIfNeeded(windowIndex: windowOrder, color: .yellow, windowSize: CGSize(width: windowWidth, height: windowHeight))
                 let windowLayer = createWindowLayer(at: windowPosition, color: .yellow, windowIndex: windowOrder)
                 buildingLayer.addSublayer(windowLayer)
-                print("Window \(windowOrder): 데이터 있음")
+//                print("Window \(windowOrder): 데이터 있음")
                 windowOrder += 1
             } else {
                 cacheWindowImageIfNeeded(windowIndex: windowOrder, color: .darkGray, windowSize: CGSize(width: windowWidth, height: windowHeight))
                 let windowLayer = createWindowLayer(at: windowPosition, color: .darkGray, windowIndex: windowOrder)
                 buildingLayer.addSublayer(windowLayer)
-                print("Window \(windowOrder): 데이터 없음")
+//                print("Window \(windowOrder): 데이터 없음")
             }
         }
     }
@@ -310,7 +310,7 @@ extension BuildingView {
                 }
                 diaries = diaries.filter { !$0.isDeleted }
                 DispatchQueue.main.async { // 메인 스레드에서 로그를 출력합니다.
-                    print("Fetched diaries: \(diaries)")
+//                    print("Fetched diaries: \(diaries)")
                 }
                 completion(diaries, nil)
             }
