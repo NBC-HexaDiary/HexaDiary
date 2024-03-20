@@ -13,7 +13,7 @@ class FirebaseStorageManager {
     static func uploadImage(image: [UIImage], pathRoot: String, assetIdentifier: String, captureTime: String? = nil, location: String? = nil, completion: @escaping ([URL]?) -> Void) {
         var uploadedURL: [URL] = []
         let dispatchGroup = DispatchGroup()
-
+        
         for image in image {
             guard let imageData = image.jpegData(compressionQuality: 0.4) else {
                 completion(nil)
@@ -44,7 +44,7 @@ class FirebaseStorageManager {
                     }
                     dispatchGroup.leave()
                 }
-
+                
             }
         }
         

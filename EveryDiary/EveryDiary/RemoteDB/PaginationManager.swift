@@ -64,7 +64,6 @@ class PaginationManager {
             if let lastDocument = snapshot.documents.last {
                 self.lastDocumentSnapshot = lastDocument
             }
-            
             completion(entries)
         }
     }
