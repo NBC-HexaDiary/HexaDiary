@@ -243,7 +243,7 @@ extension DiaryListVC: UICollectionViewDataSource {
             
             // 날짜 포맷 변경
             if let date = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) {
-                let formattedDateString = DateFormatter.yyyyMMdd.string(from: date)
+                let formattedDateString = DateFormatter.yyyyMMDD.string(from: date)
                 
                 cell.setJournalCollectionViewCell(
                     title: diary.title,

@@ -66,4 +66,5 @@ extension DateFormatter {
     static let yyyyMMdd: DateFormatter = createFormatter(dateFormat: "yyyy-MM-dd")
     static let yyyyMM: DateFormatter = createFormatter(dateFormat: "yyyy.MM")
     static let yyyyMMddE: DateFormatter = createFormatter(dateFormat: "yyyy. MM. dd(E)")
+    static let yyyyMMDD: DateFormatter = createFormatter(dateFormat: "yyyy.MM.dd")
 }
