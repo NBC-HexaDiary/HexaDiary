@@ -16,7 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
             window = UIWindow(windowScene: windowScene)
             
-            let mainVC = TabBarController() // 앱의 메인 화면
+            let mainVC = LaunchViewController() // 앱의 메인 화면
             var rootViewController: UIViewController
             
             // UserDefaults를 사용하여 최초 실행 여부를 확인합니다.
@@ -25,7 +25,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 rootViewController = mainVC
             } else {
                 // 최초 실행이라면 스타트 뷰 컨트롤러를 보여줍니다.
-                let startVC = StartVC() // 최초 실행 시 보여줄 화면
+                let startVC = LaunchViewController() // 최초 실행 시 보여줄 화면
                 rootViewController = UINavigationController(rootViewController: startVC)
             }
             
