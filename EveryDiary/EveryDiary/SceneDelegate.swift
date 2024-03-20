@@ -13,35 +13,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+       
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
-        
         let mainVC = TabBarController() // 앱의 메인 화면
+        window?.rootViewController = mainVC
+        window?.makeKeyAndVisible()
+        
         let securityVC = LaunchViewController()
-        var rootViewController: UIViewController
         
         // UserDefaults를 사용하여 최초 실행 여부를 확인합니다.
         if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
             if UserDefaults.standard.bool(forKey: "BiometricsEnabled"){
-                rootViewController = securityVC
+                window?.rootViewController = securityVC
+            } else {
+                // 최초 실행이 아니라면 탭 바 컨트롤러를 보여줍니다.
+                window?.rootViewController = mainVC
             }
-            // 최초 실행이 아니라면 탭 바 컨트롤러를 보여줍니다.
-            rootViewController = mainVC
         } else {
             // 최초 실행이라면 스타트 뷰 컨트롤러를 보여줍니다.
             let startVC = StartVC() // 최초 실행 시 보여줄 화면
-            rootViewController = UINavigationController(rootViewController: startVC)
+            startVC.modalPresentationStyle = .fullScreen
+            window?.rootViewController?.present(startVC, animated: true, completion: nil)
         }
         
-        window?.rootViewController = rootViewController
-        window?.makeKeyAndVisible()
-        //        guard let windowScene = (scene as? UIWindowScene) else { return }
-        //        window = UIWindow(windowScene: windowScene)
-        //        let mainVC = TabBarController()
-        //        let navigationController = UINavigationController(rootViewController: mainVC)
-        //        window?.rootViewController = navigationController
-        //        window?.makeKeyAndVisible()
-        
+
         //강제로 다크모드 해제
         window?.overrideUserInterfaceStyle = .light
     }

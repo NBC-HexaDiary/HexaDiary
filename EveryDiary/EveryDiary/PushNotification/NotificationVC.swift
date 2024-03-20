@@ -32,7 +32,7 @@ class NotificationVC: UIViewController {
         tableView.register(DateCell.self, forCellReuseIdentifier: DateCell.id)
         tableView.register(TimePickerCell.self, forCellReuseIdentifier: TimePickerCell.id)
         tableView.register(DayPickerCell.self, forCellReuseIdentifier: DayPickerCell.id)
-        tableView.isScrollEnabled = false
+        tableView.isScrollEnabled = true
         tableView.backgroundColor = .mainBackground
         tableView.separatorStyle = .singleLine
         tableView.clipsToBounds = true
@@ -211,18 +211,6 @@ extension NotificationVC : UITableViewDelegate, UITableViewDataSource {
             // 셀의 모서리를 둥글게 처리하는 패스 생성
             let cornerRadius: CGFloat = 20
             let path = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: cell.frame.width, height: cellHeight), byRoundingCorners: [.bottomLeft, .bottomRight], cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
-            maskLayer.path = path.cgPath
-            
-            // 셀의 마지막 셀이므로 둥근 모서리를 적용
-            cell.layer.mask = maskLayer
-        } else if indexPath.row == 4 {
-            // 셀의 높이와 경계를 가져옴
-            let cellHeight = cell.frame.size.height
-            let maskLayer = CAShapeLayer()
-            
-            // 셀의 모서리를 둥글게 처리하는 패스 생성
-            let cornerRadius: CGFloat = 20
-            let path = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: cell.frame.width, height: cellHeight), byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: cornerRadius, height: cornerRadius))
             maskLayer.path = path.cgPath
             
             // 셀의 마지막 셀이므로 둥근 모서리를 적용

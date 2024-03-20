@@ -121,6 +121,7 @@ extension DiaryListVC {
         self.navigationItem.leftBarButtonItem?.isHidden = true
         self.navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
         self.navigationController?.navigationBar.tintColor = .mainTheme
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: themeLabel)
     }
     private func setNavigationItem(imageNamed name: String, titleText: String, for action: Selector) -> UIBarButtonItem {
         var config = UIButton.Configuration.plain()
@@ -420,7 +421,7 @@ extension DiaryListVC: UISearchBarDelegate {
 // MARK: addSubViews, autoLayout
 extension DiaryListVC {
     private func addSubviews() {
-        view.addSubview(themeLabel)
+//        view.addSubview(themeLabel)
         view.addSubview(journalCollectionView)
         view.addSubview(writeDiaryButton)
     }
@@ -436,11 +437,11 @@ extension DiaryListVC {
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
         }
-        themeLabel.snp.makeConstraints { make in
-            make.top.equalTo(view).offset(50)
-            make.left.equalTo(view).offset(16)
-            make.size.equalTo(CGSize(width:120, height: 50))
-        }
+//        themeLabel.snp.makeConstraints { make in
+//            make.top.equalTo(view).offset(50)
+//            make.left.equalTo(view).offset(16)
+//            make.size.equalTo(CGSize(width:120, height: 50))
+//        }
     }
 }
 
