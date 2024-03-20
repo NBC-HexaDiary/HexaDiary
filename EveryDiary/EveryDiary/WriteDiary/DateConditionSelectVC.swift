@@ -31,7 +31,7 @@ class DateConditionSelectVC: UIViewController, UICollectionViewDataSource, UICol
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 100, height: 100)
+//        layout.itemSize = CGSize(width: 100, height: 100)
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.dataSource = self
@@ -49,17 +49,12 @@ class DateConditionSelectVC: UIViewController, UICollectionViewDataSource, UICol
         collectionView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
 //                collectionView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: (-size)),
-                collectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: arrowSize + 5),
-                collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -5),
+                collectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
+                collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
                 collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
                 collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             ])
     }
-    
-//    override func viewDidLayoutSubviews() {
-//        super.viewDidLayoutSubviews()
-////        collectionView.frame = view.bounds
-//    }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch conditionType {
@@ -93,7 +88,7 @@ class DateConditionSelectVC: UIViewController, UICollectionViewDataSource, UICol
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let height = collectionView.bounds.height
+        let height = collectionView.bounds.height * 0.7
         let width = height
         return CGSize(width: width, height: height)
     }
