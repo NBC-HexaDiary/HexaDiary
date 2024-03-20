@@ -20,6 +20,13 @@ class LockVC: UIViewController {
         return switchControl
     }()
     
+    private let iconImageView : UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "lock")
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "생체 인식 잠금"
@@ -36,24 +43,27 @@ class LockVC: UIViewController {
         return view
     }()
     
-    private let biometricsAuth = BiometricsAuth()
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupUI()
-    }
-
-    private func setupUI() {
-        view.backgroundColor = .mainBackground
-        
-        view.addSubview(backgroundView)
-        
+    private let stackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
-        stackView.spacing = 10
+        stackView.spacing = 16
         stackView.alignment = .center
         stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    private let biometricsAuth = BiometricsAuth()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .mainBackground
+        setupUI()
+    }
+    
+    private func setupUI() {
+        view.addSubview(backgroundView)
         
+        stackView.addArrangedSubview(iconImageView)
         stackView.addArrangedSubview(titleLabel)
         stackView.addArrangedSubview(biometricsSwitch)
         
@@ -63,20 +73,23 @@ class LockVC: UIViewController {
             make.top.equalTo(view.safeAreaLayoutGuide).offset(10)
             make.leading.equalTo(view.safeAreaLayoutGuide).offset(10)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-10)
-            make.width.equalTo(350)
-            make.height.equalTo(55)
+            make.height.equalTo(50)
+        }
+        
+        iconImageView.snp.makeConstraints { make in
+            make.width.height.equalTo(25)
         }
         
         stackView.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(10)
         }
-
+        
         biometricsSwitch.addTarget(self, action: #selector(switchValueChanged(_:)), for: .valueChanged)
-
+        
         let isEnabled = UserDefaults.standard.bool(forKey: "BiometricsEnabled")
         biometricsSwitch.isOn = isEnabled
     }
-
+    
     @objc private func switchValueChanged(_ sender: UISwitch) {
         let isEnabled = sender.isOn
         UserDefaults.standard.set(isEnabled, forKey: "BiometricsEnabled")
