@@ -226,7 +226,7 @@ extension WriteDiaryVC {
             dateString: formattedDateString,
             imageUrls: uploadedImageURLs,
             useMetadataLocation: self.useMetadataLocation,
-            currentLocationInfo: currentLocationInfo
+            currentLocationInfo: self.currentLocationInfo
         )
         }
     }
@@ -520,7 +520,7 @@ extension WriteDiaryVC {
         print("selectedPhotoIdentifiers: \(self.selectedPhotoIdentifiers)")
     }
     func timeAndLocationChoiceAlert(time: String, address: String, completion: @escaping (Bool) -> Void) {
-        let alert = UIAlertController(title: "첨부파일의 날짜와 위치를 사용하시겠습니까?", message: "\(time), \(address)" , preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: "첨부파일의 날짜와 위치를 사용하시겠습니까?", message: "\(time)\n\(address)" , preferredStyle: .actionSheet)
         
         let useMetadataAction = UIAlertAction(title: "예", style: .default) { [weak self] _ in
             guard let self = self else { return }
@@ -531,11 +531,13 @@ extension WriteDiaryVC {
                 self.datePickingButton.setTitle(dateString, for: .normal)
             }
             self.useMetadataLocation = true
+            self.refreshMapCell()
             completion(true)    // 사진의 메타데이터로 시간&위치 저장
         }
         
         let useCurrentAction = UIAlertAction(title: "아니오", style: .default) { _ in
             self.useMetadataLocation = false
+            self.refreshMapCell()
             completion(false)   // 현재 위치로 시간&위치 저장
         }
         
@@ -567,20 +569,29 @@ extension WriteDiaryVC: UICollectionViewDataSource, UICollectionViewDelegate, UI
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MapCollectionViewCell.reuseIdentifier, for: indexPath) as? MapCollectionViewCell else {
                 fatalError("Unable to dequeue MapCollectionViewCell")
             }
-            if useMetadataLocation {
+            if self.useMetadataLocation {
                 // 사진에 설정된 위치로 맵 셀 구성
                 let locationInfos = imagesLocationInfo.compactMap { $0.locationInfo }
                 cell.configureMapWith(locationsInfo: locationInfos)
-                print("locationInfos: \(locationInfos)")
-            } else {
+                print("imagesLocationInfo: \(locationInfos)")
+            } else if !self.useMetadataLocation {
                 // 현재 위치로 맵 셀 구성
-                cell.currentLocationInfo = currentLocationInfo
+                cell.currentLocationInfo = self.currentLocationInfo
                 cell.configureMapCellWithCurrentLocation()
+                print("currentLocationInfo: \(String(describing: self.currentLocationInfo))")
             }
             cell.delegate = self
             return cell
         }
     }
+    private func refreshMapCell() {
+        DispatchQueue.main.async {
+            // 맵을 표시하는 셀만 새로고침
+            let indexPath = IndexPath(item: self.imagesLocationInfo.count, section: 0)
+            self.imagesCollectionView.reloadItems(at: [indexPath])
+        }
+    }
+    
     private func setupImageCollectionViewHeightConstraint() {
         imageCollectionViewHeightConstraint = imagesCollectionView.heightAnchor.constraint(equalToConstant: 0)   // 초기 높이를 0으로 설정
         imageCollectionViewHeightConstraint?.isActive = true

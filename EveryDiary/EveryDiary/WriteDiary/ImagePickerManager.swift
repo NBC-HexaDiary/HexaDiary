@@ -118,9 +118,9 @@ class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
                 // 위치 정보가 없는 경우 didPickImages만 호출
                 self.delegate?.didPickImages(newImagesLocationInfo, retainedIdentifiers: newResultsIdentifiers)
                 if let presentingViewController = self.presentingViewController {
-                    let alert = UIAlertController(title: "사진의 위치정보가 없습니다. 사용자의 현재 위치로 대체됩니다.", message: nil, preferredStyle: .actionSheet)
+                    let alert = UIAlertController(title: "위치정보 없음", message: "사진의 위치정보가 없습니다. 사용자의 현재 위치로 대체됩니다.", preferredStyle: .alert)
                     presentingViewController.present(alert, animated: true, completion: nil)
-                    Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
+                    Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
                 }
             }
         }
