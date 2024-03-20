@@ -57,66 +57,74 @@ class DiaryManager {
     
     //MARK: 일기 추가
     func addDiary(diary: DiaryEntry, completion: @escaping (Error?) -> Void) {
-        guard let userID = self.getUserID() else {
-            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
-            return
-        }
-        
-        let weatherService = WeatherService()
-        
-        // 날씨 정보 가져오기
-        weatherService.getWeather { result in
-            
-            // 날씨 정보 가져오기에 실패하더라도 일기는 추가됩니다.
-            // 날씨 정보를 가져올 수 없는 경우에 대비하여 기본값을 "Unknown"으로 설정
-            var weatherDescription = "Unknown"
-            var weatherTemp = 0.0
-            
-            if case .success(let weatherResponse) = result {
-                // 날씨 정보에서 날씨 설명 가져오기
-                weatherDescription = weatherResponse.weather.first?.description ?? "Unknown"
-                weatherTemp = weatherResponse.main.temp
-            }
-            
-            // 다이어리에 날씨 정보 추가
-            var diaryWithWeather = diary
-            
-            diaryWithWeather.weatherDescription = weatherDescription
-            diaryWithWeather.weatherTemp = weatherTemp
-            
-            // 현재 날짜 가져오기
-            let currentDate = Date()
-            
-            // 날짜가 현재 날짜와 다르다면 날씨를 비어 있도록 설정
-            if !Calendar.current.isDate(diary.date, inSameDayAs: currentDate) {
-                diaryWithWeather.weatherDescription = "Unknown"
-                diaryWithWeather.weatherTemp = 0
-            }
-            
-            // 다이어리 추가
-            var newDiaryWithUserID = diaryWithWeather
-            newDiaryWithUserID.userID = userID
-            let documentReference = DiaryManager.shared.db.collection("users").document(userID).collection("diaries").document()
-            newDiaryWithUserID.id = documentReference.documentID
-            
-            do {
-                try documentReference.setData(from: newDiaryWithUserID) { error in
-                    if let error = error {
-                        print("Error adding document: \(error)")
-                        completion(error)
-                    } else {
-                        // 일기가 추가된 후에는 일기 리스트를 업데이트합니다.
-                        self.fetchDiaries { (diaries, error) in
-                            if let error = error {
-                                print("Error fetching diaries after adding a new diary: \(error)")
-                            }
-                        }
-                        completion(nil)
-                    }
-                }
-            } catch {
-                print("Error adding document: \(error)")
+//        익명으로 사용자 인증하기
+        authenticateAnonymouslyIfNeeded { error in
+            if let error = error {
+                print("Error authenticating anonymously: \(error)")
                 completion(error)
+                return
+            }
+            guard let userID = self.getUserID() else {
+                completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+                return
+            }
+            
+            let weatherService = WeatherService()
+            
+            // 날씨 정보 가져오기
+            weatherService.getWeather { result in
+                
+                // 날씨 정보 가져오기에 실패하더라도 일기는 추가됩니다.
+                // 날씨 정보를 가져올 수 없는 경우에 대비하여 기본값을 "Unknown"으로 설정
+                var weatherDescription = "Unknown"
+                var weatherTemp = 0.0
+                
+                if case .success(let weatherResponse) = result {
+                    // 날씨 정보에서 날씨 설명 가져오기
+                    weatherDescription = weatherResponse.weather.first?.description ?? "Unknown"
+                    weatherTemp = weatherResponse.main.temp
+                }
+                
+                // 다이어리에 날씨 정보 추가
+                var diaryWithWeather = diary
+                
+                diaryWithWeather.weatherDescription = weatherDescription
+                diaryWithWeather.weatherTemp = weatherTemp
+                
+                // 현재 날짜 가져오기
+                let currentDate = Date()
+                
+                // 날짜가 현재 날짜와 다르다면 날씨를 비어 있도록 설정
+                if !Calendar.current.isDate(diary.date, inSameDayAs: currentDate) {
+                    diaryWithWeather.weatherDescription = "Unknown"
+                    diaryWithWeather.weatherTemp = 0
+                }
+                
+                // 다이어리 추가
+                var newDiaryWithUserID = diaryWithWeather
+                newDiaryWithUserID.userID = userID
+                let documentReference = DiaryManager.shared.db.collection("users").document(userID).collection("diaries").document()
+                newDiaryWithUserID.id = documentReference.documentID
+                
+                do {
+                    try documentReference.setData(from: newDiaryWithUserID) { error in
+                        if let error = error {
+                            print("Error adding document: \(error)")
+                            completion(error)
+                        } else {
+                            // 일기가 추가된 후에는 일기 리스트를 업데이트합니다.
+                            self.fetchDiaries { (diaries, error) in
+                                if let error = error {
+                                    print("Error fetching diaries after adding a new diary: \(error)")
+                                }
+                            }
+                            completion(nil)
+                        }
+                    }
+                } catch {
+                    print("Error adding document: \(error)")
+                    completion(error)
+                }
             }
         }
     }
