@@ -8,29 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1A03BDA12B92F910008C13DC /* FirebaseStorage */; };
-		1A03BDA42B92FA7D008C13DC /* FirebaseStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A03BDA32B92FA7D008C13DC /* FirebaseStorageManager.swift */; };
-		1A2BA69E2B90185E0019D1D5 /* LaunchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2BA69D2B90185E0019D1D5 /* LaunchViewController.swift */; };
-		1A6D90682BA05B8600DEBB12 /* PaginationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A6D90672BA05B8500DEBB12 /* PaginationManager.swift */; };
-		1A6D906C2BA1A39800DEBB12 /* StartVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A6D906B2BA1A39800DEBB12 /* StartVC.swift */; };
 		1A83D0B62BA9B1C5005DC6C6 /* LocalAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A83D0B52BA9B1C4005DC6C6 /* LocalAuthentication.framework */; };
 		1AF880D32B8DB5A2004076EB /* Api.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880D22B8DB5A2004076EB /* Api.plist */; };
-		1AF880D52B8DB715004076EB /* WeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D42B8DB715004076EB /* WeatherModel.swift */; };
-		1AF880D82B8DC135004076EB /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D72B8DC135004076EB /* WeatherService.swift */; };
-		1AF880E22B8EC021004076EB /* EveryDiary++Bundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */; };
-		1AF880E42B8F182B004076EB /* SetFaceID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880E32B8F182B004076EB /* SetFaceID.swift */; };
-		3F0BD0072BA1A034000DD35B /* ImageZoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0BD0062BA1A034000DD35B /* ImageZoomViewController.swift */; };
-		3F0FEFE92B8D8881001539AE /* JournalCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */; };
-		3F0FEFEB2B8D88B9001539AE /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */; };
-		3F0FEFED2B8DFDB2001539AE /* DateSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */; };
-		3F0FEFFA2B8F2819001539AE /* DateConditionSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */; };
-		3F3DE3042B9EFC0900BC2038 /* ImageCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE3032B9EFC0900BC2038 /* ImageCacheManager.swift */; };
-		3F3DE30F2BA1451600BC2038 /* TrashVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE30E2BA1451600BC2038 /* TrashVC.swift */; };
-		3F3DE3112BA1461200BC2038 /* TrashCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE3102BA1461200BC2038 /* TrashCollectionViewCell.swift */; };
-		3F7831502BA9943E00354211 /* CarouselFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F78314F2BA9943E00354211 /* CarouselFlowLayout.swift */; };
-		3F7831542BA9D2C700354211 /* ImagePickerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7831532BA9D2C700354211 /* ImagePickerManager.swift */; };
-		3F7831562BA9EC0700354211 /* MapManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7831552BA9EC0700354211 /* MapManager.swift */; };
-		3F7831582BA9FE4C00354211 /* KeyboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7831572BA9FE4C00354211 /* KeyboardManager.swift */; };
-		3F9E0A4F2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */; };
 		3F9E0A532BA352E5004BF1CB /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F9E0A522BA352E4004BF1CB /* MapKit.framework */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
 		6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */; };
@@ -46,54 +25,58 @@
 		6BB3CE482B8619D5005BC3E1 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE472B8619D5005BC3E1 /* FirebaseFirestoreSwift */; };
 		D20329842BA9D04A00D3A5DF /* calendar.json in Resources */ = {isa = PBXBuildFile; fileRef = D20329832BA9D04A00D3A5DF /* calendar.json */; };
 		D2F0EEFE2BA9F7FE008736F1 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = D2F0EEFD2BA9F7FE008736F1 /* Lottie */; };
-		D2F0EF002BAA7044008736F1 /* DiaryDataDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */; };
-		D2F0EF012BAA7044008736F1 /* NotificationName.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B342BA14A6600508230 /* NotificationName.swift */; };
-		D2F0EF022BAA7044008736F1 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D72B8DC135004076EB /* WeatherService.swift */; };
-		D2F0EF032BAA7044008736F1 /* EveryDiary++Bundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */; };
-		D2F0EF042BAA7044008736F1 /* SetFaceID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880E32B8F182B004076EB /* SetFaceID.swift */; };
-		D2F0EF052BAA7044008736F1 /* FireStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA011602B88790800A26CE0 /* FireStore.swift */; };
-		D2F0EF062BAA7044008736F1 /* Firebase\Manager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A03BDA32B92FA7D008C13DC /* FirebaseStorageManager.swift */; };
-		D2F0EF072BAA7044008736F1 /* PaginationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A6D90672BA05B8500DEBB12 /* PaginationManager.swift */; };
-		D2F0EF082BAA7044008736F1 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA0115E2B8878F600A26CE0 /* DataModel.swift */; };
-		D2F0EF092BAA7044008736F1 /* WeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D42B8DB715004076EB /* WeatherModel.swift */; };
-		D2F0EF0A2BAA7044008736F1 /* MotivationImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BE7C99E2BA07D2700374A2A /* MotivationImageCache.swift */; };
-		D2F0EF0B2BAA7044008736F1 /* MotivationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */; };
-		D2F0EF0C2BAA7044008736F1 /* BuildingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B42613C2B8C579F00F12CE3 /* BuildingView.swift */; };
-		D2F0EF0D2BAA7044008736F1 /* HonorVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA0115A2B886A9100A26CE0 /* HonorVC.swift */; };
-		D2F0EF0E2BAA7044008736F1 /* DetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B937F542BA6F30400691657 /* DetailVC.swift */; };
-		D2F0EF0F2BAA7044008736F1 /* DiaryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */; };
-		D2F0EF102BAA7044008736F1 /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */; };
-		D2F0EF112BAA7044008736F1 /* JournalCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */; };
-		D2F0EF122BAA7044008736F1 /* ImageCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE3032B9EFC0900BC2038 /* ImageCacheManager.swift */; };
-		D2F0EF132BAA7044008736F1 /* TrashVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE30E2BA1451600BC2038 /* TrashVC.swift */; };
-		D2F0EF142BAA7044008736F1 /* TrashCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE3102BA1461200BC2038 /* TrashCollectionViewCell.swift */; };
-		D2F0EF152BAA7044008736F1 /* CalendarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA011582B8852B400A26CE0 /* CalendarVC.swift */; };
-		D2F0EF162BAA7044008736F1 /* CalendarListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26E2FA02B90522D0083FEAC /* CalendarListVC.swift */; };
-		D2F0EF172BAA7044008736F1 /* DailyListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26829EF2B99A16F00A1F0E5 /* DailyListCell.swift */; };
-		D2F0EF182BAA7044008736F1 /* WriteDiaryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE3B2B85F606005BC3E1 /* WriteDiaryVC.swift */; };
-		D2F0EF192BAA7044008736F1 /* ImageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */; };
-		D2F0EF1A2BAA7044008736F1 /* MapCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */; };
-		D2F0EF1B2BAA7044008736F1 /* ImageZoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0BD0062BA1A034000DD35B /* ImageZoomViewController.swift */; };
-		D2F0EF1C2BAA7044008736F1 /* ImageZoomCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A562BA44CE2004BF1CB /* ImageZoomCollectionViewController.swift */; };
-		D2F0EF1D2BAA7044008736F1 /* ImageZoomCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A582BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift */; };
-		D2F0EF1E2BAA7044008736F1 /* DateConditionSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */; };
-		D2F0EF1F2BAA7044008736F1 /* DateSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */; };
-		D2F0EF202BAA7044008736F1 /* SettingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE3D2B85F66E005BC3E1 /* SettingVC.swift */; };
-		D2F0EF212BAA7044008736F1 /* SignOutCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26E2F9E2B90239A0083FEAC /* SignOutCell.swift */; };
-		D2F0EF222BAA7044008736F1 /* ProfileCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26E2F9C2B9023400083FEAC /* ProfileCell.swift */; };
-		D2F0EF232BAA7044008736F1 /* SettingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CCC2B8EDACD00C53005 /* SettingCell.swift */; };
-		D2F0EF242BAA7044008736F1 /* LockVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CD02B8EE81300C53005 /* LockVC.swift */; };
-		D2F0EF252BAA7044008736F1 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */; };
-		D2F0EF262BAA7044008736F1 /* NotificationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CCE2B8EE80700C53005 /* NotificationVC.swift */; };
-		D2F0EF272BAA7044008736F1 /* DateCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B878572BA2B01400AB71A0 /* DateCell.swift */; };
-		D2F0EF282BAA7044008736F1 /* NotificationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B878532BA29DCB00AB71A0 /* NotificationCell.swift */; };
-		D2F0EF292BAA7044008736F1 /* TimePickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B878592BA2BF3F00AB71A0 /* TimePickerCell.swift */; };
-		D2F0EF2A2BAA7044008736F1 /* DayPickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B8785B2BA2BF4A00AB71A0 /* DayPickerCell.swift */; };
-		D2F0EF2B2BAA7044008736F1 /* LaunchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2BA69D2B90185E0019D1D5 /* LaunchViewController.swift */; };
-		D2F0EF2C2BAA7044008736F1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BABC3682B85D107009267B3 /* AppDelegate.swift */; };
-		D2F0EF2D2BAA7044008736F1 /* StartVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A6D906B2BA1A39800DEBB12 /* StartVC.swift */; };
-		D2F0EF2E2BAA7044008736F1 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BABC36A2B85D107009267B3 /* SceneDelegate.swift */; };
-		D2F0EF2F2BAA7044008736F1 /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */; };
+		D2F0EF332BAAAD51008736F1 /* DiaryDataDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */; };
+		D2F0EF342BAAAD51008736F1 /* NotificationName.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B342BA14A6600508230 /* NotificationName.swift */; };
+		D2F0EF352BAAAD51008736F1 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D72B8DC135004076EB /* WeatherService.swift */; };
+		D2F0EF362BAAAD51008736F1 /* EveryDiary++Bundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */; };
+		D2F0EF372BAAAD51008736F1 /* SetFaceID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880E32B8F182B004076EB /* SetFaceID.swift */; };
+		D2F0EF382BAAAD51008736F1 /* FireStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA011602B88790800A26CE0 /* FireStore.swift */; };
+		D2F0EF392BAAAD51008736F1 /* FirebaseStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A03BDA32B92FA7D008C13DC /* FirebaseStorageManager.swift */; };
+		D2F0EF3A2BAAAD51008736F1 /* PaginationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A6D90672BA05B8500DEBB12 /* PaginationManager.swift */; };
+		D2F0EF3B2BAAAD51008736F1 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA0115E2B8878F600A26CE0 /* DataModel.swift */; };
+		D2F0EF3C2BAAAD51008736F1 /* WeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D42B8DB715004076EB /* WeatherModel.swift */; };
+		D2F0EF3D2BAAAD51008736F1 /* MotivationImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BE7C99E2BA07D2700374A2A /* MotivationImageCache.swift */; };
+		D2F0EF3E2BAAAD51008736F1 /* MotivationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */; };
+		D2F0EF3F2BAAAD51008736F1 /* BuildingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B42613C2B8C579F00F12CE3 /* BuildingView.swift */; };
+		D2F0EF402BAAAD51008736F1 /* HonorVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA0115A2B886A9100A26CE0 /* HonorVC.swift */; };
+		D2F0EF412BAAAD51008736F1 /* DetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B937F542BA6F30400691657 /* DetailVC.swift */; };
+		D2F0EF422BAAAD51008736F1 /* DiaryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */; };
+		D2F0EF432BAAAD51008736F1 /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */; };
+		D2F0EF442BAAAD51008736F1 /* JournalCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */; };
+		D2F0EF452BAAAD51008736F1 /* ImageCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE3032B9EFC0900BC2038 /* ImageCacheManager.swift */; };
+		D2F0EF462BAAAD51008736F1 /* TrashVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE30E2BA1451600BC2038 /* TrashVC.swift */; };
+		D2F0EF472BAAAD51008736F1 /* TrashCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F3DE3102BA1461200BC2038 /* TrashCollectionViewCell.swift */; };
+		D2F0EF482BAAAD51008736F1 /* CalendarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA011582B8852B400A26CE0 /* CalendarVC.swift */; };
+		D2F0EF492BAAAD51008736F1 /* CalendarListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26E2FA02B90522D0083FEAC /* CalendarListVC.swift */; };
+		D2F0EF4A2BAAAD51008736F1 /* DailyListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26829EF2B99A16F00A1F0E5 /* DailyListCell.swift */; };
+		D2F0EF4B2BAAAD51008736F1 /* WriteDiaryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE3B2B85F606005BC3E1 /* WriteDiaryVC.swift */; };
+		D2F0EF4C2BAAAD51008736F1 /* KeyboardManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7831572BA9FE4C00354211 /* KeyboardManager.swift */; };
+		D2F0EF4D2BAAAD51008736F1 /* ImagePickerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7831532BA9D2C700354211 /* ImagePickerManager.swift */; };
+		D2F0EF4E2BAAAD51008736F1 /* MapManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7831552BA9EC0700354211 /* MapManager.swift */; };
+		D2F0EF4F2BAAAD51008736F1 /* CarouselFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F78314F2BA9943E00354211 /* CarouselFlowLayout.swift */; };
+		D2F0EF502BAAAD51008736F1 /* ImageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */; };
+		D2F0EF512BAAAD51008736F1 /* MapCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */; };
+		D2F0EF522BAAAD51008736F1 /* ImageZoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0BD0062BA1A034000DD35B /* ImageZoomViewController.swift */; };
+		D2F0EF532BAAAD51008736F1 /* ImageZoomCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A562BA44CE2004BF1CB /* ImageZoomCollectionViewController.swift */; };
+		D2F0EF542BAAAD51008736F1 /* ImageZoomCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A582BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift */; };
+		D2F0EF552BAAAD51008736F1 /* DateConditionSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */; };
+		D2F0EF562BAAAD51008736F1 /* DateSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */; };
+		D2F0EF572BAAAD51008736F1 /* SettingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE3D2B85F66E005BC3E1 /* SettingVC.swift */; };
+		D2F0EF582BAAAD51008736F1 /* SignOutCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26E2F9E2B90239A0083FEAC /* SignOutCell.swift */; };
+		D2F0EF592BAAAD51008736F1 /* ProfileCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26E2F9C2B9023400083FEAC /* ProfileCell.swift */; };
+		D2F0EF5A2BAAAD51008736F1 /* SettingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CCC2B8EDACD00C53005 /* SettingCell.swift */; };
+		D2F0EF5B2BAAAD51008736F1 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */; };
+		D2F0EF5C2BAAAD51008736F1 /* NotificationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CCE2B8EE80700C53005 /* NotificationVC.swift */; };
+		D2F0EF5D2BAAAD51008736F1 /* DateCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B878572BA2B01400AB71A0 /* DateCell.swift */; };
+		D2F0EF5E2BAAAD51008736F1 /* NotificationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B878532BA29DCB00AB71A0 /* NotificationCell.swift */; };
+		D2F0EF5F2BAAAD51008736F1 /* TimePickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B878592BA2BF3F00AB71A0 /* TimePickerCell.swift */; };
+		D2F0EF602BAAAD51008736F1 /* DayPickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B8785B2BA2BF4A00AB71A0 /* DayPickerCell.swift */; };
+		D2F0EF612BAAAD51008736F1 /* LockVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CD02B8EE81300C53005 /* LockVC.swift */; };
+		D2F0EF622BAAAD51008736F1 /* LaunchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2BA69D2B90185E0019D1D5 /* LaunchViewController.swift */; };
+		D2F0EF632BAAAD51008736F1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BABC3682B85D107009267B3 /* AppDelegate.swift */; };
+		D2F0EF642BAAAD51008736F1 /* StartVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A6D906B2BA1A39800DEBB12 /* StartVC.swift */; };
+		D2F0EF652BAAAD51008736F1 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BABC36A2B85D107009267B3 /* SceneDelegate.swift */; };
+		D2F0EF662BAAAD51008736F1 /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -414,7 +397,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6BABC3792B85D109009267B3 /* Build configuration list for PBXNativeTarget "EveryDiary" */;
 			buildPhases = (
-				D2F0EEFF2BAA7024008736F1 /* Sources */,
+				D2F0EF322BAAAD28008736F1 /* Sources */,
 				6BABC3622B85D107009267B3 /* Frameworks */,
 				6BABC3632B85D107009267B3 /* Resources */,
 				3F0FEFFE2B90AA59001539AE /* Embed Frameworks */,
@@ -496,63 +479,62 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		D2F0EEFF2BAA7024008736F1 /* Sources */ = {
+		D2F0EF322BAAAD28008736F1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1AF880E42B8F182B004076EB /* SetFaceID.swift in Sources */,
-				6BB3CE422B85F6A0005BC3E1 /* MotivationVC.swift in Sources */,
-				6BE7C99F2BA07D2700374A2A /* MotivationImageCache.swift in Sources */,
-				D2094B352BA14A6600508230 /* NotificationName.swift in Sources */,
-				6BA011612B88790800A26CE0 /* FireStore.swift in Sources */,
-				3F9E0A4F2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift in Sources */,
-				3F3DE3112BA1461200BC2038 /* TrashCollectionViewCell.swift in Sources */,
-				3F9E0A572BA44CE2004BF1CB /* ImageZoomCollectionViewController.swift in Sources */,
-				D2B8785C2BA2BF4A00AB71A0 /* DayPickerCell.swift in Sources */,
-				6BA0115F2B8878F600A26CE0 /* DataModel.swift in Sources */,
-				3F3DE3042B9EFC0900BC2038 /* ImageCacheManager.swift in Sources */,
-				D2094B2C2B9FE9BB00508230 /* DiaryDataDelegate.swift in Sources */,
-				3F3DE3042B9EFC0900BC2038 /* ImageCacheManager.swift in Sources */,
-				6B3C4CCA2B8ECF3F00C53005 /* LoginVC.swift in Sources */,
-				1AF880E22B8EC021004076EB /* EveryDiary++Bundle.swift in Sources */,
-				6BB3CE3E2B85F66E005BC3E1 /* SettingVC.swift in Sources */,
-				3F7831582BA9FE4C00354211 /* KeyboardManager.swift in Sources */,
-				D26829F02B99A16F00A1F0E5 /* DailyListCell.swift in Sources */,
-				3F9E0A592BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift in Sources */,
-				1A2BA69E2B90185E0019D1D5 /* LaunchViewController.swift in Sources */,
-				1A6D906C2BA1A39800DEBB12 /* StartVC.swift in Sources */,
-				3F3DE30F2BA1451600BC2038 /* TrashVC.swift in Sources */,
-				D2B878542BA29DCB00AB71A0 /* NotificationCell.swift in Sources */,
-				6BA0115B2B886A9100A26CE0 /* HonorVC.swift in Sources */,
-				D26E2FA12B90522D0083FEAC /* CalendarListVC.swift in Sources */,
-				1AF880D52B8DB715004076EB /* WeatherModel.swift in Sources */,
-				3F0FEFFA2B8F2819001539AE /* DateConditionSelectVC.swift in Sources */,
-				D2B8785A2BA2BF3F00AB71A0 /* TimePickerCell.swift in Sources */,
-				1AF880D82B8DC135004076EB /* WeatherService.swift in Sources */,
-				6BABC3692B85D107009267B3 /* AppDelegate.swift in Sources */,
-				6B937F552BA6F30400691657 /* DetailVC.swift in Sources */,
-				3F0FEFE92B8D8881001539AE /* JournalCollectionViewCell.swift in Sources */,
-				6BB3CE442B85F6B1005BC3E1 /* DiaryListVC.swift in Sources */,
-				6BA011592B8852B400A26CE0 /* CalendarVC.swift in Sources */,
-				1A6D90682BA05B8600DEBB12 /* PaginationManager.swift in Sources */,
-				6B3C4CCF2B8EE80700C53005 /* NotificationVC.swift in Sources */,
-				6BABC36B2B85D107009267B3 /* SceneDelegate.swift in Sources */,
-				3F7831562BA9EC0700354211 /* MapManager.swift in Sources */,
-				3F0FEFED2B8DFDB2001539AE /* DateSelectVC.swift in Sources */,
-				3F7831502BA9943E00354211 /* CarouselFlowLayout.swift in Sources */,
-				3F0BD0072BA1A034000DD35B /* ImageZoomViewController.swift in Sources */,
-				6BB3CE3C2B85F606005BC3E1 /* WriteDiaryVC.swift in Sources */,
-				1A03BDA42B92FA7D008C13DC /* FirebaseStorageManager.swift in Sources */,
-				6B3C4CD12B8EE81300C53005 /* LockVC.swift in Sources */,
-				3F9E0A552BA35E72004BF1CB /* MapCollectionViewCell.swift in Sources */,
-				D2B878582BA2B01400AB71A0 /* DateCell.swift in Sources */,
-				6B42613D2B8C579F00F12CE3 /* BuildingView.swift in Sources */,
-				6BB3CE352B85EFB1005BC3E1 /* TabBarController.swift in Sources */,
-				D26E2F9F2B90239A0083FEAC /* SignOutCell.swift in Sources */,
-				3F7831542BA9D2C700354211 /* ImagePickerManager.swift in Sources */,
-				D26E2F9D2B9023400083FEAC /* ProfileCell.swift in Sources */,
-				6B3C4CCD2B8EDACD00C53005 /* SettingCell.swift in Sources */,
-				3F0FEFEB2B8D88B9001539AE /* HeaderView.swift in Sources */,
+				D2F0EF332BAAAD51008736F1 /* DiaryDataDelegate.swift in Sources */,
+				D2F0EF342BAAAD51008736F1 /* NotificationName.swift in Sources */,
+				D2F0EF352BAAAD51008736F1 /* WeatherService.swift in Sources */,
+				D2F0EF362BAAAD51008736F1 /* EveryDiary++Bundle.swift in Sources */,
+				D2F0EF372BAAAD51008736F1 /* SetFaceID.swift in Sources */,
+				D2F0EF382BAAAD51008736F1 /* FireStore.swift in Sources */,
+				D2F0EF392BAAAD51008736F1 /* FirebaseStorageManager.swift in Sources */,
+				D2F0EF3A2BAAAD51008736F1 /* PaginationManager.swift in Sources */,
+				D2F0EF3B2BAAAD51008736F1 /* DataModel.swift in Sources */,
+				D2F0EF3C2BAAAD51008736F1 /* WeatherModel.swift in Sources */,
+				D2F0EF3D2BAAAD51008736F1 /* MotivationImageCache.swift in Sources */,
+				D2F0EF3E2BAAAD51008736F1 /* MotivationVC.swift in Sources */,
+				D2F0EF3F2BAAAD51008736F1 /* BuildingView.swift in Sources */,
+				D2F0EF402BAAAD51008736F1 /* HonorVC.swift in Sources */,
+				D2F0EF412BAAAD51008736F1 /* DetailVC.swift in Sources */,
+				D2F0EF422BAAAD51008736F1 /* DiaryListVC.swift in Sources */,
+				D2F0EF432BAAAD51008736F1 /* HeaderView.swift in Sources */,
+				D2F0EF442BAAAD51008736F1 /* JournalCollectionViewCell.swift in Sources */,
+				D2F0EF452BAAAD51008736F1 /* ImageCacheManager.swift in Sources */,
+				D2F0EF462BAAAD51008736F1 /* TrashVC.swift in Sources */,
+				D2F0EF472BAAAD51008736F1 /* TrashCollectionViewCell.swift in Sources */,
+				D2F0EF482BAAAD51008736F1 /* CalendarVC.swift in Sources */,
+				D2F0EF492BAAAD51008736F1 /* CalendarListVC.swift in Sources */,
+				D2F0EF4A2BAAAD51008736F1 /* DailyListCell.swift in Sources */,
+				D2F0EF4B2BAAAD51008736F1 /* WriteDiaryVC.swift in Sources */,
+				D2F0EF4C2BAAAD51008736F1 /* KeyboardManager.swift in Sources */,
+				D2F0EF4D2BAAAD51008736F1 /* ImagePickerManager.swift in Sources */,
+				D2F0EF4E2BAAAD51008736F1 /* MapManager.swift in Sources */,
+				D2F0EF4F2BAAAD51008736F1 /* CarouselFlowLayout.swift in Sources */,
+				D2F0EF502BAAAD51008736F1 /* ImageCollectionViewCell.swift in Sources */,
+				D2F0EF512BAAAD51008736F1 /* MapCollectionViewCell.swift in Sources */,
+				D2F0EF522BAAAD51008736F1 /* ImageZoomViewController.swift in Sources */,
+				D2F0EF532BAAAD51008736F1 /* ImageZoomCollectionViewController.swift in Sources */,
+				D2F0EF542BAAAD51008736F1 /* ImageZoomCollectionViewCell.swift in Sources */,
+				D2F0EF552BAAAD51008736F1 /* DateConditionSelectVC.swift in Sources */,
+				D2F0EF562BAAAD51008736F1 /* DateSelectVC.swift in Sources */,
+				D2F0EF572BAAAD51008736F1 /* SettingVC.swift in Sources */,
+				D2F0EF582BAAAD51008736F1 /* SignOutCell.swift in Sources */,
+				D2F0EF592BAAAD51008736F1 /* ProfileCell.swift in Sources */,
+				D2F0EF5A2BAAAD51008736F1 /* SettingCell.swift in Sources */,
+				D2F0EF5B2BAAAD51008736F1 /* LoginVC.swift in Sources */,
+				D2F0EF5C2BAAAD51008736F1 /* NotificationVC.swift in Sources */,
+				D2F0EF5D2BAAAD51008736F1 /* DateCell.swift in Sources */,
+				D2F0EF5E2BAAAD51008736F1 /* NotificationCell.swift in Sources */,
+				D2F0EF5F2BAAAD51008736F1 /* TimePickerCell.swift in Sources */,
+				D2F0EF602BAAAD51008736F1 /* DayPickerCell.swift in Sources */,
+				D2F0EF612BAAAD51008736F1 /* LockVC.swift in Sources */,
+				D2F0EF622BAAAD51008736F1 /* LaunchViewController.swift in Sources */,
+				D2F0EF632BAAAD51008736F1 /* AppDelegate.swift in Sources */,
+				D2F0EF642BAAAD51008736F1 /* StartVC.swift in Sources */,
+				D2F0EF652BAAAD51008736F1 /* SceneDelegate.swift in Sources */,
+				D2F0EF662BAAAD51008736F1 /* TabBarController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
