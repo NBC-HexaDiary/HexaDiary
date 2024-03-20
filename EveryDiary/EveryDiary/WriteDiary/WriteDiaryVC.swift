@@ -4,10 +4,7 @@
 //
 //  Created by t2023-m0044 on 2/21/24.
 //
-import Contacts
 import CoreLocation
-import MapKit
-import PhotosUI
 import UIKit
 
 import Firebase
@@ -20,6 +17,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     private var imagePickerManager = ImagePickerManager()
     private var mapManager = MapManager()
     private var keyboardManager: KeyboardManager?
+    let weatherService = WeatherService()
     
     private var selectedEmotion = "happy"
     private var selectedWeather = "Vector"
@@ -135,9 +133,6 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     }()
     private var imagesLocationInfo: [ImageLocationInfo] = []                // 이미지와 meta정보를 저장하는 배열
     private var imageCollectionViewHeightConstraint: NSLayoutConstraint?    // collectionView의 높이
-    
-    // 날씨 정보 라벨
-    let weatherService = WeatherService()
     private let weatherDescriptionLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
@@ -345,7 +340,7 @@ extension WriteDiaryVC {
         // 이미지 URL 배열에서 각 이미지와 메타데이터를 다운로드
         let group = DispatchGroup()
         diary.imageURL?.forEach { urlString in
-            guard let imageURL = URL(string: urlString) else { return }
+            guard URL(string: urlString) != nil else { return }
             group.enter()
             FirebaseStorageManager.downloadImage(urlString: urlString) { [weak self] downloadedImage, metadata in
                 defer { group.leave() }
@@ -360,8 +355,6 @@ extension WriteDiaryVC {
                 // 메타데이터를 포함한 ImageLocationInfo 객체 생성
                 let imageLocationInfo = ImageLocationInfo(image: image, locationInfo: locationInfo, assetIdentifier: assetIdentifier, captureTime: captureTime, location: locationInfoString)
                 self.imagesLocationInfo.append(imageLocationInfo)
-                print("imageLocationInfo: \(imageLocationInfo)")
-                print("locationInfo: \(locationInfo)")
             }
         }
         

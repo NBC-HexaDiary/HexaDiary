@@ -32,9 +32,6 @@ class FirebaseStorageManager {
             }
             customMetadata["assetIdentifier"] = assetIdentifier
             metaData.customMetadata = customMetadata
-            print("captureTime: \(customMetadata["captureTime"])")
-            print("location: \(customMetadata["location"])")
-            print("custoMetaData: \(customMetadata["assetIdentifier"])")
             
             let imageName = "\(UUID().uuidString)_\(Date().timeIntervalSince1970)"
             let firebaseReference = Storage.storage().reference().child("\(pathRoot)/\(imageName)")
