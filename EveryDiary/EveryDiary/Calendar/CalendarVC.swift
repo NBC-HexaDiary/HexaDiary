@@ -84,12 +84,14 @@ class CalendarVC: UIViewController {
         navigationItem.rightBarButtonItem = settingButton
         navigationController?.navigationBar.tintColor = UIColor(named: "mainTheme")
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "캘린더", style: .plain, target: nil, action: nil)
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: calendarLabel)
     }
     
     private func addSubviewsCalendarVC() {
         view.addSubview(writeDiaryButton)
         view.addSubview(calendarView)
-        view.addSubview(calendarLabel)
+        view.sendSubviewToBack(calendarView)
+//        view.addSubview(calendarLabel)
     }
     
     private func autoLayoutCalendarVC() {
@@ -98,16 +100,16 @@ class CalendarVC: UIViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
         }
         calendarView.snp.makeConstraints { make in
-            make.centerX.equalTo(view)
-            make.leading.equalTo(view.safeAreaLayoutGuide).offset(15)
-            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-15)
-            make.top.equalTo(calendarLabel.snp.bottom).offset(20)
+            make.leading.equalTo(view.safeAreaLayoutGuide).inset(15)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).inset(15)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+//            make.width.equalTo(view.safeAreaLayoutGuide).offset(-20)
         }
-        calendarLabel.snp.makeConstraints { make in
-            make.top.equalTo(view).offset(50)
-            make.left.equalTo(view).offset(16)
-            make.size.equalTo(CGSize(width:100, height: 50))
-        }
+//        calendarLabel.snp.makeConstraints { make in
+//            make.top.equalTo(view).offset(50)
+//            make.left.equalTo(view).offset(16)
+//            make.size.equalTo(CGSize(width:100, height: 50))
+//        }
     }
     
     private func loadDiaries() {

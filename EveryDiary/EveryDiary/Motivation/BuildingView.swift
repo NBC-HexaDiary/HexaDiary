@@ -16,19 +16,12 @@ protocol BuildingViewDelegate: AnyObject {
 }
 
 class BuildingView: UIView {
-    // Singleton 패턴을 사용하여 공유 인스턴스 생성
     static let shared = BuildingView()
     weak var delegate: BuildingViewDelegate?
 
-//    var windowImageCache = [Int: UIImage]()
-    // Firestore 관련 변수
     let db = Firestore.firestore()
     var diaryDays: Set<Int> = []
     
-    
-//    var listener: ListenerRegistration?
-    
-    // 빌딩 구조체 정의
     struct BuildingSize {
         let position: CGPoint
         let size: CGSize
@@ -182,7 +175,7 @@ class BuildingView: UIView {
     //창문 이미지로 랜더링하여 반환
     func cacheWindowImageIfNeeded(windowIndex: Int, color: UIColor, windowSize: CGSize) {
         if MotivationImageCache.shared.getImage(forKey: "window_\(windowIndex)") != nil {
-            print("Image for window \(windowIndex) is cached.")
+//            print("Image for window \(windowIndex) is cached.")
             return
         } else {
             let renderer = UIGraphicsImageRenderer(size: windowSize)
@@ -274,13 +267,13 @@ class BuildingView: UIView {
                 cacheWindowImageIfNeeded(windowIndex: windowOrder, color: .yellow, windowSize: CGSize(width: windowWidth, height: windowHeight))
                 let windowLayer = createWindowLayer(at: windowPosition, color: .yellow, windowIndex: windowOrder)
                 buildingLayer.addSublayer(windowLayer)
-                print("Window \(windowOrder): 데이터 있음")
+//                print("Window \(windowOrder): 데이터 있음")
                 windowOrder += 1
             } else {
                 cacheWindowImageIfNeeded(windowIndex: windowOrder, color: .darkGray, windowSize: CGSize(width: windowWidth, height: windowHeight))
                 let windowLayer = createWindowLayer(at: windowPosition, color: .darkGray, windowIndex: windowOrder)
                 buildingLayer.addSublayer(windowLayer)
-                print("Window \(windowOrder): 데이터 없음")
+//                print("Window \(windowOrder): 데이터 없음")
             }
         }
     }
@@ -303,7 +296,7 @@ extension BuildingView {
         let startOfMonth = "\(year)-\(String(format: "%02d", month))-01 00:00:00 +0000"
         let endOfMonth = month == 12 ? "\(year + 1)-01-01 23:59:59 +0000" : "\(year)-\(String(format: "%02d", month + 1))-01 23:59:59 +0000"
         //dateString에서 현재 월 데이터만 가져오기
-        db.collection("users").document(userID).collection("diaries").whereField("dateString", isGreaterThanOrEqualTo: startOfMonth).whereField("dateString", isLessThan: endOfMonth).addSnapshotListener { (querySnapshot, error) in
+        DiaryManager.shared.db.collection("users").document(userID).collection("diaries").whereField("dateString", isGreaterThanOrEqualTo: startOfMonth).whereField("dateString", isLessThan: endOfMonth).addSnapshotListener { (querySnapshot, error) in
             if let error = error {
                 print("Error getting documents: \(error)")
                 completion(nil, error)
@@ -317,7 +310,7 @@ extension BuildingView {
                 }
                 diaries = diaries.filter { !$0.isDeleted }
                 DispatchQueue.main.async { // 메인 스레드에서 로그를 출력합니다.
-                    print("Fetched diaries: \(diaries)")
+//                    print("Fetched diaries: \(diaries)")
                 }
                 completion(diaries, nil)
             }

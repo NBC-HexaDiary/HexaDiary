@@ -111,14 +111,7 @@ class StartVC: UIViewController {
     }
     
     private func showMainScreen() {
-        DispatchQueue.main.async { [weak self] in
-            guard let navigationController = self?.navigationController else { return }
-            let diaryListVC = TabBarController()
-            diaryListVC.hidesBottomBarWhenPushed = true
-            navigationController.pushViewController(diaryListVC, animated: true)
-            
-            // Dismiss StartVC
-            self?.dismiss(animated: true, completion: nil)
-        }
+        // Dismiss StartVC
+        self.dismiss(animated: true, completion: nil)
     }
 }

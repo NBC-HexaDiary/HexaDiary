@@ -23,6 +23,8 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     private var selectedWeather = "Vector"
     private var selectedDate = Date()
     private var selectedPhotoIdentifiers: [String] = []
+    private var useMetadataLocation: Bool = false
+    private var currentLocationInfo: String?
     
     private var diaryID: String?        // 수정할 일기의 ID를 저장하는 변수
     private var isSavingDiary = false   // 중복저장을 방지하기 위한 변수(플래그)
@@ -170,10 +172,20 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
         loadWeatherData()
         setupToolbar()
         setTapGesture()
+        getCurrentLocation()
         imagePickerManager.delegate = self
     }
     deinit {
         keyboardManager?.unregisterKeyboardNotifications()
+    }
+    
+    private func getCurrentLocation() {
+        mapManager.onLocationUpdate = { [weak self] latitude, longitude in
+            guard let self = self else { return }
+            self.currentLocationInfo = "\(latitude), \(longitude)"
+            print("Updated Location: \(self.currentLocationInfo ?? "Unknown"))")
+        }
+        mapManager.locationManager.startUpdatingLocation()
     }
 }
 
@@ -216,7 +228,9 @@ extension WriteDiaryVC {
             with: self.titleTextField.text ?? "",
             content: self.contentTextView.text ?? "",
             dateString: formattedDateString,
-            imageUrls: uploadedImageURLs
+            imageUrls: uploadedImageURLs,
+            useMetadataLocation: self.useMetadataLocation,
+            currentLocationInfo: currentLocationInfo
         )
         }
     }
@@ -275,15 +289,18 @@ extension WriteDiaryVC {
         self.weatherButton.isEnabled = true
     }
     
-    func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, imageUrls: [String] = []) {
-        let newDiaryEntry = DiaryEntry(
-            title: title,
-            content: content,
-            dateString: dateString,
-            emotion: selectedEmotion,
-            weather: selectedWeather,
-            imageURL: imageUrls
-        )
+    func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, imageUrls: [String] = [], useMetadataLocation: Bool, currentLocationInfo: String? = nil) {
+        var newDiaryEntry: DiaryEntry
+        
+        // currentLoactionInfo가 nil이 아닌 경우 전제 저장
+        if let locationInfo = currentLocationInfo {
+            newDiaryEntry = DiaryEntry(title: title, content: content, dateString: dateString, emotion: selectedEmotion, weather: selectedWeather, imageURL: imageUrls, useMetadataLocation: useMetadataLocation, currentLocationInfo: locationInfo
+            )
+        } else {
+            // currentLocationInfo가 nil이라면 제외하고 저장
+            newDiaryEntry = DiaryEntry(title: title, content: content, dateString: dateString, emotion: selectedEmotion, weather: selectedWeather, imageURL: imageUrls, useMetadataLocation: useMetadataLocation
+            )
+        }
         
         // DiaryManager를 사용해 FireStore에 저장
         diaryManager.addDiary(diary: newDiaryEntry) { [weak self] error in
@@ -477,91 +494,6 @@ extension WriteDiaryVC: DateSelectDelegate, UIPopoverPresentationControllerDeleg
     }
 }
 
-// MARK: addSubViews, setLayout, setButton메서드
-extension WriteDiaryVC {
-    private func addSubView() {
-        self.view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        contentView.addSubViews([datePickingButton, completeButton, updateButton, allowEditButton, photoButton, emotionButton, weatherButton, titleTextField, contentTextView, imagesCollectionView])
-    }
-    private func setLayout() {
-        scrollView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
-            self.scrollViewBottomConstraint = make.bottom.equalTo(view.safeAreaLayoutGuide).constraint
-        }
-        
-        contentView.snp.makeConstraints { make in
-            make.edges.width.equalTo(scrollView)
-            // contentView의 높이는 최소 scrollView의 높이와 같거아 더 크도록 설정
-            make.height.greaterThanOrEqualTo(scrollView).priority(.low)
-        }
-        
-        datePickingButton.snp.makeConstraints { make in
-            make.top.equalTo(contentView.snp.top).offset(37)
-            make.leading.equalTo(contentView.snp.leading).offset(16)
-        }
-        
-        completeButton.snp.makeConstraints { make in
-            make.top.equalTo(contentView.snp.top).offset(37)
-            make.trailing.equalTo(contentView.snp.trailing).offset(-16)
-        }
-        
-        updateButton.snp.makeConstraints { make in
-            make.top.equalTo(contentView.snp.top).offset(37)
-            make.trailing.equalTo(contentView.snp.trailing).offset(-16)
-        }
-        
-        allowEditButton.snp.makeConstraints { make in
-            make.top.equalTo(contentView.snp.top).offset(37)
-            make.trailing.equalTo(contentView.snp.trailing).offset(-16)
-        }
-        
-        titleTextField.snp.makeConstraints { make in
-            make.top.equalTo(datePickingButton.snp.bottom).offset(20)
-            make.leading.equalTo(contentView.snp.leading).offset(20)
-            make.trailing.equalTo(contentView.snp.trailing).offset(-20)
-            make.height.equalTo(50)
-        }
-        
-        photoButton.snp.makeConstraints { make in
-            make.top.equalTo(titleTextField.snp.bottom).offset(10)
-            make.leading.equalTo(titleTextField.snp.leading).offset(10)
-            make.height.equalTo(25)
-            make.width.equalTo(25)
-        }
-        
-        emotionButton.snp.makeConstraints { make in
-            make.top.equalTo(photoButton.snp.top).offset(0)
-            make.leading.equalTo(photoButton.snp.trailing).offset(5)
-            make.height.equalTo(25)
-            make.width.equalTo(25)
-        }
-        
-        weatherButton.snp.makeConstraints { make in
-            make.top.equalTo(photoButton.snp.top).offset(0)
-            make.leading.equalTo(emotionButton.snp.trailing).offset(5)
-            make.height.equalTo(25)
-            make.width.equalTo(25)
-        }
-        
-        imagesCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(photoButton.snp.bottom).offset(15)
-            make.leading.equalToSuperview().offset(0)
-            make.trailing.equalToSuperview().offset(0)
-        }
-        
-        // contentTextView의 최소 높이 설정
-        contentTextView.snp.makeConstraints { make in
-            make.top.equalTo(imagesCollectionView.snp.bottom).offset(10)
-            make.leading.trailing.equalTo(titleTextField)
-            // 최소 높이 제약 조건 추가
-            make.height.greaterThanOrEqualTo(self.view).multipliedBy(0.75).priority(.high)
-            make.bottom.equalTo(contentView.snp.bottom)
-        }
-        setupImageCollectionViewHeightConstraint()
-    }
-}
-
 // MARK: NotificationCenter(키보드 높이 조절) & 키보드 return 기능
 extension WriteDiaryVC: UITextFieldDelegate {
     private func setupKeyboardManager() {
@@ -585,6 +517,7 @@ extension WriteDiaryVC {
         imagePickerManager.requestPhotoLibraryAccess(from: self)
     }
     func didPickImages(_ imagesLocationInfo: [ImageLocationInfo], retainedIdentifiers: [String]) {
+        print(#function)
         // 선택된 이미지와 메타데이터를 처리하는 로직
         self.imagesLocationInfo = imagesLocationInfo
         self.selectedPhotoIdentifiers = retainedIdentifiers
@@ -592,6 +525,31 @@ extension WriteDiaryVC {
         self.updateImageCollectionViewHeight()
         print("imagesLocationInfo: \(self.imagesLocationInfo)")
         print("selectedPhotoIdentifiers: \(self.selectedPhotoIdentifiers)")
+    }
+    func timeAndLocationChoiceAlert(time: String, address: String, completion: @escaping (Bool) -> Void) {
+        let alert = UIAlertController(title: "첨부파일의 날짜와 위치를 사용하시겠습니까?", message: "\(time), \(address)" , preferredStyle: .actionSheet)
+        
+        let useMetadataAction = UIAlertAction(title: "예", style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            // 사진의 메타데이터 시간을 사용
+            if let metadataDate = DateFormatter.yyyyMMddHHmmss.date(from: time) {
+                self.selectedDate = metadataDate
+                let dateString = DateFormatter.yyyyMMddE.string(from: metadataDate)
+                self.datePickingButton.setTitle(dateString, for: .normal)
+            }
+            self.useMetadataLocation = true
+            completion(true)    // 사진의 메타데이터로 시간&위치 저장
+        }
+        
+        let useCurrentAction = UIAlertAction(title: "아니오", style: .default) { _ in
+            self.useMetadataLocation = false
+            completion(false)   // 현재 위치로 시간&위치 저장
+        }
+        
+        alert.addAction(useMetadataAction)
+        alert.addAction(useCurrentAction)
+        
+        self.present(alert, animated: true)
     }
 }
 
@@ -612,12 +570,20 @@ extension WriteDiaryVC: UICollectionViewDataSource, UICollectionViewDelegate, UI
             cell.configure(with: info.image)
             return cell
         } else {
-            let locationInfos = imagesLocationInfo.compactMap { $0.locationInfo }
+            // 맵 셀 구성
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MapCollectionViewCell.reuseIdentifier, for: indexPath) as? MapCollectionViewCell else {
                 fatalError("Unable to dequeue MapCollectionViewCell")
             }
-            cell.configureMapWith(locationsInfo: locationInfos)
-            print("locationInfos: \(locationInfos)")
+            if useMetadataLocation {
+                // 사진에 설정된 위치로 맵 셀 구성
+                let locationInfos = imagesLocationInfo.compactMap { $0.locationInfo }
+                cell.configureMapWith(locationsInfo: locationInfos)
+                print("locationInfos: \(locationInfos)")
+            } else {
+                // 현재 위치로 맵 셀 구성
+                cell.currentLocationInfo = currentLocationInfo
+                cell.configureMapCellWithCurrentLocation()
+            }
             cell.delegate = self
             return cell
         }
@@ -867,5 +833,90 @@ extension WriteDiaryVC {
 extension UIView{
     func addSubViews(_ views : [UIView]){
         _ = views.map{self.addSubview($0)}
+    }
+}
+
+// MARK: addSubViews, setLayout, setButton메서드
+extension WriteDiaryVC {
+    private func addSubView() {
+        self.view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubViews([datePickingButton, completeButton, updateButton, allowEditButton, photoButton, emotionButton, weatherButton, titleTextField, contentTextView, imagesCollectionView])
+    }
+    private func setLayout() {
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalTo(view.safeAreaLayoutGuide)
+            self.scrollViewBottomConstraint = make.bottom.equalTo(view.safeAreaLayoutGuide).constraint
+        }
+        
+        contentView.snp.makeConstraints { make in
+            make.edges.width.equalTo(scrollView)
+            // contentView의 높이는 최소 scrollView의 높이와 같거아 더 크도록 설정
+            make.height.greaterThanOrEqualTo(scrollView).priority(.low)
+        }
+        
+        datePickingButton.snp.makeConstraints { make in
+            make.top.equalTo(contentView.snp.top).offset(37)
+            make.leading.equalTo(contentView.snp.leading).offset(16)
+        }
+        
+        completeButton.snp.makeConstraints { make in
+            make.top.equalTo(contentView.snp.top).offset(37)
+            make.trailing.equalTo(contentView.snp.trailing).offset(-16)
+        }
+        
+        updateButton.snp.makeConstraints { make in
+            make.top.equalTo(contentView.snp.top).offset(37)
+            make.trailing.equalTo(contentView.snp.trailing).offset(-16)
+        }
+        
+        allowEditButton.snp.makeConstraints { make in
+            make.top.equalTo(contentView.snp.top).offset(37)
+            make.trailing.equalTo(contentView.snp.trailing).offset(-16)
+        }
+        
+        titleTextField.snp.makeConstraints { make in
+            make.top.equalTo(datePickingButton.snp.bottom).offset(20)
+            make.leading.equalTo(contentView.snp.leading).offset(20)
+            make.trailing.equalTo(contentView.snp.trailing).offset(-20)
+            make.height.equalTo(50)
+        }
+        
+        photoButton.snp.makeConstraints { make in
+            make.top.equalTo(titleTextField.snp.bottom).offset(10)
+            make.leading.equalTo(titleTextField.snp.leading).offset(10)
+            make.height.equalTo(25)
+            make.width.equalTo(25)
+        }
+        
+        emotionButton.snp.makeConstraints { make in
+            make.top.equalTo(photoButton.snp.top).offset(0)
+            make.leading.equalTo(photoButton.snp.trailing).offset(5)
+            make.height.equalTo(25)
+            make.width.equalTo(25)
+        }
+        
+        weatherButton.snp.makeConstraints { make in
+            make.top.equalTo(photoButton.snp.top).offset(0)
+            make.leading.equalTo(emotionButton.snp.trailing).offset(5)
+            make.height.equalTo(25)
+            make.width.equalTo(25)
+        }
+        
+        imagesCollectionView.snp.makeConstraints { make in
+            make.top.equalTo(photoButton.snp.bottom).offset(15)
+            make.leading.equalToSuperview().offset(0)
+            make.trailing.equalToSuperview().offset(0)
+        }
+        
+        // contentTextView의 최소 높이 설정
+        contentTextView.snp.makeConstraints { make in
+            make.top.equalTo(imagesCollectionView.snp.bottom).offset(10)
+            make.leading.trailing.equalTo(titleTextField)
+            // 최소 높이 제약 조건 추가
+            make.height.greaterThanOrEqualTo(self.view).multipliedBy(0.75).priority(.high)
+            make.bottom.equalTo(contentView.snp.bottom)
+        }
+        setupImageCollectionViewHeightConstraint()
     }
 }
