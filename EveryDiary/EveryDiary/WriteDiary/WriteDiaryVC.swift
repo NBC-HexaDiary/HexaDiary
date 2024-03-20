@@ -19,8 +19,8 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     private var keyboardManager: KeyboardManager?
     let weatherService = WeatherService()
     
-    private var selectedEmotion = "happy"
-    private var selectedWeather = "Vector"
+    private var selectedEmotion = ""
+    private var selectedWeather = ""
     private var selectedDate = Date()
     private var selectedPhotoIdentifiers: [String] = []
     private var useMetadataLocation: Bool = false
@@ -70,33 +70,18 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
         for: #selector(allowEditButtonTapped),
         hidden: true
     )
-    private lazy var photoButton = setButton(
-        imageNamed: "image",
-        titleText: "사진",
-        textFont: "SFProDisplay-Regular",
-        fontSize: 0,
-        buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(photoButtonTapped),
-        hidden: false
-    )
-    private lazy var emotionButton = setButton(
-        imageNamed: "happy",
-        titleText: "감정",
-        textFont: "SFProDisplay-Regular",
-        fontSize: 0,
-        buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(emotionButtonTapped),
-        hidden: false
-    )
-    private lazy var weatherButton = setButton(
-        imageNamed: "Vector",
-        titleText: "날씨",
-        textFont: "SFProDisplay-Regular",
-        fontSize: 0,
-        buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(weatherButtonTapped),
-        hidden: false
-    )
+    private lazy var emotionImageView: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(named: selectedEmotion)
+        view.contentMode = .scaleAspectFit
+        return view
+    }()
+    private lazy var weatherImageView: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(named: selectedWeather)
+        view.contentMode = .scaleAspectFit
+        return view
+    }()
     private lazy var titleTextField : UITextField = {
         let textField = UITextField()
         textField.backgroundColor = .clear
@@ -135,6 +120,17 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     }()
     private var imagesLocationInfo: [ImageLocationInfo] = []                // 이미지와 meta정보를 저장하는 배열
     private var imageCollectionViewHeightConstraint: NSLayoutConstraint?    // collectionView의 높이
+    
+    private lazy var photoBarButtonItem: UIBarButtonItem = {
+        return UIBarButtonItem(image: UIImage(named: "image"), style: .plain, target: self, action: #selector(photoButtonTapped))
+    }()
+    private lazy var emotionBarButtonItem: UIBarButtonItem = {
+        return UIBarButtonItem(image: UIImage(named: "happy"), style: .plain, target: self, action: #selector(emotionButtonTapped))
+    }()
+    private lazy var weatherBarButtonItem: UIBarButtonItem = {
+            return UIBarButtonItem(image: UIImage(named: "Vector"), style: .plain, target: self, action: #selector(weatherButtonTapped))
+        }()
+    
     private let weatherDescriptionLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
@@ -280,13 +276,9 @@ extension WriteDiaryVC {
     @objc func allowEditButtonTapped() {
         self.updateButton.isHidden = false
         self.allowEditButton.isHidden = true
-        
         self.datePickingButton.isEnabled = true
         self.titleTextField.isEnabled = true
         self.contentTextView.isEditable = true
-        self.photoButton.isEnabled = true
-        self.emotionButton.isEnabled = true
-        self.weatherButton.isEnabled = true
     }
     
     func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, imageUrls: [String] = [], useMetadataLocation: Bool, currentLocationInfo: String? = nil) {
@@ -347,8 +339,8 @@ extension WriteDiaryVC {
         }
         
         // 이모티콘과 날씨 업데이트
-        self.emotionButton.setImage(UIImage(named: diary.emotion)?.withRenderingMode(.alwaysOriginal), for: .normal)
-        self.weatherButton.setImage(UIImage(named: diary.weather)?.withRenderingMode(.alwaysOriginal), for: .normal)
+        emotionImageView.image = UIImage(named: diary.emotion)
+        weatherImageView.image = UIImage(named: diary.weather)
         
         // 기존 이미지 정보 초기화
         self.selectedPhotoIdentifiers.removeAll()
@@ -398,9 +390,6 @@ extension WriteDiaryVC {
         self.datePickingButton.isEnabled = isEditingEnabled
         self.titleTextField.isEnabled = isEditingEnabled
         self.contentTextView.isEditable = isEditingEnabled
-        self.photoButton.isEnabled = isEditingEnabled
-        self.emotionButton.isEnabled = isEditingEnabled
-        self.weatherButton.isEnabled = isEditingEnabled
         self.completeButton.isHidden = !isEditingEnabled
         self.updateButton.isHidden = !isEditingEnabled
         self.allowEditButton.isHidden = isEditingEnabled
@@ -425,10 +414,14 @@ extension WriteDiaryVC: DateConditionSelectDelegate {
         conditionSelectVC.delegate = self
         
         if let popoverController = conditionSelectVC.popoverPresentationController {
-            let sourceView = conditionType == .emotion ? emotionButton : weatherButton
-            popoverController.sourceView = sourceView
-            popoverController.sourceRect = sourceView.bounds
-            popoverController.permittedArrowDirections = [.up]
+            if conditionType == .emotion {
+                popoverController.barButtonItem = emotionBarButtonItem
+            } else if conditionType == .weather {
+                popoverController.barButtonItem = weatherBarButtonItem
+            }
+//            popoverController.sourceView = sourceView
+//            popoverController.sourceRect = sourceView.bounds
+            popoverController.permittedArrowDirections = [.down]
             popoverController.delegate = self
             present(conditionSelectVC, animated: true, completion: nil)
         }
@@ -439,10 +432,10 @@ extension WriteDiaryVC: DateConditionSelectDelegate {
         switch type {
         case .emotion:
             selectedEmotion = condition
-            emotionButton.setImage(UIImage(named: condition)?.withRenderingMode(.alwaysOriginal), for: .normal)
+            emotionImageView.image = UIImage(named: condition)
         case .weather:
             selectedWeather = condition
-            weatherButton.setImage(UIImage(named: condition)?.withRenderingMode(.alwaysOriginal), for: .normal)
+            weatherImageView.image = UIImage(named: condition)
         }
     }
 }
@@ -678,15 +671,12 @@ extension WriteDiaryVC {
             make.centerY.equalToSuperview()
             make.leading.equalTo(weatherDescriptionLabel.snp.trailing).offset(5)
         }
-        let weatherBarDescription = UIBarButtonItem(customView: weatherInfoView)
         
+        // 날씨 아이템 생성
+        let weatherBarDescription = UIBarButtonItem(customView: weatherInfoView)
+                
         // 툴바 아이템 생성
-        let items = [UIBarButtonItem(image: UIImage(named: "image"), style: .plain, target: self, action: #selector(photoButtonTapped)),
-                     UIBarButtonItem(image: UIImage(named: "happy"), style: .plain, target: self, action: #selector(emotionButtonTapped)),
-                     UIBarButtonItem(image: UIImage(named: "Vector"), style: .plain, target: self, action: #selector(weatherButtonTapped)),
-                     weatherBarDescription,
-                     UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
-                     UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissKeyboard))]
+        let items = [photoBarButtonItem, emotionBarButtonItem, weatherBarButtonItem, weatherBarDescription, UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil), UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissKeyboard))]
         // 툴바 할당
         toolbar.setItems(items, animated: false)
         titleTextField.inputAccessoryView = toolbar
@@ -841,7 +831,7 @@ extension WriteDiaryVC {
     private func addSubView() {
         self.view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-        contentView.addSubViews([datePickingButton, completeButton, updateButton, allowEditButton, photoButton, emotionButton, weatherButton, titleTextField, contentTextView, imagesCollectionView])
+        contentView.addSubViews([datePickingButton, completeButton, updateButton, allowEditButton, emotionImageView, weatherImageView, titleTextField, contentTextView, imagesCollectionView])
     }
     private func setLayout() {
         scrollView.snp.makeConstraints { make in
@@ -856,23 +846,23 @@ extension WriteDiaryVC {
         }
         
         datePickingButton.snp.makeConstraints { make in
-            make.top.equalTo(contentView.snp.top).offset(37)
+            make.top.equalTo(contentView.snp.top).offset(30)
             make.leading.equalTo(contentView.snp.leading).offset(16)
         }
         
         completeButton.snp.makeConstraints { make in
-            make.top.equalTo(contentView.snp.top).offset(37)
+            make.centerY.equalTo(datePickingButton)
             make.trailing.equalTo(contentView.snp.trailing).offset(-16)
         }
         
         updateButton.snp.makeConstraints { make in
-            make.top.equalTo(contentView.snp.top).offset(37)
-            make.trailing.equalTo(contentView.snp.trailing).offset(-16)
+            make.top.equalTo(completeButton)
+            make.trailing.equalTo(completeButton)
         }
         
         allowEditButton.snp.makeConstraints { make in
-            make.top.equalTo(contentView.snp.top).offset(37)
-            make.trailing.equalTo(contentView.snp.trailing).offset(-16)
+            make.top.equalTo(completeButton)
+            make.trailing.equalTo(completeButton)
         }
         
         titleTextField.snp.makeConstraints { make in
@@ -881,37 +871,30 @@ extension WriteDiaryVC {
             make.trailing.equalTo(contentView.snp.trailing).offset(-20)
             make.height.equalTo(50)
         }
-        
-        photoButton.snp.makeConstraints { make in
-            make.top.equalTo(titleTextField.snp.bottom).offset(10)
-            make.leading.equalTo(titleTextField.snp.leading).offset(10)
+                
+        emotionImageView.snp.makeConstraints { make in
+            make.centerY.equalTo(datePickingButton)
+            make.leading.equalTo(datePickingButton.snp.trailing).offset(5)
             make.height.equalTo(25)
             make.width.equalTo(25)
         }
         
-        emotionButton.snp.makeConstraints { make in
-            make.top.equalTo(photoButton.snp.top).offset(0)
-            make.leading.equalTo(photoButton.snp.trailing).offset(5)
-            make.height.equalTo(25)
-            make.width.equalTo(25)
-        }
-        
-        weatherButton.snp.makeConstraints { make in
-            make.top.equalTo(photoButton.snp.top).offset(0)
-            make.leading.equalTo(emotionButton.snp.trailing).offset(5)
+        weatherImageView.snp.makeConstraints { make in
+            make.centerY.equalTo(emotionImageView).offset(0)
+            make.leading.equalTo(emotionImageView.snp.trailing).offset(5)
             make.height.equalTo(25)
             make.width.equalTo(25)
         }
         
         imagesCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(photoButton.snp.bottom).offset(15)
+            make.top.equalTo(titleTextField.snp.bottom).offset(15)
             make.leading.equalToSuperview().offset(0)
             make.trailing.equalToSuperview().offset(0)
         }
         
         // contentTextView의 최소 높이 설정
         contentTextView.snp.makeConstraints { make in
-            make.top.equalTo(imagesCollectionView.snp.bottom).offset(10)
+            make.top.equalTo(imagesCollectionView.snp.bottom).offset(5)
             make.leading.trailing.equalTo(titleTextField)
             // 최소 높이 제약 조건 추가
             make.height.greaterThanOrEqualTo(self.view).multipliedBy(0.75).priority(.high)
