@@ -100,8 +100,6 @@ class DiaryListVC: UIViewController {
         addSubviews()
         setLayout()
         setNavigationBar()
-//        loadDiaries()
-
         
         NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
     }
@@ -117,7 +115,6 @@ extension DiaryListVC {
     // searchBar 설정 및 searchButtonTapped 전까지 hidden처리.
     private func setNavigationBar() {
         searchBar.becomeFirstResponder()
-//        self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: searchBar)
         self.navigationItem.leftBarButtonItem?.isHidden = true
         self.navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
         self.navigationController?.navigationBar.tintColor = .mainTheme
@@ -194,7 +191,6 @@ extension DiaryListVC {
         navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
         searchBar.text = ""
         searchBar.resignFirstResponder() // 키보드 숨김
-//        loadDiaries() // 원래의 일기목록 로드
         refreshDiaryData()
     }
     @objc private func tabWriteDiaryBTN() {
@@ -204,7 +200,6 @@ extension DiaryListVC {
         self.present(writeDiaryVC, animated: true)
     }
     @objc private func tabLoadDiaryButton() {
-//        loadDiaries()
         journalCollectionView.reloadData()
         print("Load Diaries")
     }
@@ -347,20 +342,6 @@ extension DiaryListVC {
                         }
                     }
                     let alert = UIAlertController(title: "휴지통으로 이동하였습니다.", message: nil, preferredStyle: .actionSheet)
-//                    let alert = UIAlertController(title: "일기 삭제", message: "이 일기를 삭제하시겠습니까?", preferredStyle: .alert)
-//                    alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { _ in
-//                        self.diaryManager.deleteDiary(diaryID: diaryID, imageURL: diary.imageURL) { error in
-//                            if let error = error {
-//                                print("Error deleting diary: \(error.localizedDescription)")
-//                            } else {
-//                                DispatchQueue.main.async {
-//                                    self.loadDiaries()
-//                                }
-//                            }
-//                        }
-//                    }))
-//                    alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
-                    // 임시
                     self.present(alert, animated: true, completion: nil)
                     Timer.scheduledTimer(withTimeInterval: 0.7, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
                 }
@@ -413,7 +394,6 @@ extension DiaryListVC: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
         searchBar.resignFirstResponder() // 키보드 숨김
-//        loadDiaries() // 원래의 일기목록 로드
         refreshDiaryData()
     }
     // searchBar의 적절한 사이즈 조절하는 메서드
@@ -464,11 +444,6 @@ extension DiaryListVC {
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
         }
-//        themeLabel.snp.makeConstraints { make in
-//            make.top.equalTo(view).offset(50)
-//            make.left.equalTo(view).offset(16)
-//            make.size.equalTo(CGSize(width:120, height: 50))
-//        }
     }
 }
 

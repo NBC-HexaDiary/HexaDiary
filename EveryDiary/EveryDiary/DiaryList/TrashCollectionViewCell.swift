@@ -24,13 +24,14 @@ class TrashCollectionViewCell: UICollectionViewCell {
     
     private lazy var contentTitle: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "SFProDisplay-Bold", size: 20)
+        label.font = UIFont(name: "SFProDisplay-Bold", size: 18)
         return label
     }()
     
     private lazy var contentTextView: UITextView = {
         let view = UITextView()
-        view.font = UIFont(name: "SFProDisplay-Regular", size: 16)
+        view.font = UIFont(name: "SFProDisplay-Regular", size: 14)
+        view.textColor = .darkGray
         view.isEditable = false
         view.backgroundColor = .clear
         view.isScrollEnabled = false
@@ -45,6 +46,7 @@ class TrashCollectionViewCell: UICollectionViewCell {
     private lazy var dateOfWriting: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: "SFProDisplay-Regular", size: 12)
+        label.textColor = .systemGray
         return label
     }()
     lazy var imageView: UIImageView = {

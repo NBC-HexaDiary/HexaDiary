@@ -54,7 +54,6 @@
 		D2F0EF4F2BAAAD51008736F1 /* CarouselFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F78314F2BA9943E00354211 /* CarouselFlowLayout.swift */; };
 		D2F0EF502BAAAD51008736F1 /* ImageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */; };
 		D2F0EF512BAAAD51008736F1 /* MapCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */; };
-		D2F0EF522BAAAD51008736F1 /* ImageZoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0BD0062BA1A034000DD35B /* ImageZoomViewController.swift */; };
 		D2F0EF532BAAAD51008736F1 /* ImageZoomCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A562BA44CE2004BF1CB /* ImageZoomCollectionViewController.swift */; };
 		D2F0EF542BAAAD51008736F1 /* ImageZoomCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A582BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift */; };
 		D2F0EF552BAAAD51008736F1 /* DateConditionSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */; };
@@ -90,7 +89,6 @@
 		1AF880D72B8DC135004076EB /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
 		1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EveryDiary++Bundle.swift"; sourceTree = "<group>"; };
 		1AF880E32B8F182B004076EB /* SetFaceID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetFaceID.swift; sourceTree = "<group>"; };
-		3F0BD0062BA1A034000DD35B /* ImageZoomViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomViewController.swift; sourceTree = "<group>"; };
 		3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSelectVC.swift; sourceTree = "<group>"; };
@@ -341,7 +339,6 @@
 				3F78314F2BA9943E00354211 /* CarouselFlowLayout.swift */,
 				3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */,
 				3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */,
-				3F0BD0062BA1A034000DD35B /* ImageZoomViewController.swift */,
 				3F9E0A562BA44CE2004BF1CB /* ImageZoomCollectionViewController.swift */,
 				3F9E0A582BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift */,
 				3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */,
@@ -502,7 +499,6 @@
 				D2F0EF4F2BAAAD51008736F1 /* CarouselFlowLayout.swift in Sources */,
 				D2F0EF502BAAAD51008736F1 /* ImageCollectionViewCell.swift in Sources */,
 				D2F0EF512BAAAD51008736F1 /* MapCollectionViewCell.swift in Sources */,
-				D2F0EF522BAAAD51008736F1 /* ImageZoomViewController.swift in Sources */,
 				D2F0EF532BAAAD51008736F1 /* ImageZoomCollectionViewController.swift in Sources */,
 				D2F0EF542BAAAD51008736F1 /* ImageZoomCollectionViewCell.swift in Sources */,
 				D2F0EF552BAAAD51008736F1 /* DateConditionSelectVC.swift in Sources */,
