@@ -122,13 +122,16 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     private var imageCollectionViewHeightConstraint: NSLayoutConstraint?    // collectionView의 높이
     
     private lazy var photoBarButtonItem: UIBarButtonItem = {
-        return UIBarButtonItem(image: UIImage(named: "image"), style: .plain, target: self, action: #selector(photoButtonTapped))
+        let originalImage = UIImage(named: "image")?.resizedImage(with: CGSize(width: 24, height: 24))
+        return UIBarButtonItem(image: originalImage, style: .plain, target: self, action: #selector(photoButtonTapped))
     }()
     private lazy var emotionBarButtonItem: UIBarButtonItem = {
-        return UIBarButtonItem(image: UIImage(named: "happy"), style: .plain, target: self, action: #selector(emotionButtonTapped))
+        let originalImage = UIImage(named: "happy")?.resizedImage(with: CGSize(width: 27, height: 27))
+        return UIBarButtonItem(image: originalImage, style: .plain, target: self, action: #selector(emotionButtonTapped))
     }()
     private lazy var weatherBarButtonItem: UIBarButtonItem = {
-            return UIBarButtonItem(image: UIImage(named: "Vector"), style: .plain, target: self, action: #selector(weatherButtonTapped))
+        let originalImage = UIImage(named: "Vector")?.resizedImage(with: CGSize(width: 25, height: 25))
+            return UIBarButtonItem(image: originalImage, style: .plain, target: self, action: #selector(weatherButtonTapped))
         }()
     
     private let weatherDescriptionLabel: UILabel = {
@@ -182,6 +185,16 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
             print("Updated Location: \(self.currentLocationInfo ?? "Unknown"))")
         }
         mapManager.locationManager.startUpdatingLocation()
+    }
+}
+
+extension UIImage {
+    func resizedImage(with size: CGSize) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        self.draw(in: CGRect(origin: .zero, size: size))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return resizedImage
     }
 }
 
@@ -506,7 +519,7 @@ extension WriteDiaryVC: UITextFieldDelegate {
 extension WriteDiaryVC {
     // 사진 접근 권한 요청 로직
     @objc func photoButtonTapped() {
-        print("selectedPhotoIdentifiers: \(self.selectedPhotoIdentifiers)")
+        print("selectedPhotoIdentifiers photoButton Tapped: \(self.selectedPhotoIdentifiers)")
         imagePickerManager.requestPhotoLibraryAccess(from: self)
     }
     func didPickImages(_ imagesLocationInfo: [ImageLocationInfo], retainedIdentifiers: [String]) {
@@ -516,7 +529,7 @@ extension WriteDiaryVC {
         self.selectedPhotoIdentifiers = retainedIdentifiers
         self.imagesCollectionView.reloadData()
         self.updateImageCollectionViewHeight()
-        print("imagesLocationInfo: \(self.imagesLocationInfo)")
+        print("imagesLocationInfo after didPickImages: \(self.imagesLocationInfo)")
         print("selectedPhotoIdentifiers: \(self.selectedPhotoIdentifiers)")
     }
     func timeAndLocationChoiceAlert(time: String, address: String, completion: @escaping (Bool) -> Void) {
