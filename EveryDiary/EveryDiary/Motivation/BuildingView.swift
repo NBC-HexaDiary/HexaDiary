@@ -27,17 +27,17 @@ class BuildingView: UIView {
         let size: CGSize
         let windowLayout: WindowLayout
     }
-    // 창문 레이아웃 구조체 정의
+
     struct WindowLayout {
         let columns: [[Int]]
     }
-    // 빌딩 배열
+
     var buildings: [BuildingSize] = []
-    // 레이어 정의
+
     let backgroundLayer = CALayer()
     let backBuildingLayer = CAShapeLayer()
     let buildingLayer = CAShapeLayer()
-    // 창문 크기 및 간격 설정
+
     let windowSize = CGSize(width: 10, height: 22)
     let windowSpacing: CGFloat = 15
     
@@ -49,14 +49,13 @@ class BuildingView: UIView {
         super.init(coder: coder)
     }
     
-    // UIView에 맞춰 동적으로 크기 변경
+
     override func layoutSubviews() {
         super.layoutSubviews()
         self.layer.addSublayer(backgroundLayer)
         backgroundLayer.frame = self.bounds
         backBuildingLayer.frame = self.bounds
         buildingLayer.frame = self.bounds
-        //backBuilding 위치와 크기
         buildings = [
             BuildingSize(position: CGPoint(x: 0, y: backgroundLayer.bounds.height * 0.97),
                          size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1], [1, 1], [1], [1, 1], [1]])),
@@ -80,10 +79,8 @@ class BuildingView: UIView {
     
     //MARK: - 빌딩 그림 UIBezierPath
     func drawBuilding() {
-        print("검은 빌딩 그림")
         let path = UIBezierPath()
         
-        // black 첫 번째 건물
         path.move(to: CGPoint(x: 0, y: buildingLayer.bounds.height))
         path.addLine(to: CGPoint(x: 0, y: buildingLayer.bounds.height * 0.65))
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.0875, y: buildingLayer.bounds.height * 0.65))
@@ -91,7 +88,6 @@ class BuildingView: UIView {
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.14, y: buildingLayer.bounds.height * 0.7))
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.14, y: buildingLayer.bounds.height))
         
-        // black 두 번째 건물
         path.move(to: CGPoint(x: buildingLayer.bounds.width * 0.1575, y: buildingLayer.bounds.height))
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.1575, y: buildingLayer.bounds.height * 0.75))
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.245, y: buildingLayer.bounds.height * 0.65))
@@ -100,7 +96,6 @@ class BuildingView: UIView {
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.42, y: buildingLayer.bounds.height * 0.7))
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.42, y: buildingLayer.bounds.height))
         
-        // black 세 번째 건물
         path.move(to: CGPoint(x: buildingLayer.bounds.width * 0.455, y: buildingLayer.bounds.height))
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.455, y: buildingLayer.bounds.height * 0.8))
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.525, y: buildingLayer.bounds.height * 0.8))
@@ -108,7 +103,6 @@ class BuildingView: UIView {
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.665, y: buildingLayer.bounds.height * 0.75))
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.665, y: buildingLayer.bounds.height))
         
-        // black 네 번째 건물
         path.move(to: CGPoint(x: buildingLayer.bounds.width * 0.68, y: buildingLayer.bounds.height))
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.68, y: buildingLayer.bounds.height * 0.6))
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.9, y: buildingLayer.bounds.height * 0.6))
@@ -123,9 +117,8 @@ class BuildingView: UIView {
     }
     
     func drawBackBuilding() {
-        print("회색 빌딩 그림")
         let backPath = UIBezierPath()
-        // gray 첫 번째 건물
+
         backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.01, y: backBuildingLayer.bounds.height))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.01, y: backBuildingLayer.bounds.height * 0.55))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.04, y: backBuildingLayer.bounds.height * 0.55))
@@ -133,14 +126,12 @@ class BuildingView: UIView {
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.15, y: backBuildingLayer.bounds.height * 0.5))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.15, y: backBuildingLayer.bounds.height))
         
-        // gray 두 번째 건물
         backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.18, y: backBuildingLayer.bounds.height))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.18, y: backBuildingLayer.bounds.height * 0.55))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.3, y: backBuildingLayer.bounds.height * 0.55))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.35, y: backBuildingLayer.bounds.height * 0.6))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.35, y: backBuildingLayer.bounds.height))
         
-        // gray 세 번째 건물
         backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.355, y: backBuildingLayer.bounds.height))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.355, y: backBuildingLayer.bounds.height * 0.63))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.45, y: backBuildingLayer.bounds.height * 0.63))
@@ -148,7 +139,6 @@ class BuildingView: UIView {
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.5, y: backBuildingLayer.bounds.height * 0.66))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.5, y: backBuildingLayer.bounds.height))
         
-        // gray 네 번째 건물
         backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.5, y: backBuildingLayer.bounds.height))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.5, y: backBuildingLayer.bounds.height * 0.85))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.671, y: backBuildingLayer.bounds.height * 0.85))
@@ -156,7 +146,6 @@ class BuildingView: UIView {
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.8, y: backBuildingLayer.bounds.height * 0.55))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.8, y: backBuildingLayer.bounds.height))
         
-        // gray 다섯 번째 건물
         backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.8, y: backBuildingLayer.bounds.height))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.8, y: backBuildingLayer.bounds.height * 0.55))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.94, y: backBuildingLayer.bounds.height * 0.55))
@@ -172,10 +161,8 @@ class BuildingView: UIView {
     }
     
     //MARK: - Image Caching
-    //창문 이미지로 랜더링하여 반환
     func cacheWindowImageIfNeeded(windowIndex: Int, color: UIColor, windowSize: CGSize) {
         if MotivationImageCache.shared.getImage(forKey: "window_\(windowIndex)") != nil {
-//            print("Image for window \(windowIndex) is cached.")
             return
         } else {
             let renderer = UIGraphicsImageRenderer(size: windowSize)
@@ -184,7 +171,7 @@ class BuildingView: UIView {
                 context.fill(CGRect(origin: .zero, size: windowSize))
             }
             MotivationImageCache.shared.setImage(windowImage, forKey: "window_\(windowIndex)")
-            print("Image for window \(windowIndex) is cached successfully.")
+//            print("Image for window \(windowIndex) is cached successfully.")
         }
     }
     
@@ -214,18 +201,14 @@ class BuildingView: UIView {
         layer.addSublayer(backBuildingLayer)
     }
     
-    //검은 빌딩 이미지로 랜더링하여 반환
     func drawBuildingImage() -> UIImage {
-        print("검은 빌딩 이미지 그리기")
         let renderer = UIGraphicsImageRenderer(size: bounds.size)
         let image = renderer.image { context in
             drawBuilding()
         }
         return image
     }
-    //회색 빌딩 이미지로 랜더링하여 반환
     func drawBackBuildingImage() -> UIImage {
-        print("회색 빌딩 이미지 그리기")
         let renderer = UIGraphicsImageRenderer(size: bounds.size)
         let image = renderer.image { context in
             drawBackBuilding()
@@ -249,7 +232,6 @@ class BuildingView: UIView {
             handleBuilding(building, &windowOrder)
         }
     }
-    //inout 키워드를 사용하면 변수처럼 함수 내부에서 매개변수의 값을 변경할 수 있음
     func handleBuilding(_ building: BuildingSize, _ windowOrder: inout Int) {
         for (i, row) in building.windowLayout.columns.enumerated() {
             handleFloor(i, row, building, &windowOrder)
@@ -267,13 +249,11 @@ class BuildingView: UIView {
                 cacheWindowImageIfNeeded(windowIndex: windowOrder, color: .yellow, windowSize: CGSize(width: windowWidth, height: windowHeight))
                 let windowLayer = createWindowLayer(at: windowPosition, color: .yellow, windowIndex: windowOrder)
                 buildingLayer.addSublayer(windowLayer)
-//                print("Window \(windowOrder): 데이터 있음")
                 windowOrder += 1
             } else {
                 cacheWindowImageIfNeeded(windowIndex: windowOrder, color: .darkGray, windowSize: CGSize(width: windowWidth, height: windowHeight))
                 let windowLayer = createWindowLayer(at: windowPosition, color: .darkGray, windowIndex: windowOrder)
                 buildingLayer.addSublayer(windowLayer)
-//                print("Window \(windowOrder): 데이터 없음")
             }
         }
     }
@@ -285,7 +265,6 @@ extension BuildingView {
         drawWindowInBuilding()
     }
     
-    //특정 월에 대한 일기 데이터를 Firestore 데이터베이스에서 가져오는 함수
     func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
         
         guard let userID = DiaryManager.shared.getUserID() else {
@@ -295,13 +274,12 @@ extension BuildingView {
         
         let startOfMonth = "\(year)-\(String(format: "%02d", month))-01 00:00:00 +0000"
         let endOfMonth = month == 12 ? "\(year + 1)-01-01 23:59:59 +0000" : "\(year)-\(String(format: "%02d", month + 1))-01 23:59:59 +0000"
-        //dateString에서 현재 월 데이터만 가져오기
+
         DiaryManager.shared.db.collection("users").document(userID).collection("diaries").whereField("dateString", isGreaterThanOrEqualTo: startOfMonth).whereField("dateString", isLessThan: endOfMonth).addSnapshotListener { (querySnapshot, error) in
             if let error = error {
                 print("Error getting documents: \(error)")
                 completion(nil, error)
             } else {
-                //DiaryEntry 형식으로 변환하고 가져온 데이터는 배열에 추가
                 var diaries = [DiaryEntry]()
                 for document in querySnapshot!.documents {
                     if let diary = try? document.data(as: DiaryEntry.self) {
@@ -309,20 +287,18 @@ extension BuildingView {
                     }
                 }
                 diaries = diaries.filter { !$0.isDeleted }
-                DispatchQueue.main.async { // 메인 스레드에서 로그를 출력합니다.
+                DispatchQueue.main.async {
 //                    print("Fetched diaries: \(diaries)")
                 }
                 completion(diaries, nil)
             }
         }
     }
-    
-    //현재 월의 일기 데이터를 가져오고 그 데이터를 바탕으로 건물 창문을 업데이트하는 함수
+
     func windowsInBuildingData() {
-        //현재 년도 + 월 가져오기
         let currentYear = Calendar.current.component(.year, from: Date())
         let currentMonth = Calendar.current.component(.month, from: Date())
-        //현재 월의 일기 데이터를 가져오기
+
         fetchDiariesForCurrentMonth(year: currentYear, month: currentMonth) { (diaries, error) in
             if let error = error {
                 print("Error fetching diaries: \(error)")
@@ -340,7 +316,7 @@ extension BuildingView {
                 }
                 DispatchQueue.main.async {
                     self.diaryDays = Set(diaryDays)
-                    print("self.diaryDays: \(self.diaryDays)")
+//                    print("self.diaryDays: \(self.diaryDays)")
                     self.delegate?.didUpdateDiaryCount(self.diaryDays.count)
                     self.drawWindowInBuilding()
                 }
