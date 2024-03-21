@@ -58,26 +58,19 @@ class StartVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .mainCell
-
+        
         addSubViewsStartVC()
         autoLayoutStartVC()
     }
     
     @objc private func startButtonTouchOutside() {
         startButton.layer.backgroundColor = UIColor(named: "loginBackground")?.cgColor
-//        DiaryManager.shared.authenticateAnonymouslyIfNeeded { error in
-//            if let error = error {
-//                print("Error authenticating anonymously: \(error)")
-//                return
-//            }
-//        }
         UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
         showMainScreen()
     }
     
     @objc private func startButtonTouchDown() {
         startButton.layer.backgroundColor = UIColor(named: "subBackground")?.cgColor
-
     }
     
     private func addSubViewsStartVC() {
@@ -111,7 +104,6 @@ class StartVC: UIViewController {
     }
     
     private func showMainScreen() {
-        // Dismiss StartVC
         self.dismiss(animated: true, completion: nil)
     }
 }

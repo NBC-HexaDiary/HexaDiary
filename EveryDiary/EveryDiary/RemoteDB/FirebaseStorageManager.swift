@@ -22,7 +22,6 @@ class FirebaseStorageManager {
             let metaData = StorageMetadata()
             metaData.contentType = "image/jpeg"
             
-            // 촬영시간과 장소 메타데이터 추가
             var customMetadata = [String: String]()
             if let captureTime = captureTime {
                 customMetadata["captureTime"] = captureTime
@@ -47,7 +46,6 @@ class FirebaseStorageManager {
                 
             }
         }
-        
         dispatchGroup.notify(queue: .main) {
             completion(uploadedURL)
         }
@@ -63,17 +61,14 @@ class FirebaseStorageManager {
                 return
             }
             
-            // 이미지 데이터로부터 UIImage 생성
             let image = UIImage(data: imageData)
             
-            // 메타데이터 가져오기
             storageReference.getMetadata { metadata, error in
                 guard let metadata = metadata, error == nil else {
                     completion(image, nil)
                     return
                 }
                 print("storageReference.name: \(storageReference.name)")
-                // 메타데이터의 customMetadata 추출
                 let customMetadata = metadata.customMetadata
                 completion(image, customMetadata)
             }

@@ -96,29 +96,28 @@ class LoginVC: UIViewController {
             
             let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
             
-            // 익명 사용자인지 확인
             if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
-                // 익명 사용자를 영구 계정으로 전환
                 print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
                 
                 currentUser.link(with: credential) { authResult, error in
                     if let error = error {
                         print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
-                        // 유저링크를 하는데 오류가 발생한 경우에는 존재하는 익명계정을 삭제하고 그냥 로그인을 시도합니다.
+                        
                         Auth.auth().currentUser?.delete { error in
                             if let error = error {
-                                print("익명 계정 삭제 오류: \(error.localizedDescription)")
+                                print("Error deleting user from Firebase: \(error.localizedDescription)")
+                            } else {
+                                print("User successfully deleted from Firebase.")
+                                DiaryManager.shared.deleteUserData(for: currentUser.uid)
                             }
                         }
+                        
                         Auth.auth().signIn(with: credential) { authResult, error in
                             if let error = error {
-                                // 로그인 중 오류가 발생한 경우
                                 print("로그인 중 오류 발생: \(error.localizedDescription)")
                                 return
                             }
-                            // 로그인이 성공한 경우
                             print("로그인 성공")
-                            // 사용자 프로필 업데이트 및 UI 갱신
                             let changeRequest = currentUser.createProfileChangeRequest()
                             changeRequest.displayName = fullName
                             changeRequest.commitChanges { error in
@@ -132,7 +131,6 @@ class LoginVC: UIViewController {
                         }
                         return
                     }
-                    // 유저링크를 성공적으로 완료한 경우
                     let changeRequest = currentUser.createProfileChangeRequest()
                     changeRequest.displayName = fullName
                     changeRequest.commitChanges { error in
@@ -147,11 +145,9 @@ class LoginVC: UIViewController {
             } else {
                 Auth.auth().signIn(with: credential) { authResult, error in
                     if let error = error {
-                        // 로그인 중 오류가 발생한 경우
                         print("로그인 중 오류 발생: \(error.localizedDescription)")
                         return
                     }
-                    // 익명 사용자가 아닌 경우에는 이미 병합된 계정이거나 일반 계정입니다.
                     print("비로그인 상태에서 로그인 시도 성공")
                     NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
                     self.dismiss(animated: true, completion: nil)
@@ -297,76 +293,76 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
             let credential = OAuthProvider.credential(withProviderID: "apple.com",
                                                       idToken: idTokenString,
                                                       rawNonce: nonce)
-            // Firebase에 로그인
-                if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
-                    // 익명 사용자를 영구 계정으로 전환
-                    
-                    currentUser.link(with: credential) { authResult, error in
-                        if let error = error {
-                            print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
-                        }
-                        let changeRequest = currentUser.createProfileChangeRequest()
-                        if let fullName = appleIDCredential.fullName {
-                            changeRequest.displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
-                        }
-                        changeRequest.commitChanges { error in
-                            if let error = error {
-                                print("Error updating user profile: \(error)")
-                            }
-                            print("익명 사용자를 영구 계정으로 전환 성공")
-                            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                            self.dismiss(animated: true, completion: nil)
-                        }
+
+            if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
+                
+                currentUser.link(with: credential) { authResult, error in
+                    if let error = error {
+                        print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
                     }
-                    Auth.auth().currentUser?.delete { error in
-                        if let error = error {
-                            print("익명 계정 삭제 오류: \(error.localizedDescription)")
-                        }
+                    let changeRequest = currentUser.createProfileChangeRequest()
+                    if let fullName = appleIDCredential.fullName {
+                        changeRequest.displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
                     }
-                    Auth.auth().signIn(with: credential) { authResult, error in
+                    changeRequest.commitChanges { error in
                         if let error = error {
-                            // 로그인 중 오류가 발생한 경우
-                            print("로그인 중 오류 발생: \(error.localizedDescription)")
-                            return
+                            print("Error updating user profile: \(error)")
                         }
-                        NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                        self.dismiss(animated: true, completion: nil)
-                    }
-                } else {
-                    // 익명 사용자가 아닌 경우에는 이미 병합된 계정이거나 일반 계정입니다.
-                    print("이미 병합된 계정이거나 일반 계정입니다.")
-                    Auth.auth().signIn(with: credential) { authResult, error in
-                        if let error = error {
-                            // 로그인 중 오류가 발생한 경우
-                            print("로그인 중 오류 발생: \(error.localizedDescription)")
-                            return
-                        }
+                        print("익명 사용자를 영구 계정으로 전환 성공")
                         NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
                         self.dismiss(animated: true, completion: nil)
                     }
                 }
                 
-                // 사용자의 authorizationCode를 로그인 시 미리 가져온다. 회원 탈퇴 시, 필요하기 때문이다.
-                if let authorizationCode = appleIDCredential.authorizationCode, let codeString = String(data: authorizationCode, encoding: .utf8) {
-                    let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/getRefreshToken?code=\(codeString)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "https://apple.com")!
-                    let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
-                        if let data = data {
-                            let refreshToken = String(data: data, encoding: .utf8) ?? ""
-                            print(refreshToken)
-                            UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
-                            UserDefaults.standard.synchronize()
-                        }
+                Auth.auth().currentUser?.delete { error in
+                    if let error = error {
+                        print("Error deleting user from Firebase: \(error.localizedDescription)")
+                    } else {
+                        print("User successfully deleted from Firebase.")
+                        DiaryManager.shared.deleteUserData(for: currentUser.uid)
                     }
-                    task.resume()
+                }
+                
+                Auth.auth().signIn(with: credential) { authResult, error in
+                    if let error = error {
+                        print("로그인 중 오류 발생: \(error.localizedDescription)")
+                        return
+                    }
+                    NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                    self.dismiss(animated: true, completion: nil)
+                }
+            } else {
+                print("이미 병합된 계정이거나 일반 계정입니다.")
+                Auth.auth().signIn(with: credential) { authResult, error in
+                    if let error = error {
+                        print("로그인 중 오류 발생: \(error.localizedDescription)")
+                        return
+                    }
+                    NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                    self.dismiss(animated: true, completion: nil)
                 }
             }
+            
+            // 사용자의 authorizationCode를 로그인 시 미리 가져온다. 회원 탈퇴 시, 필요하기 때문이다.
+            if let authorizationCode = appleIDCredential.authorizationCode, let codeString = String(data: authorizationCode, encoding: .utf8) {
+                let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/getRefreshToken?code=\(codeString)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "https://apple.com")!
+                let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
+                    if let data = data {
+                        let refreshToken = String(data: data, encoding: .utf8) ?? ""
+                        print(refreshToken)
+                        UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
+                        UserDefaults.standard.synchronize()
+                    }
+                }
+                task.resume()
+            }
         }
-        
-        // 로그인이 제대로 되지 않았을 경우, Error 발생
-        func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-            // Handle error.
-            print("로그인 실패 - \(error.localizedDescription)")
-        }
-        
     }
+    
+    // 로그인이 제대로 되지 않았을 경우, Error 발생
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        // Handle error.
+        print("로그인 실패 - \(error.localizedDescription)")
+    }
+}
 
