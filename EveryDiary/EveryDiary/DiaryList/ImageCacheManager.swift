@@ -39,7 +39,6 @@ class ImageCacheManager {
                 completion(nil)
                 return
             }
-            print("Image downloaded from remoteDB and cached for \(key)")
             
             // 다운로드한 이미지를 캐시에 저장
             self.setImage(downloadedImage, forKey: key)

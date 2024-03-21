@@ -204,9 +204,16 @@ extension WriteDiaryVC {
     // 일기 저장 로직
     @objc func completeButtonTapped() {
         guard !isSavingDiary else { return }    // 저장 중(=true)이면 실행되지 않음
-        isSavingDiary = true
+        isSavingDiary = true                    // 저장 시작
         
         let formattedDateString = DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
+        var contentText = contentTextView.text ?? ""
+        
+        // contentTextView의 텍스트가 placeHolder와 같다면 빈문자열로 처리
+        if contentText == textViewPlaceHolder {
+            contentText = ""
+        }
+        
         let dispatchGroup = DispatchGroup()
         var uploadedImageURLs = [String]()
         
@@ -235,7 +242,7 @@ extension WriteDiaryVC {
         // DiaryEntry 생성 및 업로드
         self.createAndUploadDiaryEntry(
             with: self.titleTextField.text ?? "",
-            content: self.contentTextView.text ?? "",
+            content: contentText,
             dateString: formattedDateString,
             imageUrls: uploadedImageURLs,
             useMetadataLocation: self.useMetadataLocation,
