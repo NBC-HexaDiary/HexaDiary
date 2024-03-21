@@ -10,7 +10,7 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
-    
+    var blurEffectView: UIVisualEffectView?
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
        
@@ -20,21 +20,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = mainVC
         window?.makeKeyAndVisible()
         
-        let securityVC = LaunchViewController()
-        
         if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
-            if UserDefaults.standard.bool(forKey: "BiometricsEnabled"){
-                window?.rootViewController = securityVC
-            } else {
-                window?.rootViewController = mainVC
-            }
+            window?.rootViewController = mainVC
         } else {
             let startVC = StartVC()
             startVC.modalPresentationStyle = .fullScreen
             window?.rootViewController?.present(startVC, animated: true, completion: nil)
         }
         
-
         //강제로 다크모드 해제
         window?.overrideUserInterfaceStyle = .light
     }
@@ -62,9 +55,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let biometricsEnabled = UserDefaults.standard.bool(forKey: "BiometricsEnabled")
         
         if biometricsEnabled {
-            let securityVC = LaunchViewController()
-            securityVC.authenticateWithBiometrics()
-            window?.rootViewController = securityVC
+            self.addBlurEffect()
+            
+            BiometricsAuth().authenticateWithBiometrics { [weak self] success in
+                DispatchQueue.main.async {
+                    if success {
+                        self?.removeBlurEffect()
+                    } else {
+                        print("login 실패")
+                    }
+                }
+            }
         }
     }
     
@@ -73,7 +74,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-    
-    
 }
 
+//MARK: - Blur Effect 메서드
+extension SceneDelegate {
+    private func addBlurEffect() {
+        guard let window = window else { return }
+        
+        let blurEffect = UIBlurEffect(style: .dark)
+        blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView?.frame = window.bounds
+        blurEffectView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        window.addSubview(blurEffectView!)
+    }
+
+    private func removeBlurEffect() {
+        blurEffectView?.removeFromSuperview()
+        blurEffectView = nil
+    }
+}

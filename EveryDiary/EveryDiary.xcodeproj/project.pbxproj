@@ -68,7 +68,6 @@
 		D2F0EF5F2BAAAD51008736F1 /* TimePickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B878592BA2BF3F00AB71A0 /* TimePickerCell.swift */; };
 		D2F0EF602BAAAD51008736F1 /* DayPickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B8785B2BA2BF4A00AB71A0 /* DayPickerCell.swift */; };
 		D2F0EF612BAAAD51008736F1 /* LockVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B3C4CD02B8EE81300C53005 /* LockVC.swift */; };
-		D2F0EF622BAAAD51008736F1 /* LaunchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2BA69D2B90185E0019D1D5 /* LaunchViewController.swift */; };
 		D2F0EF632BAAAD51008736F1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BABC3682B85D107009267B3 /* AppDelegate.swift */; };
 		D2F0EF642BAAAD51008736F1 /* StartVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A6D906B2BA1A39800DEBB12 /* StartVC.swift */; };
 		D2F0EF652BAAAD51008736F1 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BABC36A2B85D107009267B3 /* SceneDelegate.swift */; };
@@ -79,7 +78,6 @@
 
 /* Begin PBXFileReference section */
 		1A03BDA32B92FA7D008C13DC /* FirebaseStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseStorageManager.swift; sourceTree = "<group>"; };
-		1A2BA69D2B90185E0019D1D5 /* LaunchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchViewController.swift; sourceTree = "<group>"; };
 		1A6D90672BA05B8500DEBB12 /* PaginationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaginationManager.swift; sourceTree = "<group>"; };
 		1A6D906B2BA1A39800DEBB12 /* StartVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartVC.swift; sourceTree = "<group>"; };
 		1A83D0B52BA9B1C4005DC6C6 /* LocalAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LocalAuthentication.framework; path = System/Library/Frameworks/LocalAuthentication.framework; sourceTree = SDKROOT; };
@@ -186,7 +184,6 @@
 			isa = PBXGroup;
 			children = (
 				6B3C4CD02B8EE81300C53005 /* LockVC.swift */,
-				1A2BA69D2B90185E0019D1D5 /* LaunchViewController.swift */,
 			);
 			path = Security;
 			sourceTree = "<group>";
@@ -518,7 +515,6 @@
 				D2F0EF5F2BAAAD51008736F1 /* TimePickerCell.swift in Sources */,
 				D2F0EF602BAAAD51008736F1 /* DayPickerCell.swift in Sources */,
 				D2F0EF612BAAAD51008736F1 /* LockVC.swift in Sources */,
-				D2F0EF622BAAAD51008736F1 /* LaunchViewController.swift in Sources */,
 				D2F0EF632BAAAD51008736F1 /* AppDelegate.swift in Sources */,
 				D2F0EF642BAAAD51008736F1 /* StartVC.swift in Sources */,
 				D2F0EF652BAAAD51008736F1 /* SceneDelegate.swift in Sources */,
