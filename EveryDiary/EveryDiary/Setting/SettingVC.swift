@@ -78,10 +78,6 @@ class SettingVC: UIViewController {
         loginVC.modalPresentationStyle = .fullScreen
         self.present(loginVC, animated: true)
     }
-    
-    @objc func tapLogoutButton() {
-        signOutAlert()
-    }
         
     private func setNavigationBar() {
         navigationItem.title = "설정"
@@ -106,8 +102,19 @@ extension SettingVC {
                     .signOutItem(title: "회원 탈퇴", iconImage: "trash", number: 2, isLoggedIn: false)
                 ]
             } else if currentUser.isEmailVerified == true {
+                var profileImageName = "profile"
+                for userInfo in currentUser.providerData {
+                    switch userInfo.providerID {
+                    case "google.com":
+                        profileImageName = "googleProfile" // Google 로그인 프로필 이미지
+                    case "apple.com":
+                        profileImageName = "appleProfile" // Apple 로그인 프로필 이미지
+                    default:
+                        break
+                    }
+                }
                 self.dataSource = [
-                    .profileItem(email: currentUser.email ?? "인증 완료", name: currentUser.displayName ?? "사용자", image: "profile", isLoggedIn: true),
+                    .profileItem(email: currentUser.email ?? "인증 완료", name: currentUser.displayName ?? "사용자", image: profileImageName, isLoggedIn: true),
                     .settingItem(title: "알림", iconImage: "notification", number: 1),
                     .settingItem(title: "잠금", iconImage: "lock", number: 2),
                     .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
@@ -203,6 +210,24 @@ extension SettingVC {
 
 // MARK: - Firebase 사용자 회원탈퇴 & Apple 탈퇴
 extension SettingVC {
+    
+    func deleteUserAccout() {
+        guard let currentUser = Auth.auth().currentUser else {
+            return
+        }
+        
+        let providerID = currentUser.providerData.compactMap { $0.providerID }.first
+        
+        switch providerID {
+        case "apple.com":
+            deleteUserDataFromApple()
+        case "google.com":
+            deleteUserDataFromFirebase()
+        default:
+            print("Unsupported provider or provider could not be identified.")
+        }
+    }
+    
     // Firebase에서 사용자 데이터 삭제
     func deleteUserDataFromFirebase() {
         let firebaseAuth = Auth.auth()
@@ -228,7 +253,8 @@ extension SettingVC {
         let alert = UIAlertController(title: "회원 탈퇴하시겠습니까?", message: "일기에 저장된 모든 내용이 삭제되며  복구가 불가능해집니다. \n 그래도 진행하시겠습니까?", preferredStyle: .actionSheet)
         
         let deleteAction = UIAlertAction(title: "회원 탈퇴", style: .destructive) { _ in
-            self.deleteUserDataFromApple()
+//            self.deleteUserDataFromApple()
+            self.deleteUserAccout()
             self.showDeleteAccountConfirmAlert()
             NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
         }
