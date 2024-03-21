@@ -17,13 +17,25 @@ class LaunchViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .mainTheme
-        
-        if shouldAttemptBiometricAuthentication() {
-            authenticateWithBiometrics()
-        } else {
-            navigateToMainScreen()
-        }
+        authenticateWithBiometrics()
+
+//        if shouldAttemptBiometricAuthentication() {
+//            authenticateWithBiometrics()
+//        } else {
+//            navigateToMainScreen()
+//        }
     }
+    
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear(animated)
+//        view.backgroundColor = .mainTheme
+//        
+//        if shouldAttemptBiometricAuthentication() {
+//            authenticateWithBiometrics()
+//        } else {
+//            navigateToMainScreen()
+//        }
+//    }
     
     private func shouldAttemptBiometricAuthentication() -> Bool {
         return UserDefaults.standard.bool(forKey: "BiometricsEnabled")
@@ -39,7 +51,7 @@ class LaunchViewController: UIViewController {
         }
     }
     
-    private func authenticateWithBiometrics() {
+     func authenticateWithBiometrics() {
         biometricsAuth.authenticateWithBiometrics { [weak self] success in
             if success {
                 DispatchQueue.main.async {

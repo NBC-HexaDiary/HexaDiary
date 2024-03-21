@@ -59,9 +59,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
-        let securityVC = LaunchViewController()
-
-        window?.rootViewController = securityVC
+        let biometricsEnabled = UserDefaults.standard.bool(forKey: "BiometricsEnabled")
+        
+        if biometricsEnabled {
+            let securityVC = LaunchViewController()
+            securityVC.authenticateWithBiometrics()
+            window?.rootViewController = securityVC
+        }
     }
     
     func sceneDidEnterBackground(_ scene: UIScene) {
