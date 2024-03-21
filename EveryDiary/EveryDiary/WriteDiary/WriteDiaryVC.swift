@@ -432,8 +432,6 @@ extension WriteDiaryVC: DateConditionSelectDelegate {
             } else if conditionType == .weather {
                 popoverController.barButtonItem = weatherBarButtonItem
             }
-//            popoverController.sourceView = sourceView
-//            popoverController.sourceRect = sourceView.bounds
             popoverController.permittedArrowDirections = [.down]
             popoverController.delegate = self
             present(conditionSelectVC, animated: true, completion: nil)
@@ -519,13 +517,36 @@ extension WriteDiaryVC: UITextFieldDelegate {
 extension WriteDiaryVC {
     // 사진 접근 권한 요청 로직
     @objc func photoButtonTapped() {
-        print("selectedPhotoIdentifiers photoButton Tapped: \(self.selectedPhotoIdentifiers)")
+        print("preselected 된 identifier: \(self.selectedPhotoIdentifiers)")
         imagePickerManager.requestPhotoLibraryAccess(from: self)
     }
     func didPickImages(_ imagesLocationInfo: [ImageLocationInfo], retainedIdentifiers: [String]) {
         print(#function)
-        // 선택된 이미지와 메타데이터를 처리하는 로직
-        self.imagesLocationInfo = imagesLocationInfo
+        
+        // 새롭게 선택된 사진 식별자
+        let newIdentifiers = Set(retainedIdentifiers)
+        print("새롭게 선택된 사진 식별자: \(newIdentifiers)")
+        
+        // 기존에 선택되었던 사진 식별자
+        let existingIdentifiers = Set(self.imagesLocationInfo.map { $0.assetIdentifier ?? "" })
+        print("기존에 선택되었던 사진 식별자: \(existingIdentifiers)")
+        // 선택 해제된 사진 식별자 찾기
+        let deselectedIdentifiers = existingIdentifiers.subtracting(newIdentifiers)
+        print("선택 해제된 사진 식별자 찾기: \(deselectedIdentifiers)")
+        // 선택 해제된 사진 정보 제거
+        self.imagesLocationInfo.removeAll { deselectedIdentifiers.contains($0.assetIdentifier ?? "") }
+        print("선택 해제된 사진 정보 제거: \(self.imagesLocationInfo.removeAll { deselectedIdentifiers.contains($0.assetIdentifier ?? "") })")
+        // 새롭게 추가된 이미지의 식별자 찾기
+        let addedIdentifiers = newIdentifiers.subtracting(existingIdentifiers)
+        print("새롭게 추가된 이미지의 식별자 찾기: \(addedIdentifiers)")
+        
+        // 새롭게 선택한 이미지를 추가하는 로직
+        for imageInfo in imagesLocationInfo {
+            if let identifier = imageInfo.assetIdentifier, addedIdentifiers.contains(identifier) {
+                self.imagesLocationInfo.append(imageInfo)
+            }
+        }
+        print("새롭게 선택한 이미지를 추가하는 로직: \(self.imagesLocationInfo)")
         self.selectedPhotoIdentifiers = retainedIdentifiers
         self.imagesCollectionView.reloadData()
         self.updateImageCollectionViewHeight()

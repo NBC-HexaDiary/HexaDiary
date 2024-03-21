@@ -48,7 +48,7 @@ class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
         var newImagesLocationInfo: [ImageLocationInfo] = []
         // 새로운 결과의 식별자 배열
         let newResultsIdentifiers = results.compactMap { $0.assetIdentifier }
-        
+        print("PHPicker가 선택한 identifier: \(newResultsIdentifiers)")
         let group = DispatchGroup() // 모든 비동기작업을 추적하기 위한 DispatchGroup
         
         // 선택한 각 사진들에 대하여
@@ -86,9 +86,9 @@ class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
                             captureTime: captureTime,
                             location: locationString
                         )
-                        print("imageLocationInfo: \(imageLocationInfo)")
                         DispatchQueue.main.async {
                             newImagesLocationInfo.append(imageLocationInfo)
+                            print("새롭게 추가된 이미지: \(imageLocationInfo)")
                         }
                     }
                 }
@@ -99,22 +99,26 @@ class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
         // 모든 선택 작업이 완료되면, delegate으로 결과 전달
         group.notify(queue: .main) { [weak self] in
             print("group.notify")
-            guard let self = self, let firstImageLocationInfo = newImagesLocationInfo.first else { return }
+            guard let self = self else { return }
             // identifiers 저장
             self.selectedPhotoIdentifiers = newResultsIdentifiers
             // 위치 정보 유무에 따라 다음 단계 처리
-            if let firstImageLocationInfo = newImagesLocationInfo.first, let location = firstImageLocationInfo.locationInfo {
+            if let location = newImagesLocationInfo.first?.locationInfo {
+                print("위치정보 있음")
                 // 위치 정보가 있다면
                 let mapManger = MapManager()
                 mapManger.getPlaceName(latitude: location.latitude, longitude: location.longitude) { address in
-                    let time = firstImageLocationInfo.captureTime ?? self.formattedDateString(for: Date())
+                    let time = newImagesLocationInfo.first?.captureTime ?? self.formattedDateString(for: Date())
                     // 위치 정보가 있는 경우에만 timeAndLocationChoiceAlert 호출
                     // 선택 사진의 시간과 위치 정보를 사용할 것인지 확인하는 메서드
                     self.delegate?.timeAndLocationChoiceAlert(time: time, address: address) { useMetadata in }
+                    print("결과전달: \(newImagesLocationInfo), \(newResultsIdentifiers)")
                     // 새로운 선택결과를 delegate 메서드로 전달
                     self.delegate?.didPickImages(newImagesLocationInfo, retainedIdentifiers: newResultsIdentifiers)
                 }
             } else {
+                print("위치정보 없음")
+                print("결과전달: \(newImagesLocationInfo), \(newResultsIdentifiers)")
                 // 위치 정보가 없는 경우 didPickImages만 호출
                 self.delegate?.didPickImages(newImagesLocationInfo, retainedIdentifiers: newResultsIdentifiers)
                 if let presentingViewController = self.presentingViewController {
