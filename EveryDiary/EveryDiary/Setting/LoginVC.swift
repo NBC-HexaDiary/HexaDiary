@@ -131,7 +131,6 @@ class LoginVC: UIViewController {
                         }
                         return
                     }
-                    // 유저링크를 성공적으로 완료한 경우
                     let changeRequest = currentUser.createProfileChangeRequest()
                     changeRequest.displayName = fullName
                     changeRequest.commitChanges { error in
@@ -146,11 +145,9 @@ class LoginVC: UIViewController {
             } else {
                 Auth.auth().signIn(with: credential) { authResult, error in
                     if let error = error {
-                        // 로그인 중 오류가 발생한 경우
                         print("로그인 중 오류 발생: \(error.localizedDescription)")
                         return
                     }
-                    // 익명 사용자가 아닌 경우에는 이미 병합된 계정이거나 일반 계정입니다.
                     print("비로그인 상태에서 로그인 시도 성공")
                     NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
                     self.dismiss(animated: true, completion: nil)
