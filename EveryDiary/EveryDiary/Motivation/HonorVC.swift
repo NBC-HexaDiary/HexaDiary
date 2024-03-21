@@ -189,7 +189,7 @@ extension HonorVC {
         guard DiaryManager.shared.getUserID() != nil else {
             return
         }
-        _ = Calendar.current.component(.year, from: Date())
+        var currentYear = Calendar.current.component(.year, from: Date())
         // 데이터가 있는 월을 저장할 집합
         var existingMonths = Set<Int>()
         
@@ -197,7 +197,7 @@ extension HonorVC {
             guard let self = self, let diaries = diaries, error == nil else {
                 return
             }
-            let filteredDiaries = diaries.filter { !$0.isDeleted }
+            let filteredDiaries = diaries.filter { Calendar.current.component(.year, from: $0.date) == currentYear && !$0.isDeleted }
             for diary in filteredDiaries {
                 let month = Calendar.current.component(.month, from: diary.date)
                 let day = Calendar.current.component(.day, from: diary.date)
