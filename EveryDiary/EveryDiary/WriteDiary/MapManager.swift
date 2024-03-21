@@ -21,7 +21,35 @@ class MapManager: NSObject, CLLocationManagerDelegate {
         super.init()
         self.locationManager.delegate = self
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        checkLocationAuthorization()
+    }
+    
+    // 앱에 대한 권한 설정이 변경되면 호출(iOS 14 이상)
+    @available(iOS 14, *)
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        checkLocationAuthorization(manager.authorizationStatus)
+    }
+    // 앱에 대한 권한 설정이 변경되면 호출(iOS 14 미만)
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        checkLocationAuthorization(status)
+    }
+    // 위치 서비스 권한 상태 확인 및 요청 메서드
+    private func checkLocationAuthorization(_ status: CLAuthorizationStatus) {
+        // 권한 상태값에 따라 분기처리를 수행하는 메서드 실행
+        switch status {
+        // 권한 설정을 하지 않은 상태
+        case .notDetermined:
+            // 권한 요청 보냄
+            locationManager.requestWhenInUseAuthorization()
+        // 명시적으로 권한을 거부했거나, 위치서비스가 제한된 상태
+        case .denied, .restricted:
+            promptForLocationServiceAuthorization()
+        // 앱을 사용 중일 때 허용, 사용하지 않을 때도 항상 허용
+        case .authorizedWhenInUse, .authorizedAlways:
+            // manager 인스턴스로 사용자의 위치 획득
+            locationManager.startUpdatingLocation()
+        @unknown default:
+            fatalError("Unhandled authorization status.")
+        }
     }
     
     // 주어진 위도와 경도를 기반으로 장소 이름을 찾는 메서드
@@ -36,7 +64,7 @@ class MapManager: NSObject, CLLocationManagerDelegate {
                 return
             }
             
-            // 장소명이 있는 경우 우선 사용
+            // 장소명이 있는 경우 우선 사용, 없다면 포맷된 주소 사용
             if let placeName = placemark.name {
                 completion(placeName)
             }
@@ -90,67 +118,7 @@ class MapManager: NSObject, CLLocationManagerDelegate {
             UIApplication.shared.open(googleMapsWebURL, options: [:], completionHandler: nil)
         }
     }
-    func getCurrentLocation(completion: @escaping(CLLocationDegrees, CLLocationDegrees) -> Void) {
-        locationManager.requestWhenInUseAuthorization()     // 사용자에게 위치 정보 접근 권한 요청
-        
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.startUpdatingLocation()
-            
-            // 현재 위치 가져오기
-            if let currentLocation = locationManager.location {
-                let latitude = currentLocation.coordinate.latitude
-                let longitude = currentLocation.coordinate.longitude
-                completion(latitude, longitude) // 콜백 함수 호출
-            } else {
-                print("현재 위치를 가져올 수 없습니다.")
-            }
-        } else {
-            print("위치 서비스가 비활성화되어 있습니다.")
-        }
-    }
     
-    // 앱에 대한 권한 설정이 변경되면 호출(iOS 14 이상)
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        checkLocationAuthorization()
-    }
-    
-    // 앱에 대한 권한 설정이 변경되면 호출(iOS 14 미만)
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        checkLocationAuthorization()
-    }
-    
-    // 위치 서비스 권한 상태 확인 및 요청 메서드
-    func checkLocationAuthorization() {
-        guard CLLocationManager.locationServicesEnabled() else {
-            // 시스템 설정으로 유도
-            promptForLocationServiceAuthorization()
-            return
-        }
-        let authorizationStatus: CLAuthorizationStatus
-        
-        // 앱의 권한 상태를 가져오는 코드(iOS 버전에 따라 분기처리)
-        if #available(iOS 14.0, *) {
-            authorizationStatus = locationManager.authorizationStatus
-        } else {
-            authorizationStatus = CLLocationManager.authorizationStatus()
-        }
-        // 권한 상태값에 따라 분기처리를 수행하는 메서드 실행
-        switch authorizationStatus {
-        // 권한 설정을 하지 않은 상태
-        case .notDetermined:
-            // 권한 요청 보냄
-            locationManager.requestWhenInUseAuthorization()
-        // 명시적으로 권한을 거부했거나, 위치서비스가 제한된 상태
-        case .denied, .restricted:
-            promptForLocationServiceAuthorization()
-        // 앱을 사용 중일 때 허용, 사용하지 않을 때도 항상 허용
-        case .authorizedWhenInUse, .authorizedAlways:
-            // manager 인스턴스로 사용자의 위치 획득
-            locationManager.startUpdatingLocation()
-        @unknown default:
-            fatalError("Unhandled authorization status.")
-        }
-    }
     // 시스템 설정으로 유도하는 커스텀 alert
     func promptForLocationServiceAuthorization() {
         guard let viewController = presentingViewController else { return }
