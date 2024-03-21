@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1A03BDA12B92F910008C13DC /* FirebaseStorage */; };
 		1AF880D32B8DB5A2004076EB /* Api.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880D22B8DB5A2004076EB /* Api.plist */; };
-		3F11704B2BABF05F00ABC76F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3F11704A2BABF05F00ABC76F /* GoogleService-Info.plist */; };
 		3F7831602BAB0B3D00354211 /* calendar.json in Resources */ = {isa = PBXBuildFile; fileRef = 3F78315F2BAB0B3D00354211 /* calendar.json */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
 		6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */; };
@@ -93,7 +92,6 @@
 		3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSelectVC.swift; sourceTree = "<group>"; };
 		3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateConditionSelectVC.swift; sourceTree = "<group>"; };
-		3F11704A2BABF05F00ABC76F /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3F3DE3032B9EFC0900BC2038 /* ImageCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheManager.swift; sourceTree = "<group>"; };
 		3F3DE30E2BA1451600BC2038 /* TrashVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashVC.swift; sourceTree = "<group>"; };
 		3F3DE3102BA1461200BC2038 /* TrashCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashCollectionViewCell.swift; sourceTree = "<group>"; };
@@ -284,7 +282,6 @@
 				6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */,
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
-				3F11704A2BABF05F00ABC76F /* GoogleService-Info.plist */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
 				1AF880D22B8DB5A2004076EB /* Api.plist */,
 			);
@@ -460,7 +457,6 @@
 			files = (
 				6B95C0512B8C7A5A00DBB175 /* SFProRounded-Regular.otf in Resources */,
 				1AF880D32B8DB5A2004076EB /* Api.plist in Resources */,
-				3F11704B2BABF05F00ABC76F /* GoogleService-Info.plist in Resources */,
 				6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */,
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
 				6BABC3722B85D109009267B3 /* Assets.xcassets in Resources */,
