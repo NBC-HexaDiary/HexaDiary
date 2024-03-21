@@ -49,7 +49,6 @@ class BuildingView: UIView {
         super.init(coder: coder)
     }
     
-
     override func layoutSubviews() {
         super.layoutSubviews()
         self.layer.addSublayer(backgroundLayer)
