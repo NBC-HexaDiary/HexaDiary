@@ -23,17 +23,14 @@ class PaginationManager {
             .document(userID)
             .collection("diaries")
             .order(by: "dateString", descending: true)
-            .whereField("isDeleted", isEqualTo: isDeleted) // isDeleted에 따라 데이터 호출
+            .whereField("isDeleted", isEqualTo: isDeleted)
         
         if let lastDocumentSnapshot = lastDocumentSnapshot {
-            // 이전 페이지의 마지막 문서 다음부터 쿼리
             collection = collection.start(afterDocument: lastDocumentSnapshot)
         }
         
-        // 페이지 크기에 따라 쿼리 제한
         let query = collection.limit(to: 5)
         
-        // 쿼리 실행
         query.addSnapshotListener { [weak self] (snapshot, error) in
             guard let self = self else { return }
             
@@ -49,7 +46,6 @@ class PaginationManager {
                 return
             }
             
-            // 가져온 문서를 DiaryEntry로 변환
             let entries = snapshot.documents.compactMap { document -> DiaryEntry? in
                 do {
                     let entry = try document.data(as: DiaryEntry.self)
@@ -60,7 +56,6 @@ class PaginationManager {
                 }
             }
             
-            // 마지막 문서 기록
             if let lastDocument = snapshot.documents.last {
                 self.lastDocumentSnapshot = lastDocument
             }
