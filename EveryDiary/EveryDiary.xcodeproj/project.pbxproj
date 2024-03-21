@@ -10,6 +10,7 @@
 		1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1A03BDA12B92F910008C13DC /* FirebaseStorage */; };
 		1AF880D32B8DB5A2004076EB /* Api.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880D22B8DB5A2004076EB /* Api.plist */; };
 		3F7831602BAB0B3D00354211 /* calendar.json in Resources */ = {isa = PBXBuildFile; fileRef = 3F78315F2BAB0B3D00354211 /* calendar.json */; };
+		3F7831662BAB329600354211 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3F7831652BAB329600354211 /* GoogleService-Info.plist */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
 		6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */; };
 		6B95C04C2B8C7A5A00DBB175 /* SFProDisplay-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0412B8C7A5900DBB175 /* SFProDisplay-Regular.otf */; };
@@ -53,7 +54,6 @@
 		D2F0EF4F2BAAAD51008736F1 /* CarouselFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F78314F2BA9943E00354211 /* CarouselFlowLayout.swift */; };
 		D2F0EF502BAAAD51008736F1 /* ImageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */; };
 		D2F0EF512BAAAD51008736F1 /* MapCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */; };
-		D2F0EF522BAAAD51008736F1 /* ImageZoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0BD0062BA1A034000DD35B /* ImageZoomViewController.swift */; };
 		D2F0EF532BAAAD51008736F1 /* ImageZoomCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A562BA44CE2004BF1CB /* ImageZoomCollectionViewController.swift */; };
 		D2F0EF542BAAAD51008736F1 /* ImageZoomCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E0A582BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift */; };
 		D2F0EF552BAAAD51008736F1 /* DateConditionSelectVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */; };
@@ -89,7 +89,6 @@
 		1AF880D72B8DC135004076EB /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
 		1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EveryDiary++Bundle.swift"; sourceTree = "<group>"; };
 		1AF880E32B8F182B004076EB /* SetFaceID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetFaceID.swift; sourceTree = "<group>"; };
-		3F0BD0062BA1A034000DD35B /* ImageZoomViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomViewController.swift; sourceTree = "<group>"; };
 		3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		3F0FEFEC2B8DFDB1001539AE /* DateSelectVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSelectVC.swift; sourceTree = "<group>"; };
@@ -102,6 +101,7 @@
 		3F7831552BA9EC0700354211 /* MapManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapManager.swift; sourceTree = "<group>"; };
 		3F7831572BA9FE4C00354211 /* KeyboardManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardManager.swift; sourceTree = "<group>"; };
 		3F78315F2BAB0B3D00354211 /* calendar.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = calendar.json; sourceTree = "<group>"; };
+		3F7831652BAB329600354211 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F9E0A522BA352E4004BF1CB /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCollectionViewCell.swift; sourceTree = "<group>"; };
@@ -284,6 +284,7 @@
 				6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */,
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
+				3F7831652BAB329600354211 /* GoogleService-Info.plist */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
 				1AF880D22B8DB5A2004076EB /* Api.plist */,
 			);
@@ -346,7 +347,6 @@
 				3F78314F2BA9943E00354211 /* CarouselFlowLayout.swift */,
 				3F9E0A4E2BA2FEA2004BF1CB /* ImageCollectionViewCell.swift */,
 				3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */,
-				3F0BD0062BA1A034000DD35B /* ImageZoomViewController.swift */,
 				3F9E0A562BA44CE2004BF1CB /* ImageZoomCollectionViewController.swift */,
 				3F9E0A582BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift */,
 				3F0FEFF92B8F2819001539AE /* DateConditionSelectVC.swift */,
@@ -460,6 +460,7 @@
 			files = (
 				6B95C0512B8C7A5A00DBB175 /* SFProRounded-Regular.otf in Resources */,
 				1AF880D32B8DB5A2004076EB /* Api.plist in Resources */,
+				3F7831662BAB329600354211 /* GoogleService-Info.plist in Resources */,
 				6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */,
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
 				6BABC3722B85D109009267B3 /* Assets.xcassets in Resources */,
@@ -506,7 +507,6 @@
 				D2F0EF4F2BAAAD51008736F1 /* CarouselFlowLayout.swift in Sources */,
 				D2F0EF502BAAAD51008736F1 /* ImageCollectionViewCell.swift in Sources */,
 				D2F0EF512BAAAD51008736F1 /* MapCollectionViewCell.swift in Sources */,
-				D2F0EF522BAAAD51008736F1 /* ImageZoomViewController.swift in Sources */,
 				D2F0EF532BAAAD51008736F1 /* ImageZoomCollectionViewController.swift in Sources */,
 				D2F0EF542BAAAD51008736F1 /* ImageZoomCollectionViewCell.swift in Sources */,
 				D2F0EF552BAAAD51008736F1 /* DateConditionSelectVC.swift in Sources */,

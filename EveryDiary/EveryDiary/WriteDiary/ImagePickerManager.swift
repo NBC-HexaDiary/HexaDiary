@@ -148,7 +148,7 @@ extension ImagePickerManager {
     
     // 접근 권한이 없을 경우 설정 화면으로 유도하는 AlertController
     private func showSettingsAlert(from viewController: UIViewController) {
-        let requestPhotoServiceAlert = UIAlertController(title: "사진을 첨부할 수 없습니다.", message: "사진을 추가하기 위해 사진 접근 권한을 수정해주세요.", preferredStyle: .alert)
+        let requestPhotoServiceAlert = UIAlertController(title: "'EveryDiary'가 사용자의 사진에 접근하려고 합니다.", message: "여러분의 일기에 사진을 추가하기 위해 사진 라이브러리에 접근하도록 권한을 허용해주세요.", preferredStyle: .alert)
         requestPhotoServiceAlert.addAction(UIAlertAction(title: "취소", style: .cancel))
         requestPhotoServiceAlert.addAction(UIAlertAction(title: "설정", style: .default) { _ in
             guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }

@@ -68,8 +68,6 @@ class JournalCollectionViewCell: UICollectionViewCell {
         contentView.layer.shadowOffset = CGSize(width: 0, height: 0)
         self.layer.cornerRadius = 20
         self.clipsToBounds = true
-        
-//        initializeSwipeGesture()
     }
     
     required init?(coder: NSCoder) {
@@ -187,10 +185,5 @@ extension JournalCollectionViewCell {
             make.trailing.equalTo(contentView).offset(-11)
             make.width.equalTo(imageView.snp.height)
         }
-//        deleteButton.snp.makeConstraints { make in
-//            make.trailing.equalTo(contentView.snp.trailing).offset(-10)
-//            make.centerY.equalToSuperview()
-//            make.width.height.equalTo(30)
-//        }
     }
 }

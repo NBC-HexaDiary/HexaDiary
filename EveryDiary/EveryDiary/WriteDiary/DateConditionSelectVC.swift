@@ -31,7 +31,6 @@ class DateConditionSelectVC: UIViewController, UICollectionViewDataSource, UICol
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-//        layout.itemSize = CGSize(width: 100, height: 100)
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.dataSource = self
@@ -48,7 +47,6 @@ class DateConditionSelectVC: UIViewController, UICollectionViewDataSource, UICol
         let arrowSize: CGFloat = 13
         collectionView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
-//                collectionView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: (-size)),
                 collectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
                 collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
                 collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
