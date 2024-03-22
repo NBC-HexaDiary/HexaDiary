@@ -27,7 +27,7 @@ class SettingVC: UIViewController {
         tableView.register(SettingCell.self, forCellReuseIdentifier: SettingCell.id)
         tableView.register(ProfileCell.self, forCellReuseIdentifier: ProfileCell.id)
         tableView.register(SignOutCell.self, forCellReuseIdentifier: SignOutCell.id)
-        tableView.isScrollEnabled = false
+        tableView.isScrollEnabled = true
         tableView.backgroundColor = .mainBackground
         tableView.separatorStyle = .none
         return tableView
