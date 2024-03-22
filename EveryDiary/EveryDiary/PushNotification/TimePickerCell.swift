@@ -17,6 +17,8 @@ class TimePickerCell: UITableViewCell {
     private lazy var timePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .time
+        picker.tintColor = .mainTheme
+        picker.locale = Locale(identifier: "ko-KR")
         picker.preferredDatePickerStyle = .wheels
         picker.isUserInteractionEnabled = true
         return picker
