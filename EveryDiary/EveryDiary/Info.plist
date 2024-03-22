@@ -5,7 +5,7 @@
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>사용자가 일기를 작성한 위치를 저장하기 위해 권한이 필요합니다.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>사용자가 작성할 일기에 사진을 첨부하는 것을 위해 권한이 필요합니다.</string>
+	<string>일기에 사진을 첨부하기 위해 사진 라이브러리 접근 권한이 필요합니다.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
