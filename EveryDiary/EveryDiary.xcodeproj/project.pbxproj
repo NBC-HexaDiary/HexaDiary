@@ -74,6 +74,7 @@
 		D2F0EF712BAADECF008736F1 /* LocalAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A83D0B52BA9B1C4005DC6C6 /* LocalAuthentication.framework */; };
 		D2F0EF742BAADED1008736F1 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F9E0A522BA352E4004BF1CB /* MapKit.framework */; };
 		D2F0EF852BAC249B008736F1 /* calendar.json in Resources */ = {isa = PBXBuildFile; fileRef = D2F0EF842BAC249B008736F1 /* calendar.json */; };
+		D2F0EF892BAC5A32008736F1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D2F0EF882BAC5A32008736F1 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -141,6 +142,7 @@
 		D2B8785B2BA2BF4A00AB71A0 /* DayPickerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayPickerCell.swift; sourceTree = "<group>"; };
 		D2F0EF6D2BAAD909008736F1 /* calendar.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = calendar.json; sourceTree = "<group>"; };
 		D2F0EF842BAC249B008736F1 /* calendar.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = calendar.json; sourceTree = "<group>"; };
+		D2F0EF882BAC5A32008736F1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -280,6 +282,7 @@
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
+				D2F0EF882BAC5A32008736F1 /* PrivacyInfo.xcprivacy */,
 				1AF880D22B8DB5A2004076EB /* Api.plist */,
 			);
 			path = EveryDiary;
@@ -451,6 +454,7 @@
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
 				6BABC3722B85D109009267B3 /* Assets.xcassets in Resources */,
 				6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */,
+				D2F0EF892BAC5A32008736F1 /* PrivacyInfo.xcprivacy in Resources */,
 				6B95C04C2B8C7A5A00DBB175 /* SFProDisplay-Regular.otf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
