@@ -669,7 +669,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "일기를 안전하게 관리하기 위해 생체 인증 권한을 허용해 주세요.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "일기의 날씨 정보를 설정하기 위해 위치 정보에 동의해주세요.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사진앨범에 접근하도록 허용버튼을 눌러주세요";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "일기에 사진을 첨부하기 위해 사진 라이브러리 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -712,7 +712,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "일기를 안전하게 관리하기 위해 생체 인증 권한을 허용해 주세요.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "일기의 날씨 정보를 설정하기 위해 위치 정보에 동의해주세요.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사진앨범에 접근하도록 허용버튼을 눌러주세요";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "일기에 사진을 첨부하기 위해 사진 라이브러리 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
