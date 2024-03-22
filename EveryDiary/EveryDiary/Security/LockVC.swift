@@ -4,7 +4,7 @@
 //
 //  Created by t2023-m0044 on 2/28/24.
 //
-
+import LocalAuthentication
 import UIKit
 
 import SnapKit
@@ -91,18 +91,46 @@ class LockVC: UIViewController {
         UserDefaults.standard.set(isEnabled, forKey: "BiometricsEnabled")
         
         if isEnabled {
-            requestFaceIDAuthentication()
+            checkBiometryAvailability()
         }
     }
-    
-    private func requestFaceIDAuthentication() {
-        biometricsAuth.authenticateWithBiometrics { [weak self] success in
-            guard self != nil else { return }
+
+    private func checkBiometryAvailability() {
+        biometricsAuth.authenticateWithBiometrics { [weak self] success, error in
+            guard let self = self else { return }
             if success {
                 print("인증 성공")
             } else {
                 print("인증 실패")
+                if let error = error as? LAError, error.code == .biometryNotAvailable {
+                    self.showPermissionDeniedAlert()
+                } else {
+                    print("페이스 아이디 권한이 비활성화되어 있습니다. 설정으로 이동하여 활성화해주세요.")
+                    self.showPermissionDeniedAlert()
+                }
             }
+        }
+    }
+    
+    private func showPermissionDeniedAlert() {
+        let authorizationAlert = UIAlertController(title: "Face ID 권한 거부", message: "Face ID 권한을 사용하려면 설정에서 Face ID 권한을 허용해주세요", preferredStyle: .alert)
+
+        let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { (_) -> Void in
+            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+                return
+            }
+            if UIApplication.shared.canOpenURL(settingsUrl) {
+                UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .default, handler: nil)
+
+        authorizationAlert.addAction(settingsAction)
+        authorizationAlert.addAction(cancelAction)
+
+        DispatchQueue.main.async { [weak self] in
+            self?.present(authorizationAlert, animated: true, completion: nil)
         }
     }
 }

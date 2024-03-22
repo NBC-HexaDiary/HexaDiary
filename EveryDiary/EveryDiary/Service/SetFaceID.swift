@@ -4,26 +4,26 @@
 //
 //  Created by Dahlia on 2/28/24.
 //
-import UIKit
 import LocalAuthentication
+import UIKit
 
 class BiometricsAuth {
     
-    func authenticateWithBiometrics(completion: @escaping (Bool) -> Void) {
+    func authenticateWithBiometrics(completion: @escaping (Bool, Error?) -> Void) {
         let context = LAContext()
         
         var error: NSError?
-        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-            let reason = "Authenticate with Face ID"
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            let reason = "인증이 필요합니다."
             context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, error in
                 if success {
-                    completion(true)
+                    completion(true, nil)
                 } else {
-                    completion(false)
+                    completion(false, error)
                 }
             }
         } else {
-            completion(false)
+            completion(false, error)
         }
     }
 }

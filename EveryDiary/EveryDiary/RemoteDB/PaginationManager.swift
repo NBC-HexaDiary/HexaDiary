@@ -72,6 +72,7 @@ class PaginationManager {
             completion(entries)
         }
     }
+    
     func resetQuery() {
         query = nil                     // 쿼리를 nil로 초기화
         lastDocumentSnapshot = nil      // 마지막 문서 스냅샷을 nil로 초기화

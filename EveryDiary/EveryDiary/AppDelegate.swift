@@ -4,15 +4,14 @@
 //
 //  Created by t2023-m0044 on 2/21/24.
 //
-
-import UIKit
-
 import CoreLocation
+import NotificationCenter
+import UIKit
+import UserNotifications
+
 import FirebaseCore
 import FirebaseFirestore
 import GoogleSignIn
-import NotificationCenter
-import UserNotifications
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
