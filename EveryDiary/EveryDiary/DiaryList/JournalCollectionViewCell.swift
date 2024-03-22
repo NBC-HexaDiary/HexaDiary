@@ -49,7 +49,7 @@ class JournalCollectionViewCell: UICollectionViewCell {
         label.textColor = .systemGray
         return label
     }()
-    lazy var imageView: UIImageView = {
+    lazy var thumnailView: UIImageView = {
         let view = UIImageView()
         view.layer.cornerRadius = 10
         view.contentMode = .scaleAspectFill
@@ -78,7 +78,7 @@ class JournalCollectionViewCell: UICollectionViewCell {
         super.prepareForReuse()
         
         // UI 컴포넌트를 초기 상태로 리셋(cell 재사용시 다른 cell의 요소가 삽입되지 않도록)
-        imageView.image = nil
+        thumnailView.image = nil
         contentTitle.text = ""
         contentTextView.text = ""
         weatherIcon.image = nil
@@ -89,20 +89,29 @@ class JournalCollectionViewCell: UICollectionViewCell {
     func setJournalCollectionViewCell(title: String, content: String, weather: String, emotion: String, date: String, imageName: String? = nil) {
         contentTitle.text = title
         contentTextView.text = content
-        weatherIcon.image = UIImage(named: weather)
-        emotionIcon.image = UIImage(named: emotion)
         dateOfWriting.text = date
+        // 날씨 아이콘 업데이트
+        if !weather.isEmpty, let weatherImage = UIImage(named: weather) {
+            weatherIcon.image = weatherImage
+        } else {
+            weatherIcon.image = nil
+        }
+        if !emotion.isEmpty, let emotionImage = UIImage(named: emotion) {
+            emotionIcon.image = emotionImage
+        } else {
+            emotionIcon.image = nil
+        }
         if let imageName = imageName {
-            imageView.image = UIImage(named: imageName)
+            thumnailView.image = UIImage(named: imageName)
         }
     }
     func setImage(_ image: UIImage?) {
-        imageView.image = image
-        imageView.isHidden = false
+        thumnailView.image = image
+        thumnailView.isHidden = false
         updateLayoutForImageVisible(true)
     }
     func hideImage() {
-        imageView.isHidden = true
+        thumnailView.isHidden = true
         updateLayoutForImageVisible(false)
     }
     
@@ -113,13 +122,13 @@ class JournalCollectionViewCell: UICollectionViewCell {
                 make.top.equalTo(contentView).offset(15)
                 make.height.equalTo(24)
                 make.leading.equalTo(contentView.snp.leading).offset(15)
-                make.trailing.equalTo(imageView.snp.leading).offset(-5)
+                make.trailing.equalTo(thumnailView.snp.leading).offset(-5)
             }
             contentTextView.snp.remakeConstraints { make in
                 make.top.equalTo(contentTitle.snp.bottom).offset(4)
                 make.bottom.equalTo(weatherIcon.snp.top).offset(-4)
                 make.leading.equalTo(contentTitle.snp.leading)
-                make.trailing.equalTo(imageView.snp.leading).offset(-5)
+                make.trailing.equalTo(thumnailView.snp.leading).offset(-5)
             }
         } else {
             // 이미지가 숨겨졌을 때
@@ -147,7 +156,7 @@ extension JournalCollectionViewCell {
         contentView.addSubview(weatherIcon)
         contentView.addSubview(emotionIcon)
         contentView.addSubview(dateOfWriting)
-        contentView.addSubview(imageView)
+        contentView.addSubview(thumnailView)
         contentView.addSubview(contentTextView)
     }
     private func setLayout() {
@@ -155,7 +164,7 @@ extension JournalCollectionViewCell {
             make.top.equalTo(contentView).offset(15)
             make.height.equalTo(24)
             make.leading.equalTo(contentView.snp.leading).offset(15)
-            make.trailing.equalTo(imageView.snp.leading).offset(-5)
+            make.trailing.equalTo(thumnailView.snp.leading).offset(-5)
         }
         contentTextView.snp.makeConstraints { make in
             make.top.equalTo(contentTitle.snp.bottom).offset(4)
@@ -179,11 +188,11 @@ extension JournalCollectionViewCell {
             make.bottom.equalTo(weatherIcon.snp.bottom).offset(0)
             make.leading.equalTo(contentTitle.snp.leading).offset(0)
         }
-        imageView.snp.makeConstraints { make in
+        thumnailView.snp.makeConstraints { make in
             make.top.equalTo(contentView).offset(11)
             make.bottom.equalTo(contentView).offset(-11)
             make.trailing.equalTo(contentView).offset(-11)
-            make.width.equalTo(imageView.snp.height)
+            make.width.equalTo(thumnailView.snp.height)
         }
     }
 }

@@ -5,21 +5,7 @@
 //  Created by t2023-m0026 on 3/15/24.
 //
 
-import CoreLocation
 import MapKit
-import UIKit
-
-struct ImageLocationInfo {
-    var image: UIImage
-    var locationInfo: LocationInfo?
-    var assetIdentifier: String?
-    var captureTime: String?
-    var location: String?
-}
-struct LocationInfo {
-    var latitude: CLLocationDegrees
-    var longitude: CLLocationDegrees
-}
 
 protocol MapCollectionViewCellDelegate: AnyObject {
     func mapViewCell(_ cell: MapCollectionViewCell, didTapAnnotationWithLatitude latitude: CLLocationDegrees, longitude: CLLocationDegrees)

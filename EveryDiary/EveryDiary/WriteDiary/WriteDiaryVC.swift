@@ -72,13 +72,11 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     )
     private lazy var emotionImageView: UIImageView = {
         let view = UIImageView()
-        view.image = UIImage(named: selectedEmotion)
         view.contentMode = .scaleAspectFit
         return view
     }()
     private lazy var weatherImageView: UIImageView = {
         let view = UIImageView()
-        view.image = UIImage(named: selectedWeather)
         view.contentMode = .scaleAspectFit
         return view
     }()
@@ -167,6 +165,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
         view.backgroundColor = .mainBackground
         addSubView()
         setLayout()
+        updateImageViews()
         setupKeyboardManager()
         loadWeatherData()
         setupToolbar()
@@ -185,6 +184,19 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
             print("Updated Location: \(self.currentLocationInfo ?? "Unknown"))")
         }
         mapManager.locationManager.startUpdatingLocation()
+    }
+    private func updateImageViews() {
+        if !selectedEmotion.isEmpty {
+            emotionImageView.image = UIImage(named: selectedEmotion)
+        } else {
+            emotionImageView.image = nil
+        }
+        
+        if !selectedWeather.isEmpty {
+            weatherImageView.image = UIImage(named: selectedWeather)
+        } else {
+            weatherImageView.image = nil
+        }
     }
 }
 

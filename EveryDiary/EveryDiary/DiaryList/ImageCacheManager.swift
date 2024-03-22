@@ -26,12 +26,9 @@ class ImageCacheManager {
         
         // 캐시에서 이미지를 찾는다.
         if let cachedImage = image(forKey: key) {
-            print("Load Cached Image")   // 캐시에서 이미지를 로드할 때
             completion(cachedImage)
             return
-        }
-        print("Cache miss for \(key), downloading from remoteDB") // 새로운 이미지를 다운로드
-        
+        }        
         // 이미지가 캐시에 없으면 웹에서 이미지를 다운로드.
         URLSession.shared.dataTask(with: url) { data, response, error in
             guard let data = data, let downloadedImage = UIImage(data: data), error == nil else {

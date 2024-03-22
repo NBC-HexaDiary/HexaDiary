@@ -4,7 +4,9 @@
 //
 //  Created by t2023-m0044 on 2/23/24.
 //
+import CoreLocation
 import Foundation
+import UIKit
 
 struct DiaryEntry: Codable {
     var id: String?
@@ -21,6 +23,19 @@ struct DiaryEntry: Codable {
     var deleteDate: Date?
     var useMetadataLocation: Bool = false
     var currentLocationInfo: String?
+}
+
+// 사진 & 메타데이터를 FirebaseStorage에 저장하기 위한 Struct
+struct ImageLocationInfo {
+    var image: UIImage
+    var locationInfo: LocationInfo?
+    var assetIdentifier: String?
+    var captureTime: String?
+    var location: String?
+}
+struct LocationInfo {
+    var latitude: CLLocationDegrees
+    var longitude: CLLocationDegrees
 }
 
 extension DiaryEntry {
