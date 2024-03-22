@@ -52,6 +52,7 @@ class TrashCollectionViewCell: UICollectionViewCell {
     lazy var imageView: UIImageView = {
         let view = UIImageView()
         view.layer.cornerRadius = 10
+        view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
         return view
     }()

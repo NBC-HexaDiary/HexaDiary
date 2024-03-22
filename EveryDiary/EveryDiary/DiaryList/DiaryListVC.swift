@@ -11,20 +11,23 @@ import Firebase
 import FirebaseFirestore
 import SnapKit
 
+// 사용자가 작성한 일기 리스트를 보여주는 ViewController
 class DiaryListVC: UIViewController {
-    // fetchDiaries 관련 변수
+    // 다이어리 관리를 위한 변수
     private var diaryManager = DiaryManager()
-    private var monthlyDiaries: [String: [DiaryEntry]] = [:]
-    private var months: [String] = []
-    private var diaries: [DiaryEntry] = []
+    private var monthlyDiaries: [String: [DiaryEntry]] = [:]    // 월별로 정렬된 DiaryEntry
+    private var months: [String] = []                           // 일기의 월별 구분을 위한 배열
+    private var diaries: [DiaryEntry] = []                      // 사용자의 모든 DiaryEntry
 
-    // contextMenu 관련 변수
+    // ContextMenu 관련 변수
     private var currentLongPressedCell: JournalCollectionViewCell?
     private var selectedIndexPath: IndexPath?
     
-    private let paginationManager = PaginationManager()
-    private var isLoadingData: Bool = false
-    // 화면 구성 요소
+    // Pagenation을 위한 변수
+    private let paginationManager = PaginationManager()         // 페이지네이션 관리
+    private var isLoadingData: Bool = false                     // 데이터 로딩 중을 표시하는 플래그
+    
+    // 화면 구성 요소 정의
     private lazy var themeLabel : UILabel = {
         let label = UILabel()
         label.text = "하루일기"
@@ -33,6 +36,7 @@ class DiaryListVC: UIViewController {
         return label
     }()
     
+    // 검색 바
     private lazy var searchBar: UISearchBar = {
         let bounds = UIScreen.main.bounds
         let width = bounds.size.width - 130
@@ -42,6 +46,7 @@ class DiaryListVC: UIViewController {
         return searchBar
     }()
     
+    // NavigationBar Item 구성
     private lazy var magnifyingButton = setNavigationItem(
         imageNamed: "search",
         titleText: "돋보기",
@@ -58,6 +63,7 @@ class DiaryListVC: UIViewController {
         for: #selector(cancelButtonTapped)
     )
     
+    // 일기 작성 버튼 구성
     private lazy var writeDiaryButton : UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton(configuration: config)
@@ -70,6 +76,7 @@ class DiaryListVC: UIViewController {
         return button
     }()
     
+    // 컬렉션 뷰 구성
     private lazy var journalCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -84,14 +91,6 @@ class DiaryListVC: UIViewController {
         collectionView.register(JournalCollectionViewCell.self, forCellWithReuseIdentifier: JournalCollectionViewCell.reuseIdentifier)
         collectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderView.reuseIdentifier)
         return collectionView
-    }()
-    
-    
-    // FIXME: 삭제예정(blurEffectView, editTableView)
-    private var blurEffectView: UIVisualEffectView?
-    private lazy var editTableView: UITableView = {
-        let tableView = UITableView()
-        return tableView
     }()
     
     override func viewDidLoad() {
@@ -112,14 +111,15 @@ class DiaryListVC: UIViewController {
 // MARK: loadDiaries메서드, navigation관련
 extension DiaryListVC {
     
-    // searchBar 설정 및 searchButtonTapped 전까지 hidden처리.
+    // NavigationBar 아이템 및 색상 설정
     private func setNavigationBar() {
-        searchBar.becomeFirstResponder()
-        self.navigationItem.leftBarButtonItem?.isHidden = true
-        self.navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
         self.navigationController?.navigationBar.tintColor = .mainTheme
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: themeLabel)
     }
+    // NavigationBar Item 생성 메서드
     private func setNavigationItem(imageNamed name: String, titleText: String, for action: Selector) -> UIBarButtonItem {
         var config = UIButton.Configuration.plain()
         if name == "" {
@@ -134,6 +134,7 @@ extension DiaryListVC {
         return UIBarButtonItem(customView: button)
     }
     
+    // Firebase에서 일기데이터를 불러오는 메서드
     private func loadDiaries() {
         diaryManager.fetchDiaries { [weak self] (diaries, error) in
             guard let self = self else { return }
@@ -150,6 +151,8 @@ extension DiaryListVC {
             }
         }
     }
+    
+    // 월별로 다이어리 항목을 정리하는 메서드
     private func organizeDiariesByMonth(diaries: [DiaryEntry]) {
         var organizedDiaries: [String: [DiaryEntry]] = [:]
         
@@ -180,13 +183,7 @@ extension DiaryListVC {
         navigationItem.rightBarButtonItems = [settingButton, cancelButton]
         searchBar.becomeFirstResponder()
     }
-    @objc private func tabSettingBTN() {
-        let settingVC = SettingVC()
-        settingVC.hidesBottomBarWhenPushed = true
-        navigationController?.pushViewController(settingVC, animated: true)
-    }
     @objc private func cancelButtonTapped() {
-        themeLabel.isHidden = false
         navigationItem.leftBarButtonItems = [UIBarButtonItem(customView: themeLabel)]
         navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
         searchBar.text = ""
@@ -199,10 +196,20 @@ extension DiaryListVC {
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
     }
-    @objc private func tabLoadDiaryButton() {
-        journalCollectionView.reloadData()
-        print("Load Diaries")
+    private func adjustSearchBarVisibility(show: Bool) {
+        if show == true {
+            
+        } else {
+            
+        }
     }
+    // 설정 화면(SettingVC)으로 이동
+    @objc private func tabSettingBTN() {
+        let settingVC = SettingVC()
+        settingVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(settingVC, animated: true)
+    }
+    
     @objc private func loginStatusChanged() {
         loadDiaries()
     }
@@ -213,7 +220,6 @@ extension DiaryListVC: UICollectionViewDataSource {
     // 섹션 수 반환(월별로 구분)
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         // DiaryEntry 배열을 사용하여 월별로 구분된 섹션의 수를 계산
-        print("numberOfSections : \(months.count)")
         
         return months.count
     }
@@ -221,7 +227,6 @@ extension DiaryListVC: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let month = months[section]
         let count = monthlyDiaries[month]?.count ?? 0
-        print("numberOfItemsInSection : \(count)")
         return count
     }
     // 셀 구성
@@ -369,7 +374,6 @@ extension DiaryListVC: UICollectionViewDelegateFlowLayout {
 extension DiaryListVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
-//            loadDiaries()
             refreshDiaryData()
         } else {
             var filteredDiaries: [String: [DiaryEntry]] = [:]
@@ -428,7 +432,6 @@ extension DiaryListVC: UISearchBarDelegate {
 // MARK: addSubViews, autoLayout
 extension DiaryListVC {
     private func addSubviews() {
-//        view.addSubview(themeLabel)
         view.addSubview(journalCollectionView)
         view.addSubview(writeDiaryButton)
     }
@@ -464,7 +467,6 @@ extension Array where Element: Equatable {
 extension DiaryListVC : DiaryUpdateDelegate {
     func diaryDidUpdate() {
 //        loadDiaries()
-        print("Update Diary")
         refreshDiaryData()
     }
 }
@@ -508,7 +510,6 @@ extension DiaryListVC: UICollectionViewDelegate {
                 self.journalCollectionView.reloadData()
                 self.isLoadingData = false
             }
-            print("scroll")
         }
     }
     
@@ -524,7 +525,6 @@ extension DiaryListVC: UICollectionViewDelegate {
                 DispatchQueue.main.async {
                     self.journalCollectionView.reloadData()
                 }
-                print("refresh")
             } else {
                 print("Failed to fetch new diaries.")
             }
