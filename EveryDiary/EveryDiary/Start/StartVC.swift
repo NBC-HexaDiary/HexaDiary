@@ -8,8 +8,8 @@
 import UIKit
 
 import FirebaseAuth
-import SnapKit
 import Lottie
+import SnapKit
 
 class StartVC: UIViewController {
     
