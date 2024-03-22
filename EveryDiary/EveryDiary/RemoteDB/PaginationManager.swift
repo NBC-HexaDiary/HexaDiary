@@ -62,6 +62,7 @@ class PaginationManager {
             completion(entries)
         }
     }
+    
     func resetQuery() {
         query = nil
         lastDocumentSnapshot = nil

@@ -41,7 +41,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     func sceneWillResignActive(_ scene: UIScene) {
-        addBlurEffect()
+        let biometricsEnabled = UserDefaults.standard.bool(forKey: "BiometricsEnabled")
+        
+        if biometricsEnabled {
+            addBlurEffect()
+        }
     }
     
     func sceneWillEnterForeground(_ scene: UIScene) {
@@ -49,7 +53,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         if biometricsEnabled {
             
-            BiometricsAuth().authenticateWithBiometrics { success in
+            BiometricsAuth().authenticateWithBiometrics { success, error  in
                 DispatchQueue.main.async {
                     if success {
                         print("성공")

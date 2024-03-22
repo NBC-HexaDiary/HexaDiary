@@ -4,9 +4,8 @@
 //
 //  Created by Dahlia on 2/27/24.
 //
-import Foundation
-
 import CoreLocation
+import Foundation
 
 enum NetworkError: Error {
     case badUrl
