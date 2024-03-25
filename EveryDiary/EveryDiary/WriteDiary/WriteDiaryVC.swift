@@ -10,7 +10,14 @@ import UIKit
 import Firebase
 import SnapKit
 
-class WriteDiaryVC: UIViewController, ImagePickerDelegate {
+// WriteDiaryVC를 호출하는 목적에 따라 WriteDiaryVC의 UI컴포넌트 상태 구분
+enum UIstatus {
+    case writeNewDiary      // 새로운 일기 작성
+    case editDiary          // 작성된 일기 수정
+    case showDiary          // 작성된 일기 조회
+}
+
+class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
     
     weak var delegate: DiaryUpdateDelegate?     // Delegate 프로토콜을 통한 데이터 업데이트 각 VC 통지
     private var diaryManager = DiaryManager()
@@ -50,7 +57,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
         fontSize: 20,
         buttonSize: CGSize(width: 15, height: 15),
         for: #selector(completeButtonTapped),
-        hidden: false
+        hidden: true
     )
     private lazy var updateButton = setButton(
         imageNamed: "",
@@ -84,20 +91,21 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
         let textField = UITextField()
         textField.backgroundColor = .clear
         textField.placeholder = "제목을 입력하세요."
-        textField.tintColor = .green
+        textField.tintColor = .subBackground
         textField.font = UIFont(name: "SFProDisplay-Bold", size: 26)
         textField.textColor = .black
-        textField.delegate = self
+        
         return textField
     }()
     private lazy var contentTextView : UITextView = {
         let view = UITextView()
         view.backgroundColor = .clear
         view.font = UIFont(name: "SFProDisplay-Regular", size: 18)
+        view.tintColor = .subBackground
         view.textColor = .lightGray
         view.isScrollEnabled = false
         view.text = textViewPlaceHolder
-        view.delegate = self
+        
         return view
     }()
     private let textViewPlaceHolder = "텍스트를 입력하세요."
@@ -110,10 +118,6 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
         
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: ImageCollectionViewCell.reuseIdentifier)
-        collectionView.register(MapCollectionViewCell.self, forCellWithReuseIdentifier: MapCollectionViewCell.reuseIdentifier)
         return collectionView
     }()
     private var imagesLocationInfo: [ImageLocationInfo] = []                // 이미지와 meta정보를 저장하는 배열
@@ -129,8 +133,8 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
     }()
     private lazy var weatherBarButtonItem: UIBarButtonItem = {
         let originalImage = UIImage(named: "Vector")?.resizedImage(with: CGSize(width: 25, height: 25))
-            return UIBarButtonItem(image: originalImage, style: .plain, target: self, action: #selector(weatherButtonTapped))
-        }()
+        return UIBarButtonItem(image: originalImage, style: .plain, target: self, action: #selector(weatherButtonTapped))
+    }()
     
     private let weatherDescriptionLabel: UILabel = {
         let label = UILabel()
@@ -158,60 +162,31 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate {
         let view = UIView()
         return view
     }()
+    
     private var scrollViewBottomConstraint: Constraint?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .mainBackground
-        addSubView()
-        setLayout()
-        updateImageViews()
-        setupKeyboardManager()
-        loadWeatherData()
-        setupToolbar()
-        setTapGesture()
-        getCurrentLocation()
-        imagePickerManager.delegate = self
+        configureUI()
+        setupInitialData()
+        setupDelegates()
     }
     deinit {
         keyboardManager?.unregisterKeyboardNotifications()
     }
     
-    private func getCurrentLocation() {
-        mapManager.onLocationUpdate = { [weak self] latitude, longitude in
-            guard let self = self else { return }
-            self.currentLocationInfo = "\(latitude), \(longitude)"
-            print("Updated Location: \(self.currentLocationInfo ?? "Unknown"))")
-        }
-        mapManager.locationManager.startUpdatingLocation()
-    }
-    private func updateImageViews() {
-        if !selectedEmotion.isEmpty {
-            emotionImageView.image = UIImage(named: selectedEmotion)
-        } else {
-            emotionImageView.image = nil
-        }
-        
-        if !selectedWeather.isEmpty {
-            weatherImageView.image = UIImage(named: selectedWeather)
-        } else {
-            weatherImageView.image = nil
-        }
+    private func setupDelegates() {
+        titleTextField.delegate = self
+        imagePickerManager.delegate = self
+        contentTextView.delegate = self
+        imagesCollectionView.delegate = self
+        imagesCollectionView.dataSource = self
+        imagesCollectionView.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: ImageCollectionViewCell.reuseIdentifier)
+        imagesCollectionView.register(MapCollectionViewCell.self, forCellWithReuseIdentifier: MapCollectionViewCell.reuseIdentifier)
     }
 }
 
-extension UIImage {
-    func resizedImage(with size: CGSize) -> UIImage? {
-        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-        self.draw(in: CGRect(origin: .zero, size: size))
-        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return resizedImage
-    }
-}
-
-
-// MARK: 버튼액션 관련 메서드
+// MARK: 이벤트 핸들링 메서드
 extension WriteDiaryVC {
     // 일기 저장 로직
     @objc func completeButtonTapped() {
@@ -236,7 +211,7 @@ extension WriteDiaryVC {
             // 촬영 시간과 위치 정보를 포함하여 업로드
             FirebaseStorageManager.uploadImage(
                 image: [imageLocationInfo.image],
-                pathRoot: "diary_images", 
+                pathRoot: "diary_images",
                 assetIdentifier: assetIdentifier,
                 captureTime: imageLocationInfo.captureTime,
                 location: imageLocationInfo.location
@@ -251,15 +226,15 @@ extension WriteDiaryVC {
         }
         dispatchGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-        // DiaryEntry 생성 및 업로드
-        self.createAndUploadDiaryEntry(
-            with: self.titleTextField.text ?? "",
-            content: contentText,
-            dateString: formattedDateString,
-            imageUrls: uploadedImageURLs,
-            useMetadataLocation: self.useMetadataLocation,
-            currentLocationInfo: self.currentLocationInfo
-        )
+            // DiaryEntry 생성 및 업로드
+            self.createAndUploadDiaryEntry(
+                with: self.titleTextField.text ?? "",
+                content: contentText,
+                dateString: formattedDateString,
+                imageUrls: uploadedImageURLs,
+                useMetadataLocation: self.useMetadataLocation,
+                currentLocationInfo: self.currentLocationInfo
+            )
         }
     }
     // 일기 업데이트 로직
@@ -283,12 +258,12 @@ extension WriteDiaryVC {
                 captureTime: imagesLocationInfo.captureTime,
                 location: imagesLocationInfo.location
             ) { urls in
-            if let urls = urls, !urls.isEmpty {
-                uploadedImageURLs.append(contentsOf: urls.map { $0.absoluteString })
+                if let urls = urls, !urls.isEmpty {
+                    uploadedImageURLs.append(contentsOf: urls.map { $0.absoluteString })
+                }
+                dispatchGroup.leave()
             }
-            dispatchGroup.leave()
         }
-    }
         dispatchGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             // 이미지 URL 배열을 이용해 DiaryEntry 업데이트
@@ -306,14 +281,90 @@ extension WriteDiaryVC {
     }
     // 일기 편집 가능 상태로 변경
     @objc func allowEditButtonTapped() {
-        self.updateButton.isHidden = false
-        self.allowEditButton.isHidden = true
-        self.datePickingButton.isEnabled = true
-        self.titleTextField.isEnabled = true
-        self.contentTextView.isEditable = true
+        datePickingButton.isEnabled = true
+        titleTextField.isEnabled = true
+        contentTextView.isEditable = true
+        completeButton.isHidden = true
+        updateButton.isHidden = false
+        allowEditButton.isHidden = true
+        titleTextField.becomeFirstResponder()
     }
     
-    func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, imageUrls: [String] = [], useMetadataLocation: Bool, currentLocationInfo: String? = nil) {
+    @objc func emotionButtonTapped() {
+        presentControllerSelect(with: .emotion) // 감정 선택 로직
+    }
+    
+    @objc func weatherButtonTapped() {
+        presentControllerSelect(with: .weather)// 날씨 선택 로직
+    }
+    
+    // 날짜 선택 로직
+    @objc func datePickingButtonTapped() {
+        let dateSelectVC = DateSelectVC()
+        dateSelectVC.selectedDate = self.selectedDate
+        dateSelectVC.delegate = self    // 델리게이트 설정
+        dateSelectVC.modalPresentationStyle = .popover
+        if let popoverController = dateSelectVC.popoverPresentationController {
+            popoverController.sourceView = self.datePickingButton
+            popoverController.sourceRect = self.datePickingButton.bounds
+            popoverController.permittedArrowDirections = [.up, .down]
+            popoverController.delegate = self
+        }
+        dateSelectVC.preferredContentSize = CGSize(width: 400, height: 400)
+        self.present(dateSelectVC, animated: true, completion: nil)
+    }
+    
+    // 사진 접근 권한 요청 로직
+    @objc func photoButtonTapped() {
+        print("preselected 된 identifier: \(self.selectedPhotoIdentifiers)")
+        imagePickerManager.requestPhotoLibraryAccess(from: self)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    @objc func collectionViewEdgeTapped(_ recognizer: UITapGestureRecognizer) {
+        let tapLocation = recognizer.location(in: imagesCollectionView)
+        
+        // collectionView의 중앙 지점을 찾고 그 지점에 있는 cell의 indexPath를 찾는다.
+        let centerPoint = CGPoint(x: imagesCollectionView.frame.size.width / 2 + imagesCollectionView.contentOffset.x, y: imagesCollectionView.frame.size.height / 2)
+        guard let centerIndexPath = imagesCollectionView.indexPathForItem(at: centerPoint) else { return }
+        
+        // 중앙에 있는 cell의 frame을 구한다.
+        if let centerCellFrame = imagesCollectionView.layoutAttributesForItem(at: centerIndexPath)?.frame {
+            
+            // cell의 frame과 비교해 각 조건에 맞는 메서드 호출
+            if tapLocation.x < centerCellFrame.minX {
+                // 왼쪽 영역을 탭했다면, 이전 셀로 스크롤
+                let previousIndex = max(0, centerIndexPath.item - 1)
+                scrollToItem(at: previousIndex, animated: true)
+            } else if tapLocation.x > centerCellFrame.maxX {
+                // 오른쪽 영역을 탭했다면, 다음 셀로 스크롤
+                let nextIndex = min(imagesCollectionView.numberOfItems(inSection: 0) - 1, centerIndexPath.item + 1)
+                scrollToItem(at: nextIndex, animated: true)
+            } else {
+                // 탭한 위치가 중앙 셀의 내부인 경우, didSelectItemAt을 호출.
+                collectionView(imagesCollectionView, didSelectItemAt: centerIndexPath)
+            }
+        }
+    }
+    
+    // 컬렉션 뷰 측면을 탭했을 때, indexPath + 1로 scroll시키는 메서드
+    private func scrollToItem(at index: Int, animated: Bool) {
+        print(#function)
+        // 범위 확인을 통해 인덱스 유효성 테스트
+        if index >= 0 && index < imagesCollectionView.numberOfItems(inSection: 0) {
+            let indexPath = IndexPath(item: index, section: 0)
+            imagesCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
+        }
+    }
+}
+
+// MARK: 네트워크 요청
+extension WriteDiaryVC {
+    // DiaryEntry 생성 및 Firestore 저장
+    private func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, imageUrls: [String] = [], useMetadataLocation: Bool, currentLocationInfo: String? = nil) {
         var newDiaryEntry: DiaryEntry
         
         // currentLoactionInfo가 nil이 아닌 경우 전제 저장
@@ -341,6 +392,7 @@ extension WriteDiaryVC {
         }
     }
     
+    // DiaryEntry 수정 및 Firestore 업데이트
     private func updateDiaryInFirestore(diaryID: String, diaryEntry: DiaryEntry) {
         // Firestore 문서 업데이트
         DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: diaryEntry) { error in
@@ -353,6 +405,10 @@ extension WriteDiaryVC {
             }
         }
     }
+}
+
+// MARK: 임시
+extension WriteDiaryVC {
     
     func showsDiary(with diary: DiaryEntry) {
         // UI 내 일기 내용 반영
@@ -403,9 +459,6 @@ extension WriteDiaryVC {
             self?.imagesCollectionView.reloadData()
             self?.updateImageCollectionViewHeight()
         }
-        
-        // UI Interaction 제어
-        toggleUI(isEditingEnabled: false)
     }
     // customMetaData로 저장된 하나의 String을 lat과 long으로 나눠주는 메서드
     func locationInfoFromString(_ locationString: String) -> LocationInfo? {
@@ -417,25 +470,10 @@ extension WriteDiaryVC {
         }
         return LocationInfo(latitude: latitude, longitude: longitude)
     }
-    
-    private func toggleUI(isEditingEnabled: Bool) {
-        self.datePickingButton.isEnabled = isEditingEnabled
-        self.titleTextField.isEnabled = isEditingEnabled
-        self.contentTextView.isEditable = isEditingEnabled
-        self.completeButton.isHidden = !isEditingEnabled
-        self.updateButton.isHidden = !isEditingEnabled
-        self.allowEditButton.isHidden = isEditingEnabled
-    }
 }
 
 // MARK: Date Condition(감정, 날씨 선택)
 extension WriteDiaryVC: DateConditionSelectDelegate {
-    @objc func emotionButtonTapped() {
-        presentControllerSelect(with: .emotion) // 감정 선택 로직
-    }
-    @objc func weatherButtonTapped() {
-        presentControllerSelect(with: .weather)// 날씨 선택 로직
-    }
     
     func presentControllerSelect(with conditionType: ConditionType) {
         print(#function)
@@ -472,21 +510,6 @@ extension WriteDiaryVC: DateConditionSelectDelegate {
 
 // MARK: Date Select Delegate(날짜 선택)
 extension WriteDiaryVC: DateSelectDelegate, UIPopoverPresentationControllerDelegate {
-    // 날짜 선택 로직
-    @objc func datePickingButtonTapped() {
-        let dateSelectVC = DateSelectVC()
-        dateSelectVC.selectedDate = self.selectedDate
-        dateSelectVC.delegate = self    // 델리게이트 설정
-        dateSelectVC.modalPresentationStyle = .popover
-        if let popoverController = dateSelectVC.popoverPresentationController {
-            popoverController.sourceView = self.datePickingButton
-            popoverController.sourceRect = self.datePickingButton.bounds
-            popoverController.permittedArrowDirections = [.up, .down]
-            popoverController.delegate = self
-        }
-        dateSelectVC.preferredContentSize = CGSize(width: 400, height: 400)
-        self.present(dateSelectVC, animated: true, completion: nil)
-    }
     // DateSelectVC에서 선택한 날짜를 전달받는 로직
     func didSelectDate(_ date: Date) {
         // 선택한 날짜를 변수에 저장
@@ -517,28 +540,8 @@ extension WriteDiaryVC: DateSelectDelegate, UIPopoverPresentationControllerDeleg
     }
 }
 
-// MARK: NotificationCenter(키보드 높이 조절) & 키보드 return 기능
-extension WriteDiaryVC: UITextFieldDelegate {
-    private func setupKeyboardManager() {
-        guard let scrollViewBottomConstraint = scrollViewBottomConstraint else { return }
-        keyboardManager = KeyboardManager(scrollView: scrollView, bottomConstraint: scrollViewBottomConstraint, viewController: self)
-        keyboardManager?.registerKeyboardNotifications()
-    }
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if textField == self.titleTextField {
-            self.contentTextView.becomeFirstResponder()
-        }
-        return true
-    }
-}
-
-// MARK: PHPickerControllerDelegate
+// MARK: PHPickerControllerDelegate (사진 선택)
 extension WriteDiaryVC {
-    // 사진 접근 권한 요청 로직
-    @objc func photoButtonTapped() {
-        print("preselected 된 identifier: \(self.selectedPhotoIdentifiers)")
-        imagePickerManager.requestPhotoLibraryAccess(from: self)
-    }
     func didPickImages(_ imagesLocationInfo: [ImageLocationInfo], retainedIdentifiers: [String]) {
         print(#function)
         
@@ -645,11 +648,6 @@ extension WriteDiaryVC: UICollectionViewDataSource, UICollectionViewDelegate, UI
         }
     }
     
-    private func setupImageCollectionViewHeightConstraint() {
-        imageCollectionViewHeightConstraint = imagesCollectionView.heightAnchor.constraint(equalToConstant: 0)   // 초기 높이를 0으로 설정
-        imageCollectionViewHeightConstraint?.isActive = true
-    }
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.item < imagesLocationInfo.count {
             let zoomVC = ImageZoomCollectionViewController()
@@ -692,123 +690,8 @@ extension WriteDiaryVC: UICollectionViewDataSource, UICollectionViewDelegate, UI
     }
 }
 
-// MARK: 날씨 정보 로드(getWeather)
-extension WriteDiaryVC {
-    private func loadWeatherData() {
-        weatherService.getWeather { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let weatherResponce):
-                    // 날씨 설명과 온도를 표시. 온도는 소수점 아래를 반올림하여 표시
-                    let weatherDescription = weatherResponce.weather.first?.description ?? "날씨정보 없음"
-                    let temperature = weatherResponce.main.temp
-                    self?.weatherDescriptionLabel.text = "\(weatherDescription)"
-                    self?.weatherTempLabel.text = "\(Int(round(temperature)))℃"
-                case .failure(let error):
-                    print("Load weather failed: \(error)")
-                    self?.weatherDescriptionLabel.text = "일기를 불러오지 못했습니다."
-                    self?.weatherTempLabel.text = "일기를 불러오지 못했습니다."
-                }
-            }
-        }
-    }
-}
-
-// MARK: 키보드 위 버튼 세팅(UIToolBarItem)
-extension WriteDiaryVC {
-    func setupToolbar() {
-        let toolbar = UIToolbar()
-        toolbar.sizeToFit()
-        toolbar.tintColor = .mainTheme
-        
-        // weatherDescriptionLabel, weatherTempLabel을 넣기 위한 커스텀 뷰
-        let weatherInfoView = UIView(frame: CGRect(x: 0, y: 0, width: 200, height: 30))
-        
-        // addSubView 및 layout
-        weatherInfoView.addSubview(weatherDescriptionLabel)
-        weatherInfoView.addSubview(weatherTempLabel)
-        weatherDescriptionLabel.snp.makeConstraints { make in
-            make.centerY.equalToSuperview()
-            make.leading.equalToSuperview().offset(5)
-        }
-        weatherTempLabel.snp.makeConstraints { make in
-            make.centerY.equalToSuperview()
-            make.leading.equalTo(weatherDescriptionLabel.snp.trailing).offset(5)
-        }
-        
-        // 날씨 아이템 생성
-        let weatherBarDescription = UIBarButtonItem(customView: weatherInfoView)
-                
-        // 툴바 아이템 생성
-        let items = [photoBarButtonItem, emotionBarButtonItem, weatherBarButtonItem, weatherBarDescription, UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil), UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissKeyboard))]
-        // 툴바 할당
-        toolbar.setItems(items, animated: false)
-        titleTextField.inputAccessoryView = toolbar
-        contentTextView.inputAccessoryView = toolbar
-    }
-    @objc func dismissKeyboard() {
-        view.endEditing(true)
-    }
-}
-
 
 extension WriteDiaryVC: UITextViewDelegate {
-    // textView placeHolder 설정 메서드
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        if contentTextView.text == textViewPlaceHolder {
-            textView.text = nil
-            textView.textColor = .black
-        }
-    }
-    func textViewDidEndEditing(_ textView: UITextView) {
-        if contentTextView.text.isEmpty {
-            textView.text = textViewPlaceHolder
-            textView.textColor = .lightGray
-        }
-    }
-    
-    // 버튼 이미지, 버튼 타이틀 설정 메서드
-    private func setButton(imageNamed: String, titleText: String, textFont: String, fontSize: CGFloat, buttonSize: CGSize, for action: Selector, hidden: Bool) -> UIButton {
-        let button = UIButton(type: .system)
-        button.frame = CGRect(origin: .zero, size: buttonSize) // 버튼 크기 설정
-        
-        if !imageNamed.isEmpty {
-            // 이미지가 있을 경우, 이미지 설정
-            button.setImage(UIImage(named: imageNamed), for: .normal)
-            button.imageView?.contentMode = .scaleAspectFit
-        }
-        
-        // 버튼 타이틀 및 폰트 설정
-        button.setTitle(titleText, for: .normal)
-        button.titleLabel?.font = UIFont(name: textFont, size: fontSize)
-        
-        // 버튼 액션 추가
-        button.addTarget(self, action: action, for: .touchUpInside)
-        
-        // 추가적인 속성 설정 (예: 타이틀 색상, 배경색, 이미지 틴트색상)
-        button.setTitleColor(.mainTheme, for: .normal)
-        button.backgroundColor = .clear
-        button.tintColor = .mainTheme
-        
-        // isHidden 초기값
-        button.isHidden = hidden
-        
-        return button
-    }
-    
-    // collectionView 높이 조절 로직
-    private func updateImageCollectionViewHeight() {
-        // 이미지가 없을 경우 높이를 0으로 설정
-        if imagesLocationInfo.isEmpty {
-            imageCollectionViewHeightConstraint?.constant = 0
-        } else {
-            // 이미지가 있을 경우, 높이를 조정
-            imageCollectionViewHeightConstraint?.constant = imagesCollectionView.frame.width
-        }
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-        }
-    }
     
     // Firestore 날짜저장 형식
     func formattedDateString(for date: Date) -> String {
@@ -844,59 +727,25 @@ extension WriteDiaryVC: MapCollectionViewCellDelegate {
     }
 }
 
+
+// MARK: configureUI - addSubViews, setLayout, setButton메서드
 extension WriteDiaryVC {
-    private func setTapGesture() {
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(collectionViewEdgeTapped(_:)))
-        imagesCollectionView.addGestureRecognizer(tapGestureRecognizer)
+    private func configureUI() {
+        view.backgroundColor = .mainBackground
+        addSubView()
+        updateImageViews()
+        setLayout()
+        setupKeyboardManager()
+        setupToolbar()
+        setTapGesture()
     }
     
-    @objc func collectionViewEdgeTapped(_ recognizer: UITapGestureRecognizer) {
-        let tapLocation = recognizer.location(in: imagesCollectionView)
-        
-        // collectionView의 중앙 지점을 찾고 그 지점에 있는 cell의 indexPath를 찾는다.
-        let centerPoint = CGPoint(x: imagesCollectionView.frame.size.width / 2 + imagesCollectionView.contentOffset.x, y: imagesCollectionView.frame.size.height / 2)
-        guard let centerIndexPath = imagesCollectionView.indexPathForItem(at: centerPoint) else { return }
-        
-        // 중앙에 있는 cell의 frame을 구한다.
-        if let centerCellFrame = imagesCollectionView.layoutAttributesForItem(at: centerIndexPath)?.frame {
-            
-            // cell의 frame과 비교해 각 조건에 맞는 메서드 호출
-            if tapLocation.x < centerCellFrame.minX {
-                // 왼쪽 영역을 탭했다면, 이전 셀로 스크롤
-                let previousIndex = max(0, centerIndexPath.item - 1)
-                scrollToItem(at: previousIndex, animated: true)
-            } else if tapLocation.x > centerCellFrame.maxX {
-                // 오른쪽 영역을 탭했다면, 다음 셀로 스크롤
-                let nextIndex = min(imagesCollectionView.numberOfItems(inSection: 0) - 1, centerIndexPath.item + 1)
-                scrollToItem(at: nextIndex, animated: true)
-            } else {
-                // 탭한 위치가 중앙 셀의 내부인 경우, didSelectItemAt을 호출.
-                collectionView(imagesCollectionView, didSelectItemAt: centerIndexPath)
-            }
-        }
-    }
-    private func scrollToItem(at index: Int, animated: Bool) {
-        print(#function)
-        // 범위 확인을 통해 인덱스 유효성 테스트
-        if index >= 0 && index < imagesCollectionView.numberOfItems(inSection: 0) {
-            let indexPath = IndexPath(item: index, section: 0)
-            imagesCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
-        }
-    }
-}
-extension UIView{
-    func addSubViews(_ views : [UIView]){
-        _ = views.map{self.addSubview($0)}
-    }
-}
-
-// MARK: addSubViews, setLayout, setButton메서드
-extension WriteDiaryVC {
     private func addSubView() {
         self.view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubViews([datePickingButton, completeButton, updateButton, allowEditButton, emotionImageView, weatherImageView, titleTextField, contentTextView, imagesCollectionView])
     }
+    
     private func setLayout() {
         scrollView.snp.makeConstraints { make in
             make.edges.equalTo(view.safeAreaLayoutGuide)
@@ -965,5 +814,217 @@ extension WriteDiaryVC {
             make.bottom.equalTo(contentView.snp.bottom)
         }
         setupImageCollectionViewHeightConstraint()
+    }
+    
+    private func setupImageCollectionViewHeightConstraint() {
+        imageCollectionViewHeightConstraint = imagesCollectionView.heightAnchor.constraint(equalToConstant: 0)   // 초기 높이를 0으로 설정
+        imageCollectionViewHeightConstraint?.isActive = true
+    }
+    
+    // collectionView 높이 조절 로직
+    private func updateImageCollectionViewHeight() {
+        // 이미지가 없을 경우 높이를 0으로 설정
+        if imagesLocationInfo.isEmpty {
+            imageCollectionViewHeightConstraint?.constant = 0
+        } else {
+            // 이미지가 있을 경우, 높이를 조정
+            imageCollectionViewHeightConstraint?.constant = imagesCollectionView.frame.width
+        }
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    // NotificationCenter(키보드 높이 조절) & 키보드 return 기능
+    private func setupKeyboardManager() {
+        guard let scrollViewBottomConstraint = scrollViewBottomConstraint else { return }
+        keyboardManager = KeyboardManager(scrollView: scrollView, bottomConstraint: scrollViewBottomConstraint, viewController: self)
+        keyboardManager?.registerKeyboardNotifications()
+    }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == self.titleTextField {
+            self.contentTextView.becomeFirstResponder()
+        }
+        return true
+    }
+    
+    // Navigation Bar Item 초기 세팅
+    func setupToolbar() {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        toolbar.tintColor = .mainTheme
+        
+        // weatherDescriptionLabel, weatherTempLabel을 넣기 위한 커스텀 뷰
+        let weatherInfoView = UIView(frame: CGRect(x: 0, y: 0, width: 200, height: 30))
+        
+        // addSubView 및 layout
+        weatherInfoView.addSubview(weatherDescriptionLabel)
+        weatherInfoView.addSubview(weatherTempLabel)
+        weatherDescriptionLabel.snp.makeConstraints { make in
+            make.centerY.equalToSuperview()
+            make.leading.equalToSuperview().offset(5)
+        }
+        weatherTempLabel.snp.makeConstraints { make in
+            make.centerY.equalToSuperview()
+            make.leading.equalTo(weatherDescriptionLabel.snp.trailing).offset(5)
+        }
+        
+        // 날씨 아이템 생성
+        let weatherBarDescription = UIBarButtonItem(customView: weatherInfoView)
+                
+        // 툴바 아이템 생성
+        let items = [photoBarButtonItem, emotionBarButtonItem, weatherBarButtonItem, weatherBarDescription, UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil), UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissKeyboard))]
+        // 툴바 할당
+        toolbar.setItems(items, animated: false)
+        titleTextField.inputAccessoryView = toolbar
+        contentTextView.inputAccessoryView = toolbar
+    }
+    
+    // 컬렉션 뷰 측면을 탭했을 때 다음으로 넘어가는 Gesture 세팅
+    private func setTapGesture() {
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(collectionViewEdgeTapped(_:)))
+        imagesCollectionView.addGestureRecognizer(tapGestureRecognizer)
+    }
+    
+    // 버튼 이미지, 버튼 타이틀 설정 메서드
+    private func setButton(imageNamed: String, titleText: String, textFont: String, fontSize: CGFloat, buttonSize: CGSize, for action: Selector, hidden: Bool) -> UIButton {
+        let button = UIButton(type: .system)
+        button.frame = CGRect(origin: .zero, size: buttonSize) // 버튼 크기 설정
+        
+        if !imageNamed.isEmpty {
+            // 이미지가 있을 경우, 이미지 설정
+            button.setImage(UIImage(named: imageNamed), for: .normal)
+            button.imageView?.contentMode = .scaleAspectFit
+        }
+        
+        // 버튼 타이틀 및 폰트 설정
+        button.setTitle(titleText, for: .normal)
+        button.titleLabel?.font = UIFont(name: textFont, size: fontSize)
+        
+        // 버튼 액션 추가
+        button.addTarget(self, action: action, for: .touchUpInside)
+        
+        // 추가적인 속성 설정 (예: 타이틀 색상, 배경색, 이미지 틴트색상)
+        button.setTitleColor(.mainTheme, for: .normal)
+        button.backgroundColor = .clear
+        button.tintColor = .mainTheme
+        
+        // isHidden 초기값
+        button.isHidden = hidden
+        
+        return button
+    }
+    
+    private func updateImageViews() {
+        if !selectedEmotion.isEmpty {
+            emotionImageView.image = UIImage(named: selectedEmotion)
+        } else {
+            emotionImageView.image = nil
+        }
+        
+        if !selectedWeather.isEmpty {
+            weatherImageView.image = UIImage(named: selectedWeather)
+        } else {
+            weatherImageView.image = nil
+        }
+    }
+    // textView placeHolder 설정 메서드
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if contentTextView.text == textViewPlaceHolder {
+            textView.text = nil
+            textView.textColor = .black
+        }
+    }
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if contentTextView.text.isEmpty {
+            textView.text = textViewPlaceHolder
+            textView.textColor = .lightGray
+        }
+    }
+    
+    func enterDiary(to status: UIstatus, with diary: DiaryEntry? = nil) {
+        switch status {
+        case .writeNewDiary:
+            datePickingButton.isEnabled = true
+            titleTextField.isEnabled = true
+            contentTextView.isEditable = true
+            completeButton.isHidden = false
+            updateButton.isHidden = true
+            allowEditButton.isHidden = true
+            titleTextField.becomeFirstResponder()
+        case .editDiary:
+            guard let diary = diary else { return }
+            datePickingButton.isEnabled = true
+            titleTextField.isEnabled = true
+            contentTextView.isEditable = true
+            completeButton.isHidden = true
+            updateButton.isHidden = false
+            allowEditButton.isHidden = true
+            titleTextField.becomeFirstResponder()
+            showsDiary(with: diary)
+        case .showDiary:
+            guard let diary = diary else { return }
+            datePickingButton.isEnabled = false
+            titleTextField.isEnabled = false
+            contentTextView.isEditable = false
+            completeButton.isHidden = true
+            updateButton.isHidden = true
+            allowEditButton.isHidden = false
+            showsDiary(with: diary)
+        }
+    }
+}
+
+// MARK: Setup Initial Data
+extension WriteDiaryVC {
+    private func setupInitialData() {
+        loadWeatherData()
+        getCurrentLocation()
+    }
+    
+    // OpenWeather의 날씨 데이터를 받아오는 메서드
+    private func loadWeatherData() {
+        weatherService.getWeather { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let weatherResponce):
+                    // 날씨 설명과 온도를 표시. 온도는 소수점 아래를 반올림하여 표시
+                    let weatherDescription = weatherResponce.weather.first?.description ?? "날씨정보 없음"
+                    let temperature = weatherResponce.main.temp
+                    self?.weatherDescriptionLabel.text = "\(weatherDescription)"
+                    self?.weatherTempLabel.text = "\(Int(round(temperature)))℃"
+                case .failure(let error):
+                    print("Load weather failed: \(error)")
+                    self?.weatherDescriptionLabel.text = "일기를 불러오지 못했습니다."
+                    self?.weatherTempLabel.text = "일기를 불러오지 못했습니다."
+                }
+            }
+        }
+    }
+    
+    // 사용자의 현재 위치를 지속적으로 업데이트하는 메서드
+    private func getCurrentLocation() {
+        mapManager.onLocationUpdate = { [weak self] latitude, longitude in
+            guard let self = self else { return }
+            self.currentLocationInfo = "\(latitude), \(longitude)"
+            print("Updated Location: \(self.currentLocationInfo ?? "Unknown"))")
+        }
+        mapManager.locationManager.startUpdatingLocation()
+    }
+}
+
+extension UIImage {
+    func resizedImage(with size: CGSize) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        self.draw(in: CGRect(origin: .zero, size: size))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return resizedImage
+    }
+}
+
+extension UIView{
+    func addSubViews(_ views : [UIView]){
+        _ = views.map{self.addSubview($0)}
     }
 }
