@@ -293,51 +293,42 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
             let credential = OAuthProvider.credential(withProviderID: "apple.com",
                                                       idToken: idTokenString,
                                                       rawNonce: nonce)
-
+            
             if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
-                
                 currentUser.link(with: credential) { authResult, error in
                     if let error = error {
                         print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
-                    }
-                    let changeRequest = currentUser.createProfileChangeRequest()
-                    if let fullName = appleIDCredential.fullName {
-                        changeRequest.displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
-                    }
-                    changeRequest.commitChanges { error in
-                        if let error = error {
-                            print("Error updating user profile: \(error)")
+                        Auth.auth().currentUser?.delete { error in
+                            if let error = error {
+                                print("Error deleting user from Firebase: \(error.localizedDescription)")
+                            } else {
+                                print("User successfully deleted from Firebase.")
+                                DiaryManager.shared.deleteUserData(for: currentUser.uid)
+                            }
                         }
-                        print("익명 사용자를 영구 계정으로 전환 성공")
-                        NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                        self.dismiss(animated: true, completion: nil)
-                    }
-                }
-                
-                Auth.auth().currentUser?.delete { error in
-                    if let error = error {
-                        print("Error deleting user from Firebase: \(error.localizedDescription)")
                     } else {
-                        print("User successfully deleted from Firebase.")
-                        DiaryManager.shared.deleteUserData(for: currentUser.uid)
+                        self.updateUserProfile(withCredential: appleIDCredential)
+                        print("익명 사용자를 영구 계정으로 전환 성공")
                     }
                 }
-                
+                print("병합된 계정")
                 Auth.auth().signIn(with: credential) { authResult, error in
                     if let error = error {
                         print("로그인 중 오류 발생: \(error.localizedDescription)")
                         return
                     }
+                    self.updateUserProfile(withCredential: appleIDCredential)
                     NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
                     self.dismiss(animated: true, completion: nil)
                 }
             } else {
-                print("이미 병합된 계정이거나 일반 계정입니다.")
+                print("일반 계정")
                 Auth.auth().signIn(with: credential) { authResult, error in
                     if let error = error {
                         print("로그인 중 오류 발생: \(error.localizedDescription)")
                         return
                     }
+                    self.updateUserProfile(withCredential: appleIDCredential)
                     NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
                     self.dismiss(animated: true, completion: nil)
                 }
@@ -355,6 +346,25 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                     }
                 }
                 task.resume()
+            }
+        }
+    }
+    
+    func updateUserProfile(withCredential credential: ASAuthorizationAppleIDCredential) {
+        let currentUser = Auth.auth().currentUser
+        
+        let changeRequest = currentUser?.createProfileChangeRequest()
+        
+        if let fullName = credential.fullName {
+            changeRequest?.displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
+        }
+        
+        changeRequest?.commitChanges { error in
+            if let error = error {
+                print("Error updating user profile: \(error)")
+            } else {
+                NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                self.dismiss(animated: true, completion: nil)
             }
         }
     }
