@@ -6,11 +6,8 @@
 //
 
 import UIKit
-import SnapKit
 
-#Preview{
-    MotivationVC()
-}
+import SnapKit
 
 class MotivationVC: UIViewController {
     private let buildings = BuildingView()

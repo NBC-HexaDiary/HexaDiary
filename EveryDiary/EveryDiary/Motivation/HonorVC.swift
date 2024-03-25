@@ -6,20 +6,16 @@
 //
 
 import UIKit
+
 import SnapKit
 import Firebase
-import FirebaseFirestore
 import FirebaseAuth
-
-#Preview{
-    HonorVC()
-}
+import FirebaseFirestore
 
 class HonorVC: UIViewController {
     let db = Firestore.firestore()
-    //딕셔너리. 키는 월(Int), 값은 일(Set)
-    var monthlyDiaries = [Int: Set<Int>]()
-    var monthlyDiariesWithStrings = [Int: Set<String>]()
+    
+    private var dataByYearMonth = [String: Set<Int>]()
     var listener: ListenerRegistration?
     
     private lazy var backgroundImage: UIImageView = {
@@ -29,156 +25,44 @@ class HonorVC: UIViewController {
         return backgroundImage
     }()
     
-    private lazy var honorSV: UIScrollView = {
-        let honorSV = UIScrollView()
-        honorSV.backgroundColor = .clear
-        honorSV.showsVerticalScrollIndicator = false
-        return honorSV
-    }()
-    
-    private lazy var honorStackView: UIStackView = {
-        let honorStackView = UIStackView()
-        honorStackView.backgroundColor = .clear
-        honorStackView.translatesAutoresizingMaskIntoConstraints = false
-        honorStackView.axis = .vertical
-        honorStackView.distribution = .fillEqually
-        honorStackView.spacing = 10
-        return honorStackView
-    }()
-    
-    private lazy var centerLabel: UILabel = {
-        let centerLabel = UILabel()
+    private lazy var honorCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.itemSize = CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height / 5)
+        layout.scrollDirection = .vertical
+        layout.sectionInset = UIEdgeInsets(top: 10, left: 0, bottom: 20, right: 0)
         
-        centerLabel.text = "당신의 여정을 시작하세요."
-        centerLabel.font = UIFont(name: "SFProDisplay-Regular", size: 16)
-        centerLabel.textColor = .black
-
-        return centerLabel
+        let honorCollectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        honorCollectionView.backgroundColor = .clear
+        honorCollectionView.register(honorCollectionViewCell.self, forCellWithReuseIdentifier: honorCollectionViewCell.honorIdentifier)
+        honorCollectionView.register(honorHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "honorHeaderViewIdentifier")
+        
+        return honorCollectionView
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        honorCollectionView.delegate = self
+        honorCollectionView.dataSource = self
         setNavigationBar()
         addSubView()
         autoLayout()
         fetchDiariesButtonData()
     }
-    
-    // MARK: - Button UI Update
-    private func setupHonorStackViewImagessAndLabels() {
-        for month in 1...12 {
-            let containerView = UIView()
-            honorStackView.addArrangedSubview(containerView)
-            
-            let leftView = UIView()
-            let rightView = UIView()
-            
-            containerView.addSubview(leftView)
-            containerView.addSubview(rightView)
-            
-            leftView.snp.makeConstraints { make in
-                make.left.equalTo(containerView.snp.left).offset(30)
-                make.top.bottom.equalTo(containerView)
-                make.width.equalTo(containerView.snp.width).multipliedBy(0.5)
-            }
-            
-            rightView.snp.makeConstraints { make in
-                make.right.equalTo(containerView.snp.right).offset(-30)
-                make.top.bottom.equalTo(containerView)
-                make.width.equalTo(leftView.snp.width)
-            }
-            
-            let imageView = UIImageView()
-            imageView.tag = month
-            
-            let label = UILabel()
-            label.text = "\(month)월"
-            label.textAlignment = .center
-            
-            if month % 2 != 0 {
-                leftView.addSubview(imageView)
-                leftView.addSubview(label)
-            } else {
-                rightView.addSubview(imageView)
-                rightView.addSubview(label)
-            }
-            
-            imageView.snp.makeConstraints { make in
-                make.top.equalToSuperview().offset(10)
-                make.centerX.equalToSuperview()
-                //make.centerY.equalToSuperview()
-            }
-            label.snp.makeConstraints { make in
-                make.top.equalTo(imageView.snp.bottom).offset(20)
-                make.centerX.equalTo(imageView)
-            }
-        }
-    }
-    
-    private func setupImages(monthlyDiaries: [Int: Set<String>]) {
-        for (month, days) in monthlyDiaries {
-            let containerView = self.honorStackView.arrangedSubviews[month - 1]
-            var imageView: UIImageView?
-            for subview in containerView.subviews {
-                if let imgView = subview.subviews.first(where: { $0 is UIImageView }) as? UIImageView {
-                    imageView = imgView
-                    break
-                }
-            }
-            
-            guard let imageView = imageView else {
-                continue
-            }
-            
-            if days.isEmpty || monthlyDiaries.isEmpty {
-                imageView.image = UIImage(named: "button0")
-            } else {
-                switch days.count {
-                case 1...7:
-                    imageView.image = UIImage(named: "button1")
-                case 8...14:
-                    imageView.image = UIImage(named: "button2")
-                case 15...21:
-                    imageView.image = UIImage(named: "button3")
-                case 22...27:
-                    imageView.image = UIImage(named: "button4")
-                default:
-                    imageView.image = UIImage(named: "button5")
-                }
-            }
-        }
-    }
 }
+
 //MARK: - UI 설정
 extension HonorVC {
     private func addSubView() {
         view.addSubview(backgroundImage)
-        view.addSubview(honorSV)
-        honorSV.addSubview(honorStackView)
-        
-        if DiaryManager.shared.getUserID() == nil {
-            honorSV.addSubview(centerLabel)
-        } else {
-            centerLabel.removeFromSuperview()
-        }
+        view.addSubview(honorCollectionView)
     }
     
     private func autoLayout() {
         backgroundImage.snp.makeConstraints{ make in
             make.edges.equalToSuperview()
         }
-        honorSV.snp.makeConstraints{ make in
-            make.top.bottom.leading.trailing.equalToSuperview()
-        }
-        honorStackView.snp.makeConstraints{ make in
-            make.top.bottom.leading.trailing.equalTo(honorSV)
-            make.width.equalTo(honorSV.snp.width)
-            make.height.equalTo(honorSV.snp.height).multipliedBy(2)
-        }
-        if DiaryManager.shared.getUserID() == nil {
-            centerLabel.snp.makeConstraints { make in
-                make.centerX.centerY.equalTo(view.safeAreaLayoutGuide)
-            }
+        honorCollectionView.snp.makeConstraints { make in
+            make.top.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
         }
     }
 }
@@ -186,55 +70,20 @@ extension HonorVC {
 //MARK: - firebase
 extension HonorVC {
     private func fetchDiariesButtonData() {
-        guard DiaryManager.shared.getUserID() != nil else {
-            return
-        }
-        var currentYear = Calendar.current.component(.year, from: Date())
-        // 데이터가 있는 월을 저장할 집합
-        var existingMonths = Set<Int>()
-        
         DiaryManager.shared.fetchDiaries { [weak self] (diaries, error) in
             guard let self = self, let diaries = diaries, error == nil else {
                 return
             }
-            let filteredDiaries = diaries.filter { Calendar.current.component(.year, from: $0.date) == currentYear && !$0.isDeleted }
+            let filteredDiaries = diaries.filter { !$0.isDeleted }.sorted(by: { $0.date > $1.date })
             for diary in filteredDiaries {
-                let month = Calendar.current.component(.month, from: diary.date)
+                let yearMonth = DateFormatter.yyyyMM.string(from: diary.date)
                 let day = Calendar.current.component(.day, from: diary.date)
-                if monthlyDiaries[month] == nil {
-                    monthlyDiaries[month] = Set<Int>()
-                }
-            
-                monthlyDiaries[month]?.insert(day)
-                existingMonths.insert(month)
+                dataByYearMonth[yearMonth, default: []].insert(day)
             }
-//            print("Monthly diaries: \(monthlyDiaries)")
-//            print("Fetched diaries: \(diaries)")
-            for month in 1...12 {
-                if !existingMonths.contains(month) {
-//                    print("No data found for month \(month)")
-                    monthlyDiaries[month] = []
-                }
-            }
-            self.sortDiariesByMonth(diaries: diaries , monthlyDiaries: monthlyDiaries)
-        }
-    }
-    
-    private func sortDiariesByMonth(diaries: [DiaryEntry], monthlyDiaries: [Int: Set<Int>]) {
-        guard !diaries.isEmpty else {
-            print("Diaries data is empty.")
-            return
-        }
-        for (month, days) in monthlyDiaries {
-            var stringDays = Set<String>()
-            for day in days {
-                stringDays.insert("\(day)")
-            }
-            monthlyDiariesWithStrings[month] = stringDays
-        }
-        DispatchQueue.main.async {
-            self.setupHonorStackViewImagessAndLabels()
-            self.setupImages(monthlyDiaries: self.monthlyDiariesWithStrings)
+            print("Data by year and month: \(self.dataByYearMonth)")
+            DispatchQueue.main.async {
+                 self.honorCollectionView.reloadData()
+             }
         }
     }
     
@@ -243,4 +92,62 @@ extension HonorVC {
     }
 }
 
+// MARK: - UICollectionViewDataSource
+extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        print("numberOfSections : \(dataByYearMonth.keys)")
+        if dataByYearMonth.isEmpty {
+            let message = UILabel(frame: CGRect(x: 0, y: 0, width: honorCollectionView.bounds.width, height: honorCollectionView.bounds.height))
+            message.text = "당신의 여정을 시작하세요."
+            message.font = UIFont(name: "SFProDisplay-Regular", size: 16)
+            message.textColor = .black
+            message.textAlignment = .center
+            honorCollectionView.backgroundView = message
+            return 0
+        } else {
+            return dataByYearMonth.keys.count
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = honorCollectionView.dequeueReusableCell(withReuseIdentifier: honorCollectionViewCell.honorIdentifier, for: indexPath) as? honorCollectionViewCell else {
+            return UICollectionViewCell()
+        }
+        let yearMonth = Array(dataByYearMonth.keys)[indexPath.section]
+        let numberOfDays = dataByYearMonth[yearMonth]?.count ?? 0
+        
+        switch numberOfDays {
+        case 1...7:
+            cell.images.image = UIImage(named: "button1")
+        case 8...14:
+            cell.images.image = UIImage(named: "button2")
+        case 15...21:
+            cell.images.image = UIImage(named: "button3")
+        case 22...27:
+            cell.images.image = UIImage(named: "button4")
+        default:
+            cell.images.image = UIImage(named: "button5")
+        }
+        cell.images.contentMode = .scaleAspectFit
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        guard let headerView = honorCollectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: honorHeaderView.honorHeaderIdentifier, for: indexPath) as? honorHeaderView else {
+            fatalError("Failed to dequeue honor header view")
+        }
+        let keys = Array(dataByYearMonth.keys)
+        let keyForSection = keys[indexPath.section]
+        headerView.headerLabel.text = keyForSection
+        return headerView
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.frame.width, height: 16) // 헤더의 너비와 높이 설정
+    }
+}
 

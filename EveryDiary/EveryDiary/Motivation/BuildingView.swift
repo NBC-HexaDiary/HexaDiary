@@ -34,7 +34,6 @@ class BuildingView: UIView {
 
     var buildings: [BuildingSize] = []
 
-    let backgroundLayer = CALayer()
     let backBuildingLayer = CAShapeLayer()
     let buildingLayer = CAShapeLayer()
 
@@ -51,27 +50,25 @@ class BuildingView: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        self.layer.addSublayer(backgroundLayer)
-        backgroundLayer.frame = self.bounds
         backBuildingLayer.frame = self.bounds
         buildingLayer.frame = self.bounds
         buildings = [
-            BuildingSize(position: CGPoint(x: 0, y: backgroundLayer.bounds.height * 0.97),
-                         size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1], [1, 1], [1], [1, 1], [1]])),
+            BuildingSize(position: CGPoint(x: 0, y: layer.bounds.height * 0.97),
+                         size: CGSize(width: layer.bounds.width * 0.07, height: layer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1], [1, 1], [1], [1, 1], [1]])),
             
-            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.21, y: backgroundLayer.bounds.height * 0.99),
-                         size: CGSize(width: backgroundLayer.bounds.width * 0.07, height: backgroundLayer.bounds.height * 0.31), windowLayout: WindowLayout(columns: [[0, 1, 1], [1, 0, 1],[1, 1], [0, 1]])),
+            BuildingSize(position: CGPoint(x: layer.bounds.width * 0.21, y: layer.bounds.height * 0.99),
+                         size: CGSize(width: layer.bounds.width * 0.07, height: layer.bounds.height * 0.31), windowLayout: WindowLayout(columns: [[0, 1, 1], [1, 0, 1],[1, 1], [0, 1]])),
             
-            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.51, y: backgroundLayer.bounds.height * 1.02),
-                         size: CGSize(width: backgroundLayer.bounds.width * 0.048, height: backgroundLayer.bounds.height * 0.25), windowLayout: WindowLayout(columns: [[1, 1, 0],[0, 1, 1], [1, 0, 1], [0, 1]])),
+            BuildingSize(position: CGPoint(x: layer.bounds.width * 0.51, y: layer.bounds.height * 1.02),
+                         size: CGSize(width: layer.bounds.width * 0.048, height: layer.bounds.height * 0.25), windowLayout: WindowLayout(columns: [[1, 1, 0],[0, 1, 1], [1, 0, 1], [0, 1]])),
             
-            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.73, y: backgroundLayer.bounds.height * 1.03),
-                         size: CGSize(width: (backgroundLayer.bounds.width - backgroundLayer.bounds.width * 0.92), height: backgroundLayer.bounds.height * 0.4), windowLayout: WindowLayout(columns: [[0], [1, 0, 1], [1, 1, 1], [1, 1]])),
+            BuildingSize(position: CGPoint(x: layer.bounds.width * 0.73, y: layer.bounds.height * 1.03),
+                         size: CGSize(width: (layer.bounds.width - layer.bounds.width * 0.92), height: layer.bounds.height * 0.4), windowLayout: WindowLayout(columns: [[0], [1, 0, 1], [1, 1, 1], [1, 1]])),
             
-            BuildingSize(position: CGPoint(x: 0, y: backgroundLayer.bounds.height * 0.9),
-                         size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1, 1]])),
+            BuildingSize(position: CGPoint(x: 0, y: layer.bounds.height * 0.9),
+                         size: CGSize(width: layer.bounds.width * 0.045, height: layer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1, 1]])),
             
-            BuildingSize(position: CGPoint(x: backgroundLayer.bounds.width * 0.94, y: backgroundLayer.bounds.height * 0.89), size: CGSize(width: backgroundLayer.bounds.width * 0.045, height: backgroundLayer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[1]]))
+            BuildingSize(position: CGPoint(x: layer.bounds.width * 0.94, y: layer.bounds.height * 0.89), size: CGSize(width: layer.bounds.width * 0.045, height: layer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[1]]))
         ]
         setupBuildingLayers()
     }
@@ -112,7 +109,7 @@ class BuildingView: UIView {
         path.close()
         buildingLayer.path = path.cgPath
         buildingLayer.fillColor = UIColor.black.cgColor
-        backBuildingLayer.addSublayer(buildingLayer)
+        layer.addSublayer(buildingLayer)
     }
     
     func drawBackBuilding() {
@@ -156,7 +153,7 @@ class BuildingView: UIView {
         backPath.close()
         backBuildingLayer.path = backPath.cgPath
         backBuildingLayer.fillColor = UIColor.darkGray.cgColor
-        backgroundLayer.addSublayer(backBuildingLayer)
+        layer.addSublayer(backBuildingLayer)
     }
     
     //MARK: - Image Caching
@@ -170,34 +167,32 @@ class BuildingView: UIView {
                 context.fill(CGRect(origin: .zero, size: windowSize))
             }
             MotivationImageCache.shared.setImage(windowImage, forKey: "window_\(windowIndex)")
-//            print("Image for window \(windowIndex) is cached successfully.")
+            print("Image for window \(windowIndex) is cached successfully.")
         }
     }
     
     func setupBuildingLayers() {
-        // 빌딩 레이어 설정
-        let buildingLayer = CALayer()
-        buildingLayer.frame = bounds
-        if let cachedBuildingImage = MotivationImageCache.shared.getImage(forKey: "cachedBuildingImage") {
-            buildingLayer.contents = cachedBuildingImage.cgImage
-        } else {
-            let buildingImage = drawBuildingImage()
-            MotivationImageCache.shared.setImage(buildingImage, forKey: "cachedBuildingImage")
-            buildingLayer.contents = buildingImage.cgImage
-        }
-        layer.addSublayer(buildingLayer)
-
         // 배경 빌딩 레이어 설정
-        let backBuildingLayer = CALayer()
-        backBuildingLayer.frame = bounds
         if let cachedBackBuildingImage = MotivationImageCache.shared.getImage(forKey: "cachedBackBuildingImage") {
             backBuildingLayer.contents = cachedBackBuildingImage.cgImage
         } else {
             let backBuildingImage = drawBackBuildingImage()
             MotivationImageCache.shared.setImage(backBuildingImage, forKey: "cachedBackBuildingImage")
             backBuildingLayer.contents = backBuildingImage.cgImage
+            print("캐싱 실패")
         }
         layer.addSublayer(backBuildingLayer)
+        
+        // 빌딩 레이어 설정
+        if let cachedBuildingImage = MotivationImageCache.shared.getImage(forKey: "cachedBuildingImage") {
+            buildingLayer.contents = cachedBuildingImage.cgImage
+        } else {
+            let buildingImage = drawBuildingImage()
+            MotivationImageCache.shared.setImage(buildingImage, forKey: "cachedBuildingImage")
+            buildingLayer.contents = buildingImage.cgImage
+            print("캐싱 실패")
+        }
+        layer.addSublayer(buildingLayer)
     }
     
     func drawBuildingImage() -> UIImage {
@@ -287,7 +282,7 @@ extension BuildingView {
                 }
                 diaries = diaries.filter { !$0.isDeleted }
                 DispatchQueue.main.async {
-//                    print("Fetched diaries: \(diaries)")
+                    print("Fetched diaries: \(diaries)")
                 }
                 completion(diaries, nil)
             }
@@ -315,7 +310,7 @@ extension BuildingView {
                 }
                 DispatchQueue.main.async {
                     self.diaryDays = Set(diaryDays)
-//                    print("self.diaryDays: \(self.diaryDays)")
+                    print("self.diaryDays: \(self.diaryDays)")
                     self.delegate?.didUpdateDiaryCount(self.diaryDays.count)
                     self.drawWindowInBuilding()
                 }
