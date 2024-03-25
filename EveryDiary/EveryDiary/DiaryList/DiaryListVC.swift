@@ -192,6 +192,7 @@ extension DiaryListVC {
     }
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
+        writeDiaryVC.enterDiary(to: .writeNewDiary)
         writeDiaryVC.delegate = self
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
@@ -294,7 +295,7 @@ extension DiaryListVC: UICollectionViewDataSource {
         let writeDiaryVC = WriteDiaryVC()
         
         // 선택된 일기 정보를 전달하고, 수정 버튼을 활성화
-        writeDiaryVC.showsDiary(with: diary)
+        writeDiaryVC.enterDiary(to: .showDiary, with: diary)
         writeDiaryVC.delegate = self
         
         // 일기 수정 화면으로 전환
@@ -320,7 +321,7 @@ extension DiaryListVC {
                 let month = self.months[indexPath.section]
                 if let diary = self.monthlyDiaries[month]?[indexPath.row] {
                     let writeDiaryVC = WriteDiaryVC()
-                    writeDiaryVC.showsDiary(with: diary)
+                    writeDiaryVC.enterDiary(to: .editDiary, with: diary)
                     writeDiaryVC.delegate = self
                     writeDiaryVC.modalPresentationStyle = .automatic
                     DispatchQueue.main.async {
