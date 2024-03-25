@@ -995,8 +995,8 @@ extension WriteDiaryVC {
                     self?.weatherTempLabel.text = "\(Int(round(temperature)))℃"
                 case .failure(let error):
                     print("Load weather failed: \(error)")
-                    self?.weatherDescriptionLabel.text = "일기를 불러오지 못했습니다."
-                    self?.weatherTempLabel.text = "일기를 불러오지 못했습니다."
+                    self?.weatherDescriptionLabel.text = ""
+                    self?.weatherTempLabel.text = ""
                 }
             }
         }
