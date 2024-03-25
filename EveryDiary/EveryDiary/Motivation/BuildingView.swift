@@ -11,6 +11,10 @@ import SnapKit
 import Firebase
 import FirebaseFirestore
 
+#Preview {
+    BuildingView()
+}
+
 protocol BuildingViewDelegate: AnyObject {
     func didUpdateDiaryCount(_ diaryCount: Int)
 }
@@ -70,11 +74,12 @@ class BuildingView: UIView {
             
             BuildingSize(position: CGPoint(x: layer.bounds.width * 0.94, y: layer.bounds.height * 0.89), size: CGSize(width: layer.bounds.width * 0.045, height: layer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[1]]))
         ]
-        setupBuildingLayers()
+        drawCacheBackBuildingPath()
+        drawCacheBuildingPath()
     }
     
     //MARK: - 빌딩 그림 UIBezierPath
-    func drawBuilding() {
+    func drawBuilding() -> UIBezierPath {
         let path = UIBezierPath()
         
         path.move(to: CGPoint(x: 0, y: buildingLayer.bounds.height))
@@ -107,12 +112,10 @@ class BuildingView: UIView {
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.98, y: buildingLayer.bounds.height * 0.8))
         path.addLine(to: CGPoint(x: buildingLayer.bounds.width * 0.98, y: buildingLayer.bounds.height))
         path.close()
-        buildingLayer.path = path.cgPath
-        buildingLayer.fillColor = UIColor.black.cgColor
-        layer.addSublayer(buildingLayer)
+        return path
     }
     
-    func drawBackBuilding() {
+    func drawBackBuilding() -> UIBezierPath {
         let backPath = UIBezierPath()
 
         backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.01, y: backBuildingLayer.bounds.height))
@@ -151,9 +154,7 @@ class BuildingView: UIView {
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width, y: backBuildingLayer.bounds.height))
         
         backPath.close()
-        backBuildingLayer.path = backPath.cgPath
-        backBuildingLayer.fillColor = UIColor.darkGray.cgColor
-        layer.addSublayer(backBuildingLayer)
+        return backPath
     }
     
     //MARK: - Image Caching
@@ -171,43 +172,40 @@ class BuildingView: UIView {
         }
     }
     
-    func setupBuildingLayers() {
-        // 배경 빌딩 레이어 설정
-        if let cachedBackBuildingImage = MotivationImageCache.shared.getImage(forKey: "cachedBackBuildingImage") {
-            backBuildingLayer.contents = cachedBackBuildingImage.cgImage
+    func cacheBuildingPath(_ path: UIBezierPath) {
+        BezierPathCache.shared.setBezierPath(path, forKey: "cachedBuildingPath")
+    }
+    
+    func cacheBackBuildingPath(_ backPath: UIBezierPath) {
+        BezierPathCache.shared.setBezierPath(backPath, forKey: "cachedBackBuildingPath")
+    }
+    
+    private func drawCacheBuildingPath() {
+        let buildingPath: UIBezierPath
+        if let cachedBuildingPath = BezierPathCache.shared.getBezierPath(forKey: "cachedBuildingPath") {
+            buildingPath = cachedBuildingPath
         } else {
-            let backBuildingImage = drawBackBuildingImage()
-            MotivationImageCache.shared.setImage(backBuildingImage, forKey: "cachedBackBuildingImage")
-            backBuildingLayer.contents = backBuildingImage.cgImage
-            print("캐싱 실패")
+            print("drawCacheBuildingPath에서 drawBuilding")
+            buildingPath = drawBuilding()
+            cacheBuildingPath(buildingPath)
         }
-        layer.addSublayer(backBuildingLayer)
-        
-        // 빌딩 레이어 설정
-        if let cachedBuildingImage = MotivationImageCache.shared.getImage(forKey: "cachedBuildingImage") {
-            buildingLayer.contents = cachedBuildingImage.cgImage
-        } else {
-            let buildingImage = drawBuildingImage()
-            MotivationImageCache.shared.setImage(buildingImage, forKey: "cachedBuildingImage")
-            buildingLayer.contents = buildingImage.cgImage
-            print("캐싱 실패")
-        }
+        buildingLayer.path = buildingPath.cgPath
+        buildingLayer.fillColor = UIColor.black.cgColor
         layer.addSublayer(buildingLayer)
     }
     
-    func drawBuildingImage() -> UIImage {
-        let renderer = UIGraphicsImageRenderer(size: bounds.size)
-        let image = renderer.image { context in
-            drawBuilding()
+    private func drawCacheBackBuildingPath() {
+        let backBuildingPath: UIBezierPath
+        if let cachedBackBuildingPath = BezierPathCache.shared.getBezierPath(forKey: "cachedBackBuildingPath") {
+            backBuildingPath = cachedBackBuildingPath
+        } else {
+            print("drawCacheBackBuildingPath에서 drawBackBuilding")
+            backBuildingPath = drawBackBuilding()
+            cacheBackBuildingPath(backBuildingPath)
         }
-        return image
-    }
-    func drawBackBuildingImage() -> UIImage {
-        let renderer = UIGraphicsImageRenderer(size: bounds.size)
-        let image = renderer.image { context in
-            drawBackBuilding()
-        }
-        return image
+        backBuildingLayer.path = backBuildingPath.cgPath
+        backBuildingLayer.fillColor = UIColor.darkGray.cgColor
+        layer.addSublayer(backBuildingLayer)
     }
     
     //MARK: - 창문 관련 함수

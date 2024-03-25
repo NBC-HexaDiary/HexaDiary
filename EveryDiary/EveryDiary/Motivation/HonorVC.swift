@@ -94,6 +94,7 @@ extension HonorVC {
 
 // MARK: - UICollectionViewDataSource
 extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+    //섹션 설정
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         print("numberOfSections : \(dataByYearMonth.keys)")
         if dataByYearMonth.isEmpty {
@@ -105,10 +106,11 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
             honorCollectionView.backgroundView = message
             return 0
         } else {
+            honorCollectionView.backgroundView = nil
             return dataByYearMonth.keys.count
         }
     }
-    
+    //셀 설정
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 1
     }
@@ -136,6 +138,22 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
         return cell
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let keys = Array(dataByYearMonth.keys)
+        let keyForSection = keys[indexPath.section]
+        let selectedData = dataByYearMonth[keyForSection]
+        
+        let VC = DetailVC()
+        if let selectedData = selectedData {
+            VC.selectedData = selectedData
+        } else {
+            print("값이 없당")
+        }
+        navigationController?.pushViewController(VC, animated: true)
+        
+    }
+    
+    //헤더 설정
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard let headerView = honorCollectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: honorHeaderView.honorHeaderIdentifier, for: indexPath) as? honorHeaderView else {
             fatalError("Failed to dequeue honor header view")

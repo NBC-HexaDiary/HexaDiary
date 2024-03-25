@@ -9,6 +9,10 @@ import UIKit
 
 import SnapKit
 
+#Preview {
+    MotivationVC()
+}
+
 class MotivationVC: UIViewController {
     private let buildings = BuildingView()
     
