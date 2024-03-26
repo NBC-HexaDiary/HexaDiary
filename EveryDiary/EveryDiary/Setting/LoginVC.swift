@@ -123,6 +123,7 @@ class LoginVC: UIViewController {
             }
         }
     }
+    
     //MARK: - Google로 로그인 및 Firebase 인증
     private func handleGIDSignIn() {
         // 버튼 클릭 시, 인증
