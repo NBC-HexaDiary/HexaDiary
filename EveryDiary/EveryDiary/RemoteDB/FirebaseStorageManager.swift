@@ -39,7 +39,6 @@ class FirebaseStorageManager {
                 firebaseReference.downloadURL { url, error in
                     if let downloadURL = url {
                         uploadedURL.append(downloadURL)
-                        print("Image Uploaded")
                     }
                     dispatchGroup.leave()
                 }

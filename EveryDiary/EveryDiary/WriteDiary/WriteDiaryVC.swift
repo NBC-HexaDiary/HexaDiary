@@ -30,12 +30,14 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
     private var selectedWeather = ""
     private var selectedDate = Date()
     private var selectedPhotoIdentifiers: [String] = []
+    private var tempImagesLocationInfo: [ImageLocationInfo?] = []   // 이미지와 메타데이터를 임시로 저장하는 배열
     private var useMetadataLocation: Bool = false
     private var currentLocationInfo: String?
     
-    private var diaryID: String?        // 수정할 일기의 ID를 저장하는 변수
-    private var isSavingDiary = false   // 중복저장을 방지하기 위한 변수(플래그)
-    private lazy var dateString: String = {     // 날짜선택 버튼에 사용되는 String
+    private var diaryID: String?                                // 수정할 일기의 ID를 저장하는 변수
+    private var currentUIStatus: UIstatus = .writeNewDiary      // 현재의 diary의 상태
+    private var isSavingDiary = false                           // 중복저장을 방지하기 위한 변수(플래그)
+    private lazy var dateString: String = {                     // 날짜선택 버튼에 사용되는 String
         let dateString = DateFormatter.yyyyMMddE.string(from: selectedDate)
         return dateString
     }()
@@ -190,22 +192,27 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
 extension WriteDiaryVC {
     // 일기 저장 로직
     @objc func completeButtonTapped() {
-        guard !isSavingDiary else { return }    // 저장 중(=true)이면 실행되지 않음
+        guard !isSavingDiary, validateInput() else { return }    // 저장 중(=true)이면 실행되지 않음
         isSavingDiary = true                    // 저장 시작
-        
+        uploadImagesAndSaveDiary()
+    }
+    // 이미지 업로드 및 일기 저장
+    private func uploadImagesAndSaveDiary() {
         let formattedDateString = DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
-        var contentText = contentTextView.text ?? ""
+        let contentText = contentTextView.text == textViewPlaceHolder ? "" : contentTextView.text ?? ""
         
-        // contentTextView의 텍스트가 placeHolder와 같다면 빈문자열로 처리
-        if contentText == textViewPlaceHolder {
-            contentText = ""
+        uploadImages { [weak self] uploadImageURLs in
+            print("Start upload diary")
+            self?.createAndUploadDiaryEntry(with: self?.titleTextField.text ?? "", content: contentText, dateString: formattedDateString, imageUrls: uploadImageURLs)
         }
-        
+    }
+    
+    private func uploadImages(completion: @escaping ([String]) -> Void) {
         let dispatchGroup = DispatchGroup()
-        var uploadedImageURLs = [String]()
+        var uploadedImageURLs = Array(repeating: String?.none, count: imagesLocationInfo.count) // URL 배열을 nil로 초기화
         
         // 이미지와 메타데이터 업로드
-        for imageLocationInfo in self.imagesLocationInfo {
+        for (index ,imageLocationInfo) in imagesLocationInfo.enumerated() {
             guard let assetIdentifier = imageLocationInfo.assetIdentifier else { continue }
             dispatchGroup.enter()
             // 촬영 시간과 위치 정보를 포함하여 업로드
@@ -216,38 +223,58 @@ extension WriteDiaryVC {
                 captureTime: imageLocationInfo.captureTime,
                 location: imageLocationInfo.location
             ) { urls in
-                guard let urls = urls, !urls.isEmpty else {
-                    dispatchGroup.leave()
+                defer { dispatchGroup.leave() }
+                print("Image Uploaded")
+                if let url = urls?.first?.absoluteString {
+                    uploadedImageURLs[index] = url              // 원본 배열의 순서에 따라 URL 저장
                     return
                 }
-                uploadedImageURLs.append(contentsOf: urls.map { $0.absoluteString })
-                dispatchGroup.leave()
             }
         }
-        dispatchGroup.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            // DiaryEntry 생성 및 업로드
-            self.createAndUploadDiaryEntry(
-                with: self.titleTextField.text ?? "",
-                content: contentText,
-                dateString: formattedDateString,
-                imageUrls: uploadedImageURLs,
-                useMetadataLocation: self.useMetadataLocation,
-                currentLocationInfo: self.currentLocationInfo
-            )
+        dispatchGroup.notify(queue: .main) {
+            let orderedUploadImageURLs = uploadedImageURLs.compactMap { $0 }     // nil 값을 제거하고 URL 순서대로 정렬
+            completion(Array(orderedUploadImageURLs))     // 순서대로 정렬된 URL 배열로 완료 콜백 호출
         }
     }
+    
+    
+    // 입력 값 검증
+    private func validateInput() -> Bool {
+        // title이 비어있는 경우, alert와 함께 제목 작성할 것을 요청
+        guard let titleText = titleTextField.text, !titleText.isEmpty else {
+            TemporaryAlert.presentTemporaryMessage(with: "빈 제목", message: "제목이 비어있습니다. 제목을 입력해주세요.", interval: 2.0, for: self)
+            isSavingDiary = false   // 저장 시도 중지
+            return false
+        }
+        return true
+    }
+    
     // 일기 업데이트 로직
     @objc func updateButtonTapped() {
-        guard let diaryID = self.diaryID else { return }
+        guard !isSavingDiary, let diaryID = self.diaryID else { return }
+        
+        isSavingDiary = true
+    }
+    private func prepareDiaryForUpdate(diaryID: String) {
+        guard validateInput() else {
+            isSavingDiary = false
+            return
+        }
         
         let formattedDateString =  DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
-        var uploadedImageURLs = [String]()
+        let contentText = contentTextView.text == textViewPlaceHolder ? "" : contentTextView.text ?? ""
+        let titleText = titleTextField.text ?? ""
         
+        uploadImagesForUpdate { [weak self] uploadImageURLs in
+            self?.finalizeDiaryUpdate(diaryID: diaryID, title: titleText, content: contentText, dateString: formattedDateString, imageUrls: uploadImageURLs)
+        }
+    }
+    private func uploadImagesForUpdate(completion: @escaping ([String]) -> Void) {
         // 이미지 업로드 작업을 관리하기 위한 DispatchGroup
         let dispatchGroup = DispatchGroup()
+        var uploadedImageURLs = [String?](repeating: nil, count: imagesLocationInfo.count)
         
-        for imagesLocationInfo in self.imagesLocationInfo {
+        for (index, imagesLocationInfo) in imagesLocationInfo.enumerated() {
             guard let assetIdentifier = imagesLocationInfo.assetIdentifier else { continue }
             dispatchGroup.enter()
             
@@ -258,29 +285,31 @@ extension WriteDiaryVC {
                 captureTime: imagesLocationInfo.captureTime,
                 location: imagesLocationInfo.location
             ) { urls in
-                if let urls = urls, !urls.isEmpty {
-                    uploadedImageURLs.append(contentsOf: urls.map { $0.absoluteString })
+                defer { dispatchGroup.leave() }
+                if let url = urls?.first?.absoluteString {
+                    uploadedImageURLs[index] = url
                 }
-                dispatchGroup.leave()
             }
         }
-        dispatchGroup.notify(queue: .main) { [weak self] in
-            guard let self = self else { return }
-            // 이미지 URL 배열을 이용해 DiaryEntry 업데이트
-            let updatedDiaryEntry = DiaryEntry(
-                id: diaryID,
-                title: self.titleTextField.text ?? "",
-                content: self.contentTextView.text ?? "",
-                dateString: formattedDateString,
-                emotion: self.selectedEmotion,
-                weather: self.selectedWeather,
-                imageURL: uploadedImageURLs
-            )
-            self.updateDiaryInFirestore(diaryID: diaryID, diaryEntry: updatedDiaryEntry)
+        dispatchGroup.notify(queue: .main) {
+            completion(uploadedImageURLs.compactMap { $0 })
         }
+    }
+    private func finalizeDiaryUpdate(diaryID: String, title: String, content: String, dateString: String, imageUrls: [String]) {
+        let updatedDiaryEntry = DiaryEntry(
+            id: diaryID,
+            title: title,
+            content: content,
+            dateString: dateString,
+            emotion: selectedEmotion,
+            weather: selectedWeather,
+            imageURL: imageUrls
+        )
+        self.updateDiaryInFirestore(diaryID: diaryID, diaryEntry: updatedDiaryEntry)
     }
     // 일기 편집 가능 상태로 변경
     @objc func allowEditButtonTapped() {
+        currentUIStatus = .editDiary
         datePickingButton.isEnabled = true
         titleTextField.isEnabled = true
         contentTextView.isEditable = true
@@ -288,6 +317,7 @@ extension WriteDiaryVC {
         updateButton.isHidden = false
         allowEditButton.isHidden = true
         titleTextField.becomeFirstResponder()
+        imagesCollectionView.reloadData()
     }
     
     @objc func emotionButtonTapped() {
@@ -364,18 +394,18 @@ extension WriteDiaryVC {
 // MARK: 네트워크 요청
 extension WriteDiaryVC {
     // DiaryEntry 생성 및 Firestore 저장
-    private func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, imageUrls: [String] = [], useMetadataLocation: Bool, currentLocationInfo: String? = nil) {
-        var newDiaryEntry: DiaryEntry
-        
-        // currentLoactionInfo가 nil이 아닌 경우 전제 저장
-        if let locationInfo = currentLocationInfo {
-            newDiaryEntry = DiaryEntry(title: title, content: content, dateString: dateString, emotion: selectedEmotion, weather: selectedWeather, imageURL: imageUrls, useMetadataLocation: useMetadataLocation, currentLocationInfo: locationInfo
+    private func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, imageUrls: [String] = []) {
+        let newDiaryEntry = DiaryEntry(
+            title: title,
+            content: content,
+            dateString: dateString,
+            emotion: selectedEmotion,
+            weather: selectedWeather,
+            imageURL: imageUrls,
+            useMetadataLocation: useMetadataLocation, 
+            currentLocationInfo: currentLocationInfo
             )
-        } else {
-            // currentLocationInfo가 nil이라면 제외하고 저장
-            newDiaryEntry = DiaryEntry(title: title, content: content, dateString: dateString, emotion: selectedEmotion, weather: selectedWeather, imageURL: imageUrls, useMetadataLocation: useMetadataLocation
-            )
-        }
+        print("newDiaryEntry: \(newDiaryEntry)")
         
         // DiaryManager를 사용해 FireStore에 저장
         diaryManager.addDiary(diary: newDiaryEntry) { [weak self] error in
@@ -386,7 +416,9 @@ extension WriteDiaryVC {
                 print("Error saving diary to Firestore: \(error.localizedDescription)")
             } else {
                 // 에러가 없다면, 화면 닫기
+                print("Saved Diary Successfully.")
                 self.dismiss(animated: true, completion: nil)
+                print("dismiss WriteDiaryVC")
                 self.delegate?.diaryDidUpdate()
             }
         }
@@ -409,16 +441,21 @@ extension WriteDiaryVC {
 
 // MARK: 임시
 extension WriteDiaryVC {
-    
     func showsDiary(with diary: DiaryEntry) {
+        updateUIWithDiaryEntry(diary)
+        loadDisplayImages(with: diary)
+    }
+    private func updateUIWithDiaryEntry(_ diary: DiaryEntry) {
         // UI 내 일기 내용 반영
         self.diaryID = diary.id
         self.titleTextField.text = diary.title
         self.contentTextView.text = diary.content
-        self.contentTextView.textColor = .black
         self.selectedEmotion = diary.emotion
         self.selectedWeather = diary.weather
-        
+        updateDateAndEmotionWeatherImages(diary: diary)
+    }
+    
+    private func updateDateAndEmotionWeatherImages(diary: DiaryEntry) {
         // 날짜 형식 업데이트
         if let date = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) {
             self.selectedDate = date
@@ -429,37 +466,51 @@ extension WriteDiaryVC {
         // 이모티콘과 날씨 업데이트
         emotionImageView.image = UIImage(named: diary.emotion)
         weatherImageView.image = UIImage(named: diary.weather)
-        
+    }
+    private func loadDisplayImages(with diary: DiaryEntry) {
         // 기존 이미지 정보 초기화
         self.selectedPhotoIdentifiers.removeAll()
         self.imagesLocationInfo.removeAll()
+        self.tempImagesLocationInfo = Array(repeating: nil, count: diary.imageURL?.count ?? 0)
         
-        // 이미지 URL 배열에서 각 이미지와 메타데이터를 다운로드
-        let group = DispatchGroup()
-        diary.imageURL?.forEach { urlString in
-            guard URL(string: urlString) != nil else { return }
-            group.enter()
+        guard let imageURLs = diary.imageURL, !imageURLs.isEmpty else {
+            self.imagesCollectionView.reloadData()
+            return
+        }
+        
+        imageURLs.enumerated().forEach { index, urlString in
             FirebaseStorageManager.downloadImage(urlString: urlString) { [weak self] downloadedImage, metadata in
-                defer { group.leave() }
-                guard let self = self, let image = downloadedImage else { return }
-                let captureTime = metadata?["captureTime"] ?? "Unknown"
-                let locationInfoString = metadata?["location"] ?? "Unknown"
-                let assetIdentifier = metadata?["assetIdentifier"]
-                if let assetIdentifier = assetIdentifier {
-                    self.imagePickerManager.selectedPhotoIdentifiers.append(assetIdentifier)
-                }
-                let locationInfo = self.locationInfoFromString(locationInfoString)
-                // 메타데이터를 포함한 ImageLocationInfo 객체 생성
-                let imageLocationInfo = ImageLocationInfo(image: image, locationInfo: locationInfo, assetIdentifier: assetIdentifier, captureTime: captureTime, location: locationInfoString)
-                self.imagesLocationInfo.append(imageLocationInfo)
+                self?.handleDownloadedImage(downloadedImage, metadata: metadata, index: index, totalImages: imageURLs.count)
             }
         }
+    }
+    
+    private func handleDownloadedImage(_ downloadedImage: UIImage?, metadata: [String: String]?, index: Int, totalImages: Int) {
+        guard let image = downloadedImage else { return }
+        let captureTime = metadata?["captureTime"] ?? "Unknown"
+        let locationInfoString = metadata?["location"] ?? "Unknown"
+        let assetIdentifier = metadata?["assetIdentifier"]
+        let locationInfo = self.locationInfoFromString(locationInfoString)
         
-        group.notify(queue: .main) { [weak self] in
-            self?.imagesCollectionView.reloadData()
-            self?.updateImageCollectionViewHeight()
+        // 메타데이터를 포함한 ImageLocationInfo 객체 생성 및 배열에 할당
+        if let assetIdentifier = assetIdentifier {
+            self.imagePickerManager.selectedPhotoIdentifiers.append(assetIdentifier)
+        }
+        // 메타데이터를 포함한 ImageLocationInfo 객체 생성
+        let imageLocationInfo = ImageLocationInfo(image: image, locationInfo: locationInfo, assetIdentifier: assetIdentifier, captureTime: captureTime, location: locationInfoString)
+        self.tempImagesLocationInfo[index] = imageLocationInfo
+        
+        if tempImagesLocationInfo.compactMap({ $0 }).count == totalImages {
+            DispatchQueue.main.async {
+                // 다운로드된 이미지를 순서대로 배열에 저장
+                self.imagesLocationInfo = self.tempImagesLocationInfo.compactMap { $0 }
+                self.imagePickerManager.selectedPhotoIdentifiers = self.imagesLocationInfo.compactMap { $0.assetIdentifier }
+                self.imagesCollectionView.reloadData()
+                self.updateImageCollectionViewHeight()
+            }
         }
     }
+    
     // customMetaData로 저장된 하나의 String을 lat과 long으로 나눠주는 메서드
     func locationInfoFromString(_ locationString: String) -> LocationInfo? {
         let components = locationString.split(separator: ", ").map { String($0) }
@@ -495,15 +546,47 @@ extension WriteDiaryVC: DateConditionSelectDelegate {
         }
     }
     
+    // 선택한 condition과 같은 이름을 가진 Asset 이미지를 버튼에 적용
     func didSelectCondition(_ condition: String, type: ConditionType) {
-        // 선택한 condition과 같은 이름을 가진 Asset 이미지를 버튼에 적용
+        // 해당하는 condition(emotion, weather)의 이미지로 변경해주면서, 사용자가 인식할 수 있도록 변화가 있는 뷰로 scroll
         switch type {
         case .emotion:
             selectedEmotion = condition
-            emotionImageView.image = UIImage(named: condition)
+            UIView.transition(
+                with: emotionImageView,
+                duration: 0.2,
+                options: .transitionFlipFromTop,
+                animations: { self.emotionImageView.image = UIImage(named: condition) }
+            ) { _ in
+                self.scroll(to: self.emotionImageView)
+            }
         case .weather:
             selectedWeather = condition
-            weatherImageView.image = UIImage(named: condition)
+            UIView.transition(
+                with: weatherImageView,
+                duration: 0.2,
+                options: .transitionFlipFromTop,
+                animations: { self.weatherImageView.image = UIImage(named: condition) }
+            ) { _ in
+                self.scroll(to: self.weatherImageView)
+            }
+        }
+    }
+    
+    // 파라미터로 전달한 컴포넌트로 view를 scroll하는 메서드
+    private func scroll(to view: UIView, animated: Bool = true, padding: CGFloat = 20) {
+        
+        // scrolleView가 현재보여주는 영역과 보여줄 대상 뷰의 위치가 같은 좌표계 상에서 비교될 수 있도록
+        // scrollView가 현재 보여주고 있는 영역(scrollView.bounds)을 view의 superview 좌표계로 변환(convert)
+        let scrollViewRect = scrollView.convert(scrollView.bounds, to: view.superview)
+        
+        // 주변에 여유공간을 추가하기 위해서 view.frame.inset에 padding을 부여
+        let paddedFrame = view.frame.insetBy(dx: -padding, dy: -padding)
+        
+        // scrollViewRect가 보여주고자하는 view의 시작점을 포함하는지 확인.
+        if !scrollViewRect.contains(paddedFrame.origin) {
+            // 포함하고있지 않다면(안보인다면), 해당 뷰가 보이도록 스크롤을 수행(scrollRectToVisible)
+            scrollView.scrollRectToVisible(paddedFrame, animated: true)
         }
     }
 }
@@ -617,8 +700,47 @@ extension WriteDiaryVC: UICollectionViewDataSource, UICollectionViewDelegate, UI
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCollectionViewCell.reuseIdentifier, for: indexPath) as? ImageCollectionViewCell else {
                 fatalError("Unalble to dequeue ImageCollectionView Cell")
             }
+            // 현재 UIstatus에 따라 삭제 버튼의 표시 여부 결정
+            let shouldHideDeleteButton = currentUIStatus == .showDiary
+            cell.configureDeleteButton(hidden: shouldHideDeleteButton)
+            
+//            if !shouldHideDeleteButton {
+//                cell.startJiggling()
+//            } else {
+//                cell.stopJiggling()
+//            }
+            
             let info = imagesLocationInfo[indexPath.item]
             cell.configure(with: info.image)
+            // cell 내의 삭제버튼을 트리거로 하는 closer를 정의
+            cell.onDeleteButtonTapped = { [weak self] in
+                guard let self = self else { return }
+                // 현재 셀의 assetIdentifier를 가져온다.
+                guard let assetIdentifier = self.imagesLocationInfo[indexPath.item].assetIdentifier else { return }
+                
+                // assetIdentifier를 기반으로 imagesLocationInfo 배열에서 해당 이미지 정보를 삭제한다.
+                if let assetIdentifier = self.imagesLocationInfo[indexPath.item].assetIdentifier {
+                    // indexPath.item이 imagesLocation 배열의 범위 내에 있는지 확인 후, 범위 내라면 해당 항목을 배열에서 삭제
+                    if indexPath.item < self.imagesLocationInfo.count {
+                        self.imagesLocationInfo.remove(at: indexPath.item)
+                    }
+                    // 해당 assetIdentifier를, selectedPhotoIdentifier에서도 삭제
+                    // firstIndex(of:)메서드로 assetIdentifier와 일치하는 첫번째 인덱스를 찾고, 해당 인덱스를 가진 항목을 selectedPhotoIdentifier에서 삭제
+                    if let index = self.selectedPhotoIdentifiers.firstIndex(of: assetIdentifier) {
+                        self.selectedPhotoIdentifiers.remove(at: index)
+                        // ImagePickerManager로 변경된 selectedPhotoIdentifier 업데이트
+                        imagePickerManager.updateSelectedPhotoIdentifier(selectedPhotoIdentifiers)
+                    }
+                }
+                // collectionView 업데이트(performBatchUpdates는 여러 UI 변경사항을 그룹화하여 하나의 애니메이션으로 표현)
+                self.imagesCollectionView.performBatchUpdates({
+                    // deleteItems 메서드를 사용해 지정된 indexPath의 셀을 삭제
+                    self.imagesCollectionView.deleteItems(at: [indexPath])
+                }) { complted in
+                    // UI 업데이트 완료 후, reloadData를 통해서 잠재적인 UI불일치를 방지.
+                    self.imagesCollectionView.reloadData()
+                }
+            }
             return cell
         } else {
             // 맵 셀 구성
@@ -942,9 +1064,12 @@ extension WriteDiaryVC {
         }
     }
     
-    func enterDiary(to status: UIstatus, with diary: DiaryEntry? = nil) {
+    // WriteDiaryVC를 호출한 목적에 맞게 UI상태 업데이트
+    func enterDiary(to status: UIstatus, with diary: DiaryEntry? = nil, reloadImages: Bool = true) {
+        self.currentUIStatus = status
         switch status {
         case .writeNewDiary:
+            print(currentUIStatus)
             datePickingButton.isEnabled = true
             titleTextField.isEnabled = true
             contentTextView.isEditable = true
@@ -953,6 +1078,7 @@ extension WriteDiaryVC {
             allowEditButton.isHidden = true
             titleTextField.becomeFirstResponder()
         case .editDiary:
+            print(currentUIStatus)
             guard let diary = diary else { return }
             datePickingButton.isEnabled = true
             titleTextField.isEnabled = true
@@ -963,6 +1089,7 @@ extension WriteDiaryVC {
             titleTextField.becomeFirstResponder()
             showsDiary(with: diary)
         case .showDiary:
+            print(currentUIStatus)
             guard let diary = diary else { return }
             datePickingButton.isEnabled = false
             titleTextField.isEnabled = false

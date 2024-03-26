@@ -23,10 +23,9 @@ class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
     var selectedPhotoIdentifiers: [String] = []
     
     // PHPicker를 호출하는 메서드
-    func presentImagePicker(from viewController: UIViewController, selectedPhotoIdentifiers: [String]) {
-        self.selectedPhotoIdentifiers = selectedPhotoIdentifiers
+    func presentImagePicker(from viewController: UIViewController) {
         self.presentingViewController = viewController
-        let configuration = createPickerConfiguration(with: selectedPhotoIdentifiers)
+        let configuration = createPickerConfiguration(with: self.selectedPhotoIdentifiers)
         // PHPickerViewController 인스턴스 생성 및 표시
         let picker = PHPickerViewController(configuration: configuration)
         picker.delegate = self
@@ -42,96 +41,6 @@ class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
         return configuration
     }
     
-//    // PHPickerViewControllerDelegate 메서드
-//    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-//        picker.dismiss(animated: true)  // 선택완료(picker 닫기)
-//        
-//        // 새로 선택한 이미지와 메타데이터를 담는 배열
-//        var newImagesLocationInfo: [ImageLocationInfo] = []
-//        // 새로운 결과의 식별자 배열
-//        let newResultsIdentifiers = results.compactMap { $0.assetIdentifier }
-//        print("PHPicker가 선택한 identifier: \(newResultsIdentifiers)")
-//        let group = DispatchGroup() // 모든 비동기작업을 추적하기 위한 DispatchGroup
-//        
-//        // 선택한 각 사진들에 대하여
-//        for result in results {
-//            // 새로 선택된 이미지의 assetIdentifier 저장
-//            guard let assetIdentifier = result.assetIdentifier else { continue }
-//            let itemProvider = result.itemProvider
-//            group.enter()   // 비동기 작업 시작
-//            
-//            // itemProver를 통해 선택한 이미지에 대한 로딩 시작
-//            if itemProvider.canLoadObject(ofClass: UIImage.self) {  // itemProvider가 UIImage 객체를 로드할 수 있는지 확인
-//                itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
-//                    defer { group.leave() } // 작업 완료 알림
-//                    guard let image = image as? UIImage else { return }
-//                    
-//                    // 선택한 이미지의 PHAsset을 조회하여 위치 정보와 촬영 시간을 추출
-//                    let assets = PHAsset.fetchAssets(withLocalIdentifiers: [assetIdentifier], options: nil)
-//                    
-//                    if let asset = assets.firstObject {
-//                        let captureTime = asset.creationDate?.description
-//                        let location = asset.location
-//                        var locationInfo: LocationInfo?
-//                        if let location = location {
-//                            locationInfo = LocationInfo(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
-//                        } else {
-//                            locationInfo = nil
-//                        }
-//                        let locationString = location.map { "\($0.coordinate.latitude), \($0.coordinate.longitude)" }
-//                        
-//                        // 위치 정보가 있을 경우에만 locationInfo생성
-//                        let imageLocationInfo = ImageLocationInfo(
-//                            image: image,
-//                            locationInfo: locationInfo,
-//                            assetIdentifier: assetIdentifier,
-//                            captureTime: captureTime,
-//                            location: locationString
-//                        )
-//                        DispatchQueue.main.async {
-//                            newImagesLocationInfo.append(imageLocationInfo)
-//                            print("새롭게 추가된 이미지: \(imageLocationInfo)")
-//                        }
-//                    }
-//                }
-//            } else {
-//                group.leave()
-//            }
-//        }
-//        // 모든 선택 작업이 완료되면, delegate으로 결과 전달
-//        group.notify(queue: .main) { [weak self] in
-//            print("group.notify")
-//            guard let self = self else { return }
-//            // identifiers 저장
-//            self.selectedPhotoIdentifiers = newResultsIdentifiers
-//            // 위치 정보 유무에 따라 다음 단계 처리
-//            if let location = newImagesLocationInfo.first?.locationInfo {
-//                print("위치정보 있음")
-//                // 위치 정보가 있다면
-//                let mapManger = MapManager()
-//                mapManger.getPlaceName(latitude: location.latitude, longitude: location.longitude) { address in
-//                    let time = newImagesLocationInfo.first?.captureTime ?? self.formattedDateString(for: Date())
-//                    // 위치 정보가 있는 경우에만 timeAndLocationChoiceAlert 호출
-//                    // 선택 사진의 시간과 위치 정보를 사용할 것인지 확인하는 메서드
-//                    self.delegate?.timeAndLocationChoiceAlert(time: time, address: address) { useMetadata in }
-//                    print("결과전달: \(newImagesLocationInfo), \(newResultsIdentifiers)")
-//                    // 새로운 선택결과를 delegate 메서드로 전달
-//                    self.delegate?.didPickImages(newImagesLocationInfo, retainedIdentifiers: newResultsIdentifiers)
-//                }
-//            } else {
-//                print("위치정보 없음")
-//                print("결과전달: \(newImagesLocationInfo), \(newResultsIdentifiers)")
-//                // 위치 정보가 없는 경우 didPickImages만 호출
-//                self.delegate?.didPickImages(newImagesLocationInfo, retainedIdentifiers: newResultsIdentifiers)
-//                if let presentingViewController = self.presentingViewController {
-//                    let alert = UIAlertController(title: "사진의 위치정보가 없습니다. 사용자의 현재 위치로 대체됩니다.", message: nil, preferredStyle: .actionSheet)
-//                    presentingViewController.present(alert, animated: true, completion: nil)
-//                    Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
-//                }
-//            }
-//        }
-//    }
-    
     // PHPickerViewControllerDelegate 메서드
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)          // 선택완료(picker 닫기)
@@ -139,7 +48,7 @@ class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
     }
     
     private func processPickedImages(results: [PHPickerResult]) {
-        var newImagesLocationInfo: [ImageLocationInfo] = []                     // 새로 선택한 이미지와 메타데이터를 담는 배열
+        var newImagesLocationInfo: [Int: ImageLocationInfo] = [:]                     // 새로 선택한 이미지와 메타데이터의 순서를 담는 딕셔너리
         let newResultsIdentifiers = results.compactMap { $0.assetIdentifier }   // 새로운 결과의 식별자 배열
         
         // 모든 비동기작업을 추적하기 위한 DispatchGroup
@@ -147,24 +56,26 @@ class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
         print("PHPicker가 선택한 identifier: \(newResultsIdentifiers)")
         
         // 선택한 각 사진들에 대하여
-        for result in results {
+        for (index, result) in results.enumerated() {
             // 새로 선택된 이미지의 assetIdentifier 저장
             guard let assetIdentifier = result.assetIdentifier else { continue }
             group.enter()   // 비동기 작업 시작
             
-            loadImageAneMetadata(from: result, with: assetIdentifier) { imageLocationInfo in
+            loadImageAndMetadata(from: result, with: assetIdentifier) { imageLocationInfo in
                 if let info = imageLocationInfo {
-                    newImagesLocationInfo.append(info)
+                    newImagesLocationInfo[index] = (info)
                 }
                 group.leave()
             }
         }
         // 모든 선택 작업이 완료되면, delegate으로 결과 전달
         group.notify(queue: .main) { [weak self] in
-            self?.handleImageSelectionCompleted(with: newImagesLocationInfo, identifiers: newResultsIdentifiers)
+            // 임시 딕셔너리를 배열로 다시 변환하고 원래의 순서대로 정렬
+            let orderedImagesLocationInfo = newImagesLocationInfo.sorted(by: { $0.key < $1.key}).map { $0.value }
+            self?.handleImageSelectionCompleted(with: orderedImagesLocationInfo, identifiers: newResultsIdentifiers)
         }
     }
-    private func loadImageAneMetadata(from result: PHPickerResult, with identifier: String, completion: @escaping (ImageLocationInfo?) -> Void) {
+    private func loadImageAndMetadata(from result: PHPickerResult, with identifier: String, completion: @escaping (ImageLocationInfo?) -> Void) {
         // itemProver를 통해 선택한 이미지에 대한 로딩 시작
         result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
             guard let image = object as? UIImage else {
@@ -221,7 +132,11 @@ class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
             print("결과전달: \(imagesLocationInfo), \(identifiers)")
             // 위치 정보가 없는 경우 didPickImages만 호출
             self.delegate?.didPickImages(imagesLocationInfo, retainedIdentifiers: identifiers)
-            presentTemporaryMessage(with: "사진의 위치정보가 없습니다.")
+            guard let viewController = presentingViewController else {
+                print("PresentingViewController is nil")
+                return
+            }
+            TemporaryAlert.presentTemporaryMessage(with: "위치정보 없음.", message: "사진의 위치정보가 없습니다.\n사용자의 현재 위치로 대체됩니다.", interval: 2.0, for: viewController)
         }
     }
 }
@@ -235,7 +150,7 @@ extension ImagePickerManager {
                 switch status {
                 case .authorized, .limited:
                     // 접근권한이 있는 상태라면 PHPickerViewController 호출
-                    self?.presentImagePicker(from: viewController, selectedPhotoIdentifiers: self?.selectedPhotoIdentifiers ?? [])
+                    self?.presentImagePicker(from: viewController)
                 case .denied, .restricted, .notDetermined:
                     // 접근권한이 없는 경우, 설정으로 유도하는 UIAlert 표시
                     self?.showSettingsAlert(from: viewController)
@@ -260,11 +175,7 @@ extension ImagePickerManager {
     func formattedDateString(for date: Date) -> String {
         return DateFormatter.yyyyMMddHHmmss.string(from: date)
     }
-    // 사용자에게 일시적인 메세지를 보여줄 때 사용하는 메서드
-    private func presentTemporaryMessage(with message: String) {
-        guard let presentingViewController = self.presentingViewController else { return }
-        let alert = UIAlertController(title: message, message: nil, preferredStyle: .actionSheet)
-        presentingViewController.present(alert, animated: true, completion: nil)
-        Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
+    func updateSelectedPhotoIdentifier(_ identifiers: [String]) {
+        self.selectedPhotoIdentifiers = identifiers
     }
 }
