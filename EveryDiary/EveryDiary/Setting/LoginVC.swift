@@ -298,41 +298,20 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                 currentUser.link(with: credential) { authResult, error in
                     if let error = error {
                         print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
-                        Auth.auth().currentUser?.delete { error in
-                            if let error = error {
-                                print("Error deleting user from Firebase: \(error.localizedDescription)")
-                            } else {
-                                print("User successfully deleted from Firebase.")
-                                DiaryManager.shared.deleteUserData(for: currentUser.uid)
-                            }
-                        }
+//                        if let error = error as? AuthErrorCode, error.code == .credentialAlreadyInUse {
+//                    }
+                        
                     } else {
-                        self.updateUserProfile(withCredential: appleIDCredential)
                         print("익명 사용자를 영구 계정으로 전환 성공")
+                        self.updateUserProfile(withCredential: appleIDCredential)
                     }
-                }
-                print("병합된 계정")
-                Auth.auth().signIn(with: credential) { authResult, error in
-                    if let error = error {
-                        print("로그인 중 오류 발생: \(error.localizedDescription)")
-                        return
-                    }
-                    self.updateUserProfile(withCredential: appleIDCredential)
-                    NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                    self.dismiss(animated: true, completion: nil)
                 }
             } else {
-                print("일반 계정")
-                Auth.auth().signIn(with: credential) { authResult, error in
-                    if let error = error {
-                        print("로그인 중 오류 발생: \(error.localizedDescription)")
-                        return
-                    }
-                    self.updateUserProfile(withCredential: appleIDCredential)
-                    NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                    self.dismiss(animated: true, completion: nil)
-                }
+                print("현재 사용자가 없습니다. 애플 로그인을 진행합니다.")
+                self.signInWithCredential(credential: credential, appleIDCredential: appleIDCredential)
             }
+            
+            self.signInWithCredential(credential: credential, appleIDCredential: appleIDCredential)
             
             // 사용자의 authorizationCode를 로그인 시 미리 가져온다. 회원 탈퇴 시, 필요하기 때문이다.
             if let authorizationCode = appleIDCredential.authorizationCode, let codeString = String(data: authorizationCode, encoding: .utf8) {
@@ -351,20 +330,50 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
     }
     
     func updateUserProfile(withCredential credential: ASAuthorizationAppleIDCredential) {
-        let currentUser = Auth.auth().currentUser
-        
-        let changeRequest = currentUser?.createProfileChangeRequest()
-        
-        if let fullName = credential.fullName {
-            changeRequest?.displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
+        guard let currentUser = Auth.auth().currentUser else {
+            print("사용자가 없습니다.")
+            return
         }
         
-        changeRequest?.commitChanges { error in
+        let changeRequest = currentUser.createProfileChangeRequest()
+        
+        if let fullName = credential.fullName {
+            changeRequest.displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
+        }
+        
+        changeRequest.commitChanges { error in
             if let error = error {
                 print("Error updating user profile: \(error)")
             } else {
                 NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
                 self.dismiss(animated: true, completion: nil)
+            }
+        }
+    }
+    
+    func signInWithCredential(credential: AuthCredential, appleIDCredential: ASAuthorizationAppleIDCredential) {
+        Auth.auth().signIn(with: credential) { authResult, error in
+            if let error = error {
+                print("로그인 중 오류 발생: \(error.localizedDescription)")
+                return
+            }
+            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+            self.dismiss(animated: true, completion: nil)
+        }
+    }
+    
+    func deleteWithCredential(credential: AuthCredential, appleIDCredential: ASAuthorizationAppleIDCredential) {
+        guard let currentUser = Auth.auth().currentUser else {
+            print("사용자가 없습니다.")
+            return
+        }
+        
+        currentUser.delete { error in
+            if let error = error {
+                print("Error deleting user from Firebase: \(error.localizedDescription)")
+            } else {
+                print("User successfully deleted from Firebase.")
+                DiaryManager.shared.deleteUserData(for: currentUser.uid )
             }
         }
     }
