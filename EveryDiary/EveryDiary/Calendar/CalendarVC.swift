@@ -75,6 +75,7 @@ class CalendarVC: UIViewController {
     
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
+        writeDiaryVC.enterDiary(to: .writeNewDiary)
         writeDiaryVC.delegate = self
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
