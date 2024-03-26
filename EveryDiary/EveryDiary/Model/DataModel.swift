@@ -83,3 +83,8 @@ extension DateFormatter {
     static let yyyyMMddE: DateFormatter = createFormatter(dateFormat: "yyyy. MM. dd(E)")
     static let yyyyMMDD: DateFormatter = createFormatter(dateFormat: "yyyy.MM.dd")
 }
+
+struct OnboardingModel : Equatable {
+    var descriptionImage : String
+    var descriptionLabel : String
+}
