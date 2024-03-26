@@ -36,6 +36,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
     
     private var diaryID: String?                                // 수정할 일기의 ID를 저장하는 변수
     private var currentUIStatus: UIstatus = .writeNewDiary      // 현재의 diary의 상태
+    private var existingImageURLs: [String] = []                // 이미지 목록을 저장할 변수
     private var isSavingDiary = false                           // 중복저장을 방지하기 위한 변수(플래그)
     private lazy var dateString: String = {                     // 날짜선택 버튼에 사용되는 String
         let dateString = DateFormatter.yyyyMMddE.string(from: selectedDate)
@@ -251,50 +252,41 @@ extension WriteDiaryVC {
     
     // 일기 업데이트 로직
     @objc func updateButtonTapped() {
-        guard !isSavingDiary, let diaryID = self.diaryID else { return }
+        guard !isSavingDiary, let diaryID = self.diaryID, validateInput() else { return }
         
         isSavingDiary = true
-    }
-    private func prepareDiaryForUpdate(diaryID: String) {
-        guard validateInput() else {
-            isSavingDiary = false
-            return
-        }
         
-        let formattedDateString =  DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
-        let contentText = contentTextView.text == textViewPlaceHolder ? "" : contentTextView.text ?? ""
-        let titleText = titleTextField.text ?? ""
-        
-        uploadImagesForUpdate { [weak self] uploadImageURLs in
-            self?.finalizeDiaryUpdate(diaryID: diaryID, title: titleText, content: contentText, dateString: formattedDateString, imageUrls: uploadImageURLs)
-        }
-    }
-    private func uploadImagesForUpdate(completion: @escaping ([String]) -> Void) {
-        // 이미지 업로드 작업을 관리하기 위한 DispatchGroup
-        let dispatchGroup = DispatchGroup()
-        var uploadedImageURLs = [String?](repeating: nil, count: imagesLocationInfo.count)
-        
-        for (index, imagesLocationInfo) in imagesLocationInfo.enumerated() {
-            guard let assetIdentifier = imagesLocationInfo.assetIdentifier else { continue }
-            dispatchGroup.enter()
+        // 1단계: 이미지 삭제
+        deleteExistingImages { [weak self] in
+            guard let self = self else { return }
             
-            FirebaseStorageManager.uploadImage(
-                image: [imagesLocationInfo.image],
-                pathRoot: "diary_images",
-                assetIdentifier: assetIdentifier,
-                captureTime: imagesLocationInfo.captureTime,
-                location: imagesLocationInfo.location
-            ) { urls in
-                defer { dispatchGroup.leave() }
-                if let url = urls?.first?.absoluteString {
-                    uploadedImageURLs[index] = url
-                }
+            // 2단계: 이미지 업로드
+            self.uploadImages { [weak self] uploadImageURLs in
+                guard let self = self else { return }
+                
+                // 3단계: 일기 엔트리 업데이트
+                let formattedDateString = DateFormatter.yyyyMMddHHmmss.string(from: self.selectedDate)
+                let contentText = contentTextView.text == textViewPlaceHolder ? "" : contentTextView.text ?? ""
+                let titleText = titleTextField.text ?? ""
+                
+                self.finalizeDiaryUpdate(diaryID: diaryID, title: titleText, content: contentText, dateString: formattedDateString, imageUrls: uploadImageURLs)
+            }
+        }
+    }
+    private func deleteExistingImages(completion: @escaping () -> Void) {
+        let dispatchGroup = DispatchGroup()
+        
+        for urlString in self.existingImageURLs {
+            dispatchGroup.enter()
+            FirebaseStorageManager.deleteImage(urlString: urlString) { error in
+                dispatchGroup.leave()
             }
         }
         dispatchGroup.notify(queue: .main) {
-            completion(uploadedImageURLs.compactMap { $0 })
+            completion()
         }
     }
+
     private func finalizeDiaryUpdate(diaryID: String, title: String, content: String, dateString: String, imageUrls: [String]) {
         let updatedDiaryEntry = DiaryEntry(
             id: diaryID,
@@ -303,9 +295,23 @@ extension WriteDiaryVC {
             dateString: dateString,
             emotion: selectedEmotion,
             weather: selectedWeather,
-            imageURL: imageUrls
+            imageURL: imageUrls,
+            useMetadataLocation: useMetadataLocation,
+            currentLocationInfo: currentLocationInfo
         )
-        self.updateDiaryInFirestore(diaryID: diaryID, diaryEntry: updatedDiaryEntry)
+        // Firestore 문서 업데이트
+        DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: updatedDiaryEntry) { [weak self] error in
+            guard let self = self else { return }
+            
+            self.isSavingDiary = false
+            if let error = error {
+                print("Error updating diary: \(error.localizedDescription)")
+            } else {
+                print("Dairy updated successfully")
+                self.dismiss(animated: true, completion: nil)
+                self.delegate?.diaryDidUpdate()
+            }
+        }
     }
     // 일기 편집 가능 상태로 변경
     @objc func allowEditButtonTapped() {
@@ -426,16 +432,7 @@ extension WriteDiaryVC {
     
     // DiaryEntry 수정 및 Firestore 업데이트
     private func updateDiaryInFirestore(diaryID: String, diaryEntry: DiaryEntry) {
-        // Firestore 문서 업데이트
-        DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: diaryEntry) { error in
-            if let error = error {
-                print("Error updating diary: \(error.localizedDescription)")
-            } else {
-                print("Dairy updated successfully")
-                self.dismiss(animated: true, completion: nil)
-                self.delegate?.diaryDidUpdate()
-            }
-        }
+
     }
 }
 
@@ -444,6 +441,7 @@ extension WriteDiaryVC {
     func showsDiary(with diary: DiaryEntry) {
         updateUIWithDiaryEntry(diary)
         loadDisplayImages(with: diary)
+        self.existingImageURLs = diary.imageURL ?? []
     }
     private func updateUIWithDiaryEntry(_ diary: DiaryEntry) {
         // UI 내 일기 내용 반영
