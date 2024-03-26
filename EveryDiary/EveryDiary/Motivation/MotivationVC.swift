@@ -6,9 +6,10 @@
 //
 
 import UIKit
+
 import SnapKit
 
-#Preview{
+#Preview {
     MotivationVC()
 }
 

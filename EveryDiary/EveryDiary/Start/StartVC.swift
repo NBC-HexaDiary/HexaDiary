@@ -7,42 +7,24 @@
 
 import UIKit
 
-import FirebaseAuth
-import Lottie
 import SnapKit
 
 class StartVC: UIViewController {
     
-    private lazy var animationView: LottieAnimationView = {
-        let config = LottieConfiguration(renderingEngine: .automatic)
-        let view = LottieAnimationView(name: "calendar", configuration: config)
-        view.contentMode = .scaleAspectFill
-        view.loopMode = .playOnce
-        view.animationSpeed = 0.5
-        view.play(fromFrame: 1, toFrame: 90)
-        return view
-    }()
+    private var pageVC : PageVC!
     
-    private lazy var startLabel : UILabel = {
-        let label = UILabel()
-        label.font = UIFont(name: "SFProRounded-Regular", size: 25)
-        label.textColor = .mainTheme
-        let fullText = "하루의 이야기를 기록해보아요"
-        let changeText = "이야기"
-        let attributedString = NSMutableAttributedString(string: fullText)
-        if let range = fullText.range(of: changeText) {
-            let nsRange = NSRange(range, in: fullText)
-            attributedString.addAttribute(.foregroundColor, value: UIColor(named: "storyText") ?? UIColor.black, range: nsRange)
-            attributedString.addAttribute(.font, value: UIFont(name: "SFProRounded-Bold", size: 28) ?? UIFont.systemFont(ofSize: 28), range: nsRange)
-        }
-        label.attributedText = attributedString
-        label.textAlignment = .center
-        return label
+    private var currentPageIndex : Int = 0
+    
+    private lazy var pageControl: UIPageControl = {
+        let control = UIPageControl()
+        control.currentPageIndicatorTintColor = .mainTheme
+        control.pageIndicatorTintColor = .subBackground
+        return control
     }()
     
     private lazy var startButton : UIButton = {
         let button = UIButton()
-        button.setTitle("시작하기", for: .normal)
+        button.setTitle("다음", for: .normal)
         button.layer.backgroundColor = UIColor(named: "loginBackground")?.cgColor
         button.setTitleColor(.mainCell, for: .normal)
         button.layer.cornerRadius = 10
@@ -61,12 +43,18 @@ class StartVC: UIViewController {
         
         addSubViewsStartVC()
         autoLayoutStartVC()
+        
+        print("\(String(describing: pageVC))")
     }
     
     @objc private func startButtonTouchOutside() {
         startButton.layer.backgroundColor = UIColor(named: "loginBackground")?.cgColor
-        UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-        showMainScreen()
+        if currentPageIndex < pageVC.pages.count - 1 {
+            moveToNextPage()
+        } else {
+            showMainScreen()
+            UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+        }
     }
     
     @objc private func startButtonTouchDown() {
@@ -75,9 +63,14 @@ class StartVC: UIViewController {
     
     private func addSubViewsStartVC() {
         if !UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+            pageVC = PageVC(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
+            pageVC.delegate = self
+            pageControl.numberOfPages = pageVC.pageCount
+            
             view.addSubview(startButton)
-            view.addSubview(animationView)
-            view.addSubview(startLabel)
+            addChild(pageVC)
+            view.addSubview(pageVC.view)
+            view.addSubview(pageControl)
         } else {
             showMainScreen()
         }
@@ -86,24 +79,60 @@ class StartVC: UIViewController {
     private func autoLayoutStartVC(){
         startButton.snp.makeConstraints { make in
             make.centerX.equalTo(view.safeAreaLayoutGuide)
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-40)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            make.width.equalTo(view.safeAreaLayoutGuide).offset(-100)
+            make.height.equalTo(50)
+        }
+        pageVC.view.snp.makeConstraints { make in
+            make.centerX.equalTo(view.safeAreaLayoutGuide)
+            make.top.equalTo(view.safeAreaLayoutGuide).inset(16)
             make.width.equalTo(view.safeAreaLayoutGuide).offset(-20)
-            make.height.equalTo(50)
+            make.bottom.equalTo(pageControl.snp.top).offset(16)
         }
-        animationView.snp.makeConstraints { make in
+        pageControl.snp.makeConstraints { make in
             make.centerX.equalTo(view.safeAreaLayoutGuide)
-            make.centerY.equalTo(view.safeAreaLayoutGuide).offset(-20)
-            make.height.width.equalTo(300)
+            make.bottom.equalTo(startButton.snp.top).offset(-16)
+            make.width.equalTo(view.safeAreaLayoutGuide).offset(-20)
         }
-        startLabel.snp.makeConstraints { make in
-            make.centerX.equalTo(view.safeAreaLayoutGuide)
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-            make.height.equalTo(50)
-            make.width.equalTo(view.safeAreaLayoutGuide).offset(-40)
+    }
+    
+    private func updateButtonText() {
+        if currentPageIndex < pageVC.pageCount - 1 {
+            startButton.setTitle("다음", for: .normal)
+        } else {
+            startButton.setTitle("시작하기", for: .normal)
+        }
+    }
+    
+    private func moveToNextPage() {
+        let nextPageIndex = currentPageIndex + 1
+        guard nextPageIndex < pageVC.pageCount else { return }
+        
+        guard let currentViewController = pageVC.viewControllers?.first,
+              let nextViewController = pageVC.pageViewController(pageVC, viewControllerAfter: currentViewController) else {
+            return
+        }
+        pageVC.setViewControllers([nextViewController], direction: .forward, animated: true) { completed in
+            if completed {
+                self.currentPageIndex = nextPageIndex
+                self.pageControl.currentPage = self.currentPageIndex
+                self.updateButtonText()
+            }
         }
     }
     
     private func showMainScreen() {
         self.dismiss(animated: true, completion: nil)
+    }
+}
+
+extension StartVC : UIPageViewControllerDelegate {
+    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+        guard completed, let currentPage = pageVC?.viewControllers?.first, let currentIndex = pageVC?.pages.firstIndex(of: currentPage) else {
+            return
+        }
+        currentPageIndex = currentIndex
+        pageControl.currentPage = currentIndex
+        updateButtonText()
     }
 }
