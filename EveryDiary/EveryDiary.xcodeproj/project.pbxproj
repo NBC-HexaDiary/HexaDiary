@@ -20,6 +20,11 @@
 		6BABC3722B85D109009267B3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6BABC3712B85D109009267B3 /* Assets.xcassets */; };
 		6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */; };
 		6BABC37E2B85D142009267B3 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6BABC37D2B85D142009267B3 /* SnapKit */; };
+		6BB23A2F2BAC253500C3DA25 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6BB23A2E2BAC253500C3DA25 /* GoogleService-Info.plist */; };
+		6BB23A312BAC5D7500C3DA25 /* DetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A302BAC5D7500C3DA25 /* DetailVC.swift */; };
+		6BB23A352BAD9EE300C3DA25 /* honorCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A342BAD9EE300C3DA25 /* honorCollectionViewCell.swift */; };
+		6BB23A372BB13B7E00C3DA25 /* honorHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A362BB13B7E00C3DA25 /* honorHeaderView.swift */; };
+		6BB23A392BB171D100C3DA25 /* BezierPathCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A382BB171D100C3DA25 /* BezierPathCache.swift */; };
 		6BB3CE462B8619D0005BC3E1 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE452B8619D0005BC3E1 /* FirebaseFirestore */; };
 		6BB3CE482B8619D5005BC3E1 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE472B8619D5005BC3E1 /* FirebaseFirestoreSwift */; };
 		D294E7592BB148E000F92D44 /* PageVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D294E7582BB148E000F92D44 /* PageVC.swift */; };
@@ -125,6 +130,11 @@
 		6BABC3712B85D109009267B3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6BABC3742B85D109009267B3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6BABC3762B85D109009267B3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6BB23A2E2BAC253500C3DA25 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Desktop/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		6BB23A302BAC5D7500C3DA25 /* DetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailVC.swift; sourceTree = "<group>"; };
+		6BB23A342BAD9EE300C3DA25 /* honorCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = honorCollectionViewCell.swift; sourceTree = "<group>"; };
+		6BB23A362BB13B7E00C3DA25 /* honorHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = honorHeaderView.swift; sourceTree = "<group>"; };
+		6BB23A382BB171D100C3DA25 /* BezierPathCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BezierPathCache.swift; sourceTree = "<group>"; };
 		6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
 		6BB3CE3B2B85F606005BC3E1 /* WriteDiaryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteDiaryVC.swift; sourceTree = "<group>"; };
 		6BB3CE3D2B85F66E005BC3E1 /* SettingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingVC.swift; sourceTree = "<group>"; };
@@ -147,6 +157,7 @@
 		D2B8785B2BA2BF4A00AB71A0 /* DayPickerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayPickerCell.swift; sourceTree = "<group>"; };
 		D2F0EF6D2BAAD909008736F1 /* calendar.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = calendar.json; sourceTree = "<group>"; };
 		D2F0EF882BAC5A32008736F1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -286,6 +297,7 @@
 				6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */,
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
+				6BB23A2E2BAC253500C3DA25 /* GoogleService-Info.plist */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
 				D2F0EF882BAC5A32008736F1 /* PrivacyInfo.xcprivacy */,
 				1AF880D22B8DB5A2004076EB /* Api.plist */,
@@ -321,9 +333,13 @@
 			isa = PBXGroup;
 			children = (
 				6BE7C99E2BA07D2700374A2A /* MotivationImageCache.swift */,
+				6BB23A382BB171D100C3DA25 /* BezierPathCache.swift */,
 				6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */,
 				6B42613C2B8C579F00F12CE3 /* BuildingView.swift */,
+				6BB23A362BB13B7E00C3DA25 /* honorHeaderView.swift */,
 				6BA0115A2B886A9100A26CE0 /* HonorVC.swift */,
+				6BB23A342BAD9EE300C3DA25 /* honorCollectionViewCell.swift */,
+				6BB23A302BAC5D7500C3DA25 /* DetailVC.swift */,
 			);
 			path = Motivation;
 			sourceTree = "<group>";
@@ -475,8 +491,10 @@
 				D294E7592BB148E000F92D44 /* PageVC.swift in Sources */,
 				D2F0EF342BAAAD51008736F1 /* NotificationName.swift in Sources */,
 				D2F0EF352BAAAD51008736F1 /* WeatherService.swift in Sources */,
+				6BB23A392BB171D100C3DA25 /* BezierPathCache.swift in Sources */,
 				D2F0EF362BAAAD51008736F1 /* EveryDiary++Bundle.swift in Sources */,
 				D2F0EF372BAAAD51008736F1 /* SetFaceID.swift in Sources */,
+				6BB23A312BAC5D7500C3DA25 /* DetailVC.swift in Sources */,
 				D2F0EF382BAAAD51008736F1 /* FireStore.swift in Sources */,
 				D2F0EF392BAAAD51008736F1 /* FirebaseStorageManager.swift in Sources */,
 				D294E75D2BB1502900F92D44 /* ContentVC.swift in Sources */,
@@ -489,10 +507,12 @@
 				D2F0EF402BAAAD51008736F1 /* HonorVC.swift in Sources */,
 				D2F0EF422BAAAD51008736F1 /* DiaryListVC.swift in Sources */,
 				D2F0EF432BAAAD51008736F1 /* HeaderView.swift in Sources */,
+				6BB23A352BAD9EE300C3DA25 /* honorCollectionViewCell.swift in Sources */,
 				D2F0EF442BAAAD51008736F1 /* JournalCollectionViewCell.swift in Sources */,
 				D2F0EF452BAAAD51008736F1 /* ImageCacheManager.swift in Sources */,
 				D2F0EF462BAAAD51008736F1 /* TrashVC.swift in Sources */,
 				D2F0EF472BAAAD51008736F1 /* TrashCollectionViewCell.swift in Sources */,
+				6BB23A372BB13B7E00C3DA25 /* honorHeaderView.swift in Sources */,
 				D2F0EF482BAAAD51008736F1 /* CalendarVC.swift in Sources */,
 				D2F0EF492BAAAD51008736F1 /* CalendarListVC.swift in Sources */,
 				D2F0EF4A2BAAAD51008736F1 /* DailyListCell.swift in Sources */,
