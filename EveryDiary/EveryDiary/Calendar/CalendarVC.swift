@@ -75,6 +75,7 @@ class CalendarVC: UIViewController {
     
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
+        writeDiaryVC.enterDiary(to: .writeNewDiary)
         writeDiaryVC.delegate = self
         writeDiaryVC.modalPresentationStyle = .automatic
         self.present(writeDiaryVC, animated: true)
@@ -91,7 +92,6 @@ class CalendarVC: UIViewController {
         view.addSubview(writeDiaryButton)
         view.addSubview(calendarView)
         view.sendSubviewToBack(calendarView)
-//        view.addSubview(calendarLabel)
     }
     
     private func autoLayoutCalendarVC() {
@@ -103,13 +103,7 @@ class CalendarVC: UIViewController {
             make.leading.equalTo(view.safeAreaLayoutGuide).inset(15)
             make.trailing.equalTo(view.safeAreaLayoutGuide).inset(15)
             make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-//            make.width.equalTo(view.safeAreaLayoutGuide).offset(-20)
         }
-//        calendarLabel.snp.makeConstraints { make in
-//            make.top.equalTo(view).offset(50)
-//            make.left.equalTo(view).offset(16)
-//            make.size.equalTo(CGSize(width:100, height: 50))
-//        }
     }
     
     private func loadDiaries() {
@@ -152,7 +146,7 @@ extension CalendarVC {
         calendarView.layer.shadowOpacity = 0.1
         calendarView.layer.shadowOffset = CGSize(width: 0, height: 0)
         calendarView.calendar = .current
-        calendarView.locale = .current
+        calendarView.locale = Locale(identifier: "ko-KR")
         calendarView.timeZone = .current
         calendarView.fontDesign = .rounded
         calendarView.layer.cornerRadius = 20

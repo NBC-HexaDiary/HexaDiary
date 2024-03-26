@@ -39,11 +39,9 @@ class FirebaseStorageManager {
                 firebaseReference.downloadURL { url, error in
                     if let downloadURL = url {
                         uploadedURL.append(downloadURL)
-                        print("Image Uploaded")
                     }
                     dispatchGroup.leave()
                 }
-                
             }
         }
         dispatchGroup.notify(queue: .main) {
@@ -68,7 +66,6 @@ class FirebaseStorageManager {
                     completion(image, nil)
                     return
                 }
-//                print("storageReference.name: \(storageReference.name)")
                 let customMetadata = metadata.customMetadata
                 completion(image, customMetadata)
             }

@@ -17,7 +17,7 @@ class TrashVC: UIViewController {
     private var monthlyDiaries: [String: [DiaryEntry]] = [:]
     private var months: [String] = []
     private var diaries: [DiaryEntry] = []
-
+    
     // contextMenu 관련 변수
     private var currentLongPressedCell: TrashCollectionViewCell?
     private var selectedIndexPath: IndexPath?
@@ -77,7 +77,6 @@ class TrashVC: UIViewController {
         addSubviews()
         setLayout()
         setNavigationBar()
-//        loadDiaries()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -96,12 +95,14 @@ extension TrashVC {
         self.navigationItem.title = "휴지통"
         self.navigationController?.navigationBar.tintColor = .mainTheme
     }
+    
     @objc private func magnifyingButtonTapped() {
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: searchBar)
         navigationItem.title = nil
         navigationItem.rightBarButtonItems = [seemMoreButton, cancelButton]
         searchBar.becomeFirstResponder()
     }
+    
     @objc private func cancelButtonTapped() {
         // 검색바 텍스트를 초기화하고 포커스를 해제
         searchBar.text = ""
@@ -109,9 +110,9 @@ extension TrashVC {
         searchBar.removeFromSuperview()
         
         setNavigationBar()  // navigationBar 초기화
-//        loadDiaries() // 원래의 일기목록 로드
         refreshDiaryData()
     }
+    
     @objc private func seeMoreButtonTapped() {
         // 액션 시트 생성
         let seeMoreActionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
@@ -131,7 +132,8 @@ extension TrashVC {
                     }
                 }
             }
-            self.loadDiaries()
+            refreshDiaryData()
+            //            self.loadDiaries()
         }
         
         // "비우기" 액션
@@ -139,8 +141,16 @@ extension TrashVC {
             guard let self = self else { return }
             // 모든 휴지통 일기를 삭제하는 로직
             let deletedDiaries = self.monthlyDiaries.flatMap { $0.value }.filter { $0.isDeleted }
-            let dispatchGroup = DispatchGroup()
             
+            if deletedDiaries.isEmpty {
+                self.presentAlert(with: "휴지통이 이미 비어있습니다.")
+                return
+            }
+            
+            // 삭제 작업을 시작한다면, getPage가 호출되지 않도록 isLoadingData 플래그를 true로 설정
+            self.isLoadingData = true
+            
+            let dispatchGroup = DispatchGroup()
             for diary in deletedDiaries {
                 guard let diaryID = diary.id else { continue }
                 dispatchGroup.enter()
@@ -153,16 +163,16 @@ extension TrashVC {
                     dispatchGroup.leave()
                 }
             }
+            // 비동기 작업이 완료된 후 호출할 메서드
             dispatchGroup.notify(queue: .main) {
-                self.loadDiaries()
-                let alert = UIAlertController(title: "휴지통이 비워졌습니다.", message: nil, preferredStyle: .actionSheet)
-                self.present(alert, animated: true, completion: nil)
-                Timer.scheduledTimer(withTimeInterval: 0.7, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
+                // 모든 삭제 작업이 완료된 후에 isLoadingData를 false로 설정
+                self.isLoadingData = false
+                self.refreshDiaryData()
+                self.presentAlert(with: "휴지통이 비워졌습니다.")
             }
         }
         
-        
-        // 취소
+        // 취소 액션
         let cancelAction = UIAlertAction(title: "취소", style: .cancel)
         
         // 액션 시트에 액션 추가 및 표시
@@ -171,6 +181,13 @@ extension TrashVC {
         seeMoreActionSheet.addAction(cancelAction)
         present(seeMoreActionSheet, animated: true)
     }
+    
+    private func presentAlert(with message: String) {
+        let alert = UIAlertController(title: message, message: nil, preferredStyle: .actionSheet)
+        self.present(alert, animated: true, completion: nil)
+        Timer.scheduledTimer(withTimeInterval: 0.7, repeats: false, block: { _ in alert.dismiss(animated: true, completion: nil)})
+    }
+    
     private func setNavigationItem(imageNamed name: String, titleText: String, for action: Selector) -> UIBarButtonItem {
         var config = UIButton.Configuration.plain()
         if name == "" {
@@ -222,6 +239,7 @@ extension TrashVC {
             }
         }
     }
+    
     private func organizeDiariesByMonth(diaries: [DiaryEntry]) {
         var organizedDiaries: [String: [DiaryEntry]] = [:]
         
@@ -256,6 +274,7 @@ extension TrashVC: UICollectionViewDataSource {
         
         return months.count
     }
+    
     // 각 섹션 별 아이템 수 반환
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let month = months[section]
@@ -263,6 +282,7 @@ extension TrashVC: UICollectionViewDataSource {
         print("numberOfItemsInSection : \(count)")
         return count
     }
+    
     // 셀 구성
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrashCollectionViewCell.reuseIdentifier, for: indexPath) as? TrashCollectionViewCell else {
@@ -279,13 +299,8 @@ extension TrashVC: UICollectionViewDataSource {
             if let date = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) {
                 let formattedDateString = DateFormatter.yyyyMMdd.string(from: date)
                 
-                cell.setTrashCollectionViewCell(
-                    title: diary.title,
-                    content: diary.content,
-                    weather: diary.weather,
-                    emotion: diary.emotion,
-                    date: formattedDateString   // 변경된 날짜 형식 사용
-                )
+                // 변경된 날짜 형식 사용
+                cell.setTrashCollectionViewCell(title: diary.title, content: diary.content, weather: diary.weather, emotion: diary.emotion, date: formattedDateString)
                 
                 // 이미지 URL이 있는 경우 이미지 다운로드 및 설정
                 if let firstImageUrlString = diary.imageURL?.first, let imageUrl = URL(string: firstImageUrlString) {
@@ -328,7 +343,7 @@ extension TrashVC: UICollectionViewDataSource {
         let writeDiaryVC = WriteDiaryVC()
         
         // 선택된 일기 정보를 전달하고, 수정 버튼을 활성화
-        writeDiaryVC.showsDiary(with: diary)
+        writeDiaryVC.enterDiary(to: .showDiary, with: diary)
         writeDiaryVC.delegate = self
         
         // 일기 수정 화면으로 전환
@@ -354,7 +369,7 @@ extension TrashVC {
                 let month = self.months[indexPath.section]
                 if let diary = self.monthlyDiaries[month]?[indexPath.row] {
                     let writeDiaryVC = WriteDiaryVC()
-                    writeDiaryVC.showsDiary(with: diary)
+                    writeDiaryVC.enterDiary(to: .editDiary, with: diary)
                     writeDiaryVC.delegate = self
                     writeDiaryVC.modalPresentationStyle = .automatic
                     DispatchQueue.main.async {
@@ -376,7 +391,7 @@ extension TrashVC {
                         } else {
                             print("Diary restored successfully.")
                             DispatchQueue.main.async {
-//                                self.loadDiaries()
+                                //                                self.loadDiaries()
                                 self.refreshDiaryData()
                             }
                         }
@@ -396,7 +411,7 @@ extension TrashVC {
                             print("Error deleting diary: \(error.localizedDescription)")
                         } else {
                             DispatchQueue.main.async {
-//                                self.loadDiaries()
+                                //                                self.loadDiaries()
                                 self.refreshDiaryData()
                             }
                         }
@@ -429,7 +444,7 @@ extension TrashVC: UICollectionViewDelegateFlowLayout {
 extension TrashVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
-//            loadDiaries()
+            //            loadDiaries()
             refreshDiaryData()
         } else {
             var filteredDiaries: [String: [DiaryEntry]] = [:]
@@ -454,7 +469,7 @@ extension TrashVC: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
         searchBar.resignFirstResponder() // 키보드 숨김
-//        loadDiaries() // 원래의 일기목록 로드
+        //        loadDiaries()
         refreshDiaryData()
     }
 }
@@ -477,9 +492,11 @@ extension TrashVC {
 
 extension TrashVC : DiaryUpdateDelegate {
     func diaryDidUpdate() {
-        loadDiaries()
+        refreshDiaryData()
+        //        loadDiaries()
     }
 }
+
 extension TrashVC: UICollectionViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -498,13 +515,13 @@ extension TrashVC: UICollectionViewDelegate {
     
     func getPage() {
         paginationManager.isDeleted = true
-
+        
         paginationManager.getNextPage { [weak self] newDiaries in
             guard let self = self, let newDiaries = newDiaries else {
                 self?.isLoadingData = false
                 return
             }
-
+            
             let uniqueNewDiaries = newDiaries.filter { newDiary in
                 !self.diaries.contains { $0.id == newDiary.id }
             }
@@ -522,7 +539,6 @@ extension TrashVC: UICollectionViewDelegate {
                 self.trashCollectionView.reloadData()
                 self.isLoadingData = false
             }
-            print("scroll")
         }
     }
     
@@ -532,7 +548,7 @@ extension TrashVC: UICollectionViewDelegate {
         
         paginationManager.getNextPage { newDiaries in
             if let newDiaries = newDiaries {
-
+                
                 let filteredDiaries = newDiaries.filter { $0.isDeleted }
                 
                 self.diaries = filteredDiaries
@@ -540,7 +556,6 @@ extension TrashVC: UICollectionViewDelegate {
                 DispatchQueue.main.async {
                     self.trashCollectionView.reloadData()
                 }
-                print("refresh")
             } else {
                 print("Failed to fetch new diaries.")
             }

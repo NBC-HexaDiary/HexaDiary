@@ -47,7 +47,14 @@ class NotificationVC: UIViewController {
         autoLayoutNotificationVC()
         fetchAlarmData()
         refreshdata()
-        printAllPendingNotifications()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isSwitchOn == true {
+            updateAndRescheduleNotification()
+            printAllPendingNotifications()
+        }
     }
     
     private func addSubviewsNotificationVC() {
@@ -79,8 +86,6 @@ class NotificationVC: UIViewController {
         }
         if let savedSelectedDaysString = UserDefaults.standard.string(forKey: "selectedDaysString") {
             selectedDaysString = savedSelectedDaysString
-        } else {
-            selectedDaysString = "반복할 요일을 선택하세요"
         }
     }
     
@@ -89,7 +94,11 @@ class NotificationVC: UIViewController {
         newDataSource.append(.switchItem(title: "알림", image: "alarm", switchStatus: isSwitchOn))
         
         if isSwitchOn {
-            let timeLabel = selectedTime != nil ? DateFormatter.localizedString(from: selectedTime!, dateStyle: .none, timeStyle: .short) : "시간을 선택하세요"
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateStyle = .none
+            dateFormatter.timeStyle = .short
+            dateFormatter.locale = Locale(identifier: "ko-KR")
+            let timeLabel = selectedTime != nil ? dateFormatter.string(from: selectedTime ?? Date()) : "시간을 선택하세요"
             newDataSource.append(.dateItem(title: "시간", image: "clock", label: timeLabel, switchStatus: isSwitchOn, isExpanded: isDatePickerVisible))
             if isDatePickerVisible {
                 newDataSource.append(.timePicker)
@@ -174,21 +183,10 @@ extension NotificationVC : UITableViewDelegate, UITableViewDataSource {
         case .dateItem(let title, _, _, _, _):
             if title == "시간" {
                 isDatePickerVisible.toggle()
-                
-                if !isDatePickerVisible {
-                    updateAndRescheduleNotification()
-                    printAllPendingNotifications()
-                }
             } else if title == "반복" {
                 isDayPickerVisible.toggle()
-                
-                if !isDayPickerVisible {
-                    updateAndRescheduleNotification()
-                    printAllPendingNotifications()
-                }
             }
             tableView.deselectRow(at: indexPath, animated: true)
-
             refreshdata()
         case .dayItem(let title, _):
             if let dayIndex = ["일요일" ,"월요일", "화요일", "수요일", "목요일", "금요일", "토요일"].firstIndex(of: title) {

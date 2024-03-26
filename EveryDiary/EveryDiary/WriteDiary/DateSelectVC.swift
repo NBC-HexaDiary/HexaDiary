@@ -29,10 +29,12 @@ class DateSelectVC: UIViewController {
         var picker = UIDatePicker()
         picker.preferredDatePickerStyle = .inline
         picker.datePickerMode = .date
+        picker.locale = Locale(identifier: "ko-KR")
+        picker.tintColor = .mainTheme
         picker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
         
         // 최대 선택가능한 날짜 지정
-        let calendar = Calendar(identifier: .gregorian)
+        var calendar = Calendar(identifier: .gregorian)
         let currentDate = Date()
         var components = DateComponents()
         components.calendar = calendar
