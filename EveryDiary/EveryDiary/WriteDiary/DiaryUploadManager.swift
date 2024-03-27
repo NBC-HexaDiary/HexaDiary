@@ -7,6 +7,8 @@
 
 import UIKit
 
+import FirebaseAuth
+
 //MARK: 일기, 이미지 데이터의 업로드 & 업데이트 프로세스 관리
 // DiaryManager(DiaryEntry CRUD)와 FirebaseStorageManager(Image Upload, Delete, Download, URL제공)를 사용해 일기데이터를 생성, 업데이트하는 역할
 class DiaryUploadManager {
@@ -85,7 +87,7 @@ class DiaryUploadManager {
             // 촬영 시간과 위치 정보를 포함하여 업로드
             FirebaseStorageManager.uploadImage(
                 image: [imageLocationInfo.image],
-                pathRoot: "diary_images",
+                pathRoot: Auth.auth().currentUser?.uid ?? "UnknownUser",
                 assetIdentifier: assetIdentifier,
                 captureTime: imageLocationInfo.captureTime,
                 location: imageLocationInfo.location

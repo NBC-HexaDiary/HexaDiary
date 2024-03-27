@@ -226,17 +226,19 @@ extension WriteDiaryVC {
         self.dismiss(animated: true) { [weak self] in
             guard let self = self else { return }
             
-            self.uploadImagesAndSaveDiary1 { success in
-                // 이미지 업로드 및 일기 저장을 비동기적으로 시작
-                DispatchQueue.main.async {
-                    if success {
-                        self.delegate?.diaryDidUpdate()
-                        self.loadingDiaryDelegate?.diaryUploadDidFinish()
-                    } else {
-                        TemporaryAlert.presentTemporaryMessage(with: "업로드 실패", message: "일기를 업로드하지 못했습니다.", interval: 2.0, for: DiaryListVC())
-                        self.isSavingDiary = false
-                        self.loadingDiaryDelegate?.diaryUploadDidFinish()
-                        DiaryUploadManager.shared.release(self)
+            createAnonymousAccount {
+                self.uploadImagesAndSaveDiary1 { success in
+                    // 이미지 업로드 및 일기 저장을 비동기적으로 시작
+                    DispatchQueue.main.async {
+                        if success {
+                            self.delegate?.diaryDidUpdate()
+                            self.loadingDiaryDelegate?.diaryUploadDidFinish()
+                        } else {
+                            TemporaryAlert.presentTemporaryMessage(with: "업로드 실패", message: "일기를 업로드하지 못했습니다.", interval: 2.0, for: DiaryListVC())
+                            self.isSavingDiary = false
+                            self.loadingDiaryDelegate?.diaryUploadDidFinish()
+                            DiaryUploadManager.shared.release(self)
+                        }
                     }
                 }
             }
