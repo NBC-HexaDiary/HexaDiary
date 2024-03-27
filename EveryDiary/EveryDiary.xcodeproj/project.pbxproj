@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1A03BDA12B92F910008C13DC /* FirebaseStorage */; };
 		1AF880D32B8DB5A2004076EB /* Api.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880D22B8DB5A2004076EB /* Api.plist */; };
+		3FB6D74E2BB2E8EF0098F29F /* LoadingIndicatorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB6D74D2BB2E8EF0098F29F /* LoadingIndicatorCell.swift */; };
+		3FB6D7502BB316820098F29F /* DiaryUploadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB6D74F2BB316820098F29F /* DiaryUploadManager.swift */; };
 		3FF0FEEA2BB14F140045EBB7 /* TemporaryAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FF0FEE92BB14F140045EBB7 /* TemporaryAlert.swift */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
 		6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */; };
@@ -109,6 +111,8 @@
 		3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F9E0A562BA44CE2004BF1CB /* ImageZoomCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomCollectionViewController.swift; sourceTree = "<group>"; };
 		3F9E0A582BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomCollectionViewCell.swift; sourceTree = "<group>"; };
+		3FB6D74D2BB2E8EF0098F29F /* LoadingIndicatorCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicatorCell.swift; sourceTree = "<group>"; };
+		3FB6D74F2BB316820098F29F /* DiaryUploadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryUploadManager.swift; sourceTree = "<group>"; };
 		3FF0FEE92BB14F140045EBB7 /* TemporaryAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryAlert.swift; sourceTree = "<group>"; };
 		6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		6B3C4CCC2B8EDACD00C53005 /* SettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingCell.swift; sourceTree = "<group>"; };
@@ -318,6 +322,7 @@
 				3FF0FEE92BB14F140045EBB7 /* TemporaryAlert.swift */,
 				3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */,
 				3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */,
+				3FB6D74D2BB2E8EF0098F29F /* LoadingIndicatorCell.swift */,
 				3F3DE3032B9EFC0900BC2038 /* ImageCacheManager.swift */,
 				3F3DE30E2BA1451600BC2038 /* TrashVC.swift */,
 				3F3DE3102BA1461200BC2038 /* TrashCollectionViewCell.swift */,
@@ -356,6 +361,7 @@
 			isa = PBXGroup;
 			children = (
 				6BB3CE3B2B85F606005BC3E1 /* WriteDiaryVC.swift */,
+				3FB6D74F2BB316820098F29F /* DiaryUploadManager.swift */,
 				3F7831572BA9FE4C00354211 /* KeyboardManager.swift */,
 				3F7831532BA9D2C700354211 /* ImagePickerManager.swift */,
 				3F7831552BA9EC0700354211 /* MapManager.swift */,
@@ -512,6 +518,7 @@
 				D2F0EF482BAAAD51008736F1 /* CalendarVC.swift in Sources */,
 				D2F0EF492BAAAD51008736F1 /* CalendarListVC.swift in Sources */,
 				D2F0EF4A2BAAAD51008736F1 /* DailyListCell.swift in Sources */,
+				3FB6D74E2BB2E8EF0098F29F /* LoadingIndicatorCell.swift in Sources */,
 				D2F0EF4B2BAAAD51008736F1 /* WriteDiaryVC.swift in Sources */,
 				D2F0EF4C2BAAAD51008736F1 /* KeyboardManager.swift in Sources */,
 				D2F0EF4D2BAAAD51008736F1 /* ImagePickerManager.swift in Sources */,
@@ -524,6 +531,7 @@
 				D2F0EF552BAAAD51008736F1 /* DateConditionSelectVC.swift in Sources */,
 				D2F0EF562BAAAD51008736F1 /* DateSelectVC.swift in Sources */,
 				D2F0EF572BAAAD51008736F1 /* SettingVC.swift in Sources */,
+				3FB6D7502BB316820098F29F /* DiaryUploadManager.swift in Sources */,
 				D2F0EF582BAAAD51008736F1 /* SignOutCell.swift in Sources */,
 				D2F0EF592BAAAD51008736F1 /* ProfileCell.swift in Sources */,
 				D2F0EF5A2BAAAD51008736F1 /* SettingCell.swift in Sources */,
