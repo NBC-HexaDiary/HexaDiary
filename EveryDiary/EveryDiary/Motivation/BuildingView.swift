@@ -157,7 +157,6 @@ class BuildingView: UIView {
         if let cachedBuildingPath = BezierPathCache.shared.getBezierPath(forKey: "cachedBuildingPath") {
             buildingPath = cachedBuildingPath
         } else {
-            print("drawCacheBuildingPath에서 drawBuilding")
             buildingPath = drawBuilding()
             cacheBuildingPath(buildingPath)
         }
@@ -171,7 +170,6 @@ class BuildingView: UIView {
         if let cachedBackBuildingPath = BezierPathCache.shared.getBezierPath(forKey: "cachedBackBuildingPath") {
             backBuildingPath = cachedBackBuildingPath
         } else {
-            print("drawCacheBackBuildingPath에서 drawBackBuilding")
             backBuildingPath = drawBackBuilding()
             cacheBackBuildingPath(backBuildingPath)
         }
@@ -235,7 +233,6 @@ extension BuildingView {
                 }
                 DispatchQueue.main.async {
                     self.diaryDays = Set(diaryDays)
-                    print("self.diaryDays: \(self.diaryDays)")
                     self.delegate?.didUpdateDiaryCount(self.diaryDays.count)
                     WindowDrawingHelper.drawBuildingWithWindows(buildings: self.buildings, onLayer: self.buildingLayer, diaryDays: self.diaryDays)
                 }
