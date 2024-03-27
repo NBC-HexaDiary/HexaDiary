@@ -53,66 +53,59 @@ class DiaryManager {
     
     //MARK: 일기 추가
     func addDiary(diary: DiaryEntry, completion: @escaping (Error?) -> Void) {
-//        authenticateAnonymouslyIfNeeded { error in
-//            if let error = error {
-//                print("Error authenticating anonymously: \(error)")
-//                completion(error)
-//                return
-//            }
-            guard let userID = self.getUserID() else {
-                completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
-                return
+        guard let userID = self.getUserID() else {
+            completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
+            return
+        }
+        
+        let weatherService = WeatherService()
+        
+        weatherService.getWeather { result in
+            
+            var weatherDescription = "Unknown"
+            var weatherTemp = 0.0
+            
+            if case .success(let weatherResponse) = result {
+                weatherDescription = weatherResponse.weather.first?.description ?? "Unknown"
+                weatherTemp = weatherResponse.main.temp
             }
             
-            let weatherService = WeatherService()
+            var diaryWithWeather = diary
             
-            weatherService.getWeather { result in
-                
-                var weatherDescription = "Unknown"
-                var weatherTemp = 0.0
-                
-                if case .success(let weatherResponse) = result {
-                    weatherDescription = weatherResponse.weather.first?.description ?? "Unknown"
-                    weatherTemp = weatherResponse.main.temp
-                }
-                
-                var diaryWithWeather = diary
-                
-                diaryWithWeather.weatherDescription = weatherDescription
-                diaryWithWeather.weatherTemp = weatherTemp
-                
-                let currentDate = Date()
-                
-                if !Calendar.current.isDate(diary.date, inSameDayAs: currentDate) {
-                    diaryWithWeather.weatherDescription = "Unknown"
-                    diaryWithWeather.weatherTemp = 0
-                }
-                
-                var newDiaryWithUserID = diaryWithWeather
-                newDiaryWithUserID.userID = userID
-                let documentReference = DiaryManager.shared.db.collection("users").document(userID).collection("diaries").document()
-                newDiaryWithUserID.id = documentReference.documentID
-                
-                do {
-                    try documentReference.setData(from: newDiaryWithUserID) { error in
-                        if let error = error {
-                            print("Error adding document: \(error)")
-                            completion(error)
-                        } else {
-                            self.fetchDiaries { (diaries, error) in
-                                if let error = error {
-                                    print("Error fetching diaries after adding a new diary: \(error)")
-                                }
+            diaryWithWeather.weatherDescription = weatherDescription
+            diaryWithWeather.weatherTemp = weatherTemp
+            
+            let currentDate = Date()
+            
+            if !Calendar.current.isDate(diary.date, inSameDayAs: currentDate) {
+                diaryWithWeather.weatherDescription = "Unknown"
+                diaryWithWeather.weatherTemp = 0
+            }
+            
+            var newDiaryWithUserID = diaryWithWeather
+            newDiaryWithUserID.userID = userID
+            let documentReference = DiaryManager.shared.db.collection("users").document(userID).collection("diaries").document()
+            newDiaryWithUserID.id = documentReference.documentID
+            
+            do {
+                try documentReference.setData(from: newDiaryWithUserID) { error in
+                    if let error = error {
+                        print("Error adding document: \(error)")
+                        completion(error)
+                    } else {
+                        self.fetchDiaries { (diaries, error) in
+                            if let error = error {
+                                print("Error fetching diaries after adding a new diary: \(error)")
                             }
-                            completion(nil)
                         }
+                        completion(nil)
                     }
-                } catch {
-                    print("Error adding document: \(error)")
-                    completion(error)
                 }
+            } catch {
+                print("Error adding document: \(error)")
+                completion(error)
             }
-//        }
+        }
     }
     
     //MARK: 다이어리 조회
@@ -124,7 +117,7 @@ class DiaryManager {
         
         listener = db.collection("users").document(userID).collection("diaries").order(by: "dateString", descending: true).addSnapshotListener { querySnapshot, error in
             if let error = error {
-//                print("Error listening for real-time updates: \(error)")
+                //                print("Error listening for real-time updates: \(error)")
                 completion([], error)
             } else {
                 var diaries = [DiaryEntry]()
@@ -189,36 +182,6 @@ class DiaryManager {
                     print("Diary document successfully deleted.")
                     completion(nil)
                 }
-            }
-        }
-    }
-    
-    //MARK: 회원탈퇴시 데이터 삭제
-    func deleteUserData(for userID: String) {
-        db.collection("users").document(userID).collection("diaries").getDocuments { (querySnapshot, error) in
-            if let error = error {
-                print("Error deleting user's diaries: \(error)")
-            } else {
-                for document in querySnapshot!.documents {
-                    let diaryData = document.data()
-                    if let imageURL = diaryData["imageURL"] as? String {
-                        FirebaseStorageManager.deleteImage(urlString: imageURL) { error in
-                            if let error = error {
-                                print("Error deleting image: \(error.localizedDescription)")
-                            }
-                        }
-                    }
-                    document.reference.delete()
-                }
-                print("User's diaries successfully deleted.")
-            }
-        }
-        
-        db.collection("users").document(userID).delete { error in
-            if let error = error {
-                print("Error deleting user document: \(error)")
-            } else {
-                print("User document successfully deleted.")
             }
         }
     }

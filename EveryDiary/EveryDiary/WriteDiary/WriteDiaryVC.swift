@@ -205,6 +205,7 @@ extension WriteDiaryVC {
         guard !isSavingDiary, validateInput() else { return }    // 저장 중(=true)이면 실행되지 않음
         isSavingDiary = true                    // 저장 시작
         //        uploadImagesAndSaveDiary()
+        // 익명 계정 생성
         createAnonymousAccount { [weak self] in
             self?.uploadImagesAndSaveDiary()
         }
@@ -272,9 +273,9 @@ extension WriteDiaryVC {
             print("DiaryEntry Upload Finish")
         }
     }
-    
     // 익명 계정 생성
     private func createAnonymousAccount(completion: @escaping () -> Void) {
+        // 익명 계정 생성 로직 추가
         DiaryManager.shared.authenticateAnonymouslyIfNeeded { error in
             if let error = error {
                 print("Error creating anonymous account: \(error.localizedDescription)")
