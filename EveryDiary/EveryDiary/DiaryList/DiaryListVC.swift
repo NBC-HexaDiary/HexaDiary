@@ -422,12 +422,6 @@ extension DiaryListVC: UISearchBarDelegate {
             searchTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
                 self.searchDiaries(with: searchText) // 입력이 멈추면 검색을 실행합니다.
             }
-
-            monthlyDiaries = filteredDiaries
-            months = monthlyDiaries.keys.sorted().reversed()
-            print("monthlyDiaries: \(monthlyDiaries)")
-            print("months: \(months)")
-            journalCollectionView.reloadData()
         }
     }
     
