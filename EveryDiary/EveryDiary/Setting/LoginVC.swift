@@ -94,13 +94,16 @@ class LoginVC: UIViewController {
             let email = user.profile?.email
             let fullName = user.profile?.name
             
-            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken,
+                                                           accessToken: user.accessToken.tokenString)
             
             if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
                 currentUser.link(with: credential) { authResult, error in
                     if let error = error {
                         print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
-                        self.deleteWithCredential(credential: credential)
+                        self.deleteWithCredential(credential: credential) {
+                            self.signInWithCredential(credential: credential)
+                        }
                     } else {
                         print("익명 사용자를 영구 계정으로 전환 성공")
                         let changeRequest = currentUser.createProfileChangeRequest()
@@ -119,7 +122,6 @@ class LoginVC: UIViewController {
                 print("현재 사용자가 없습니다. 구글 로그인을 진행합니다.")
                 self.signInWithCredential(credential: credential)
             }
-            self.signInWithCredential(credential: credential)
         }
     }
 }
@@ -263,19 +265,33 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
             
             if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
                 currentUser.link(with: credential) { authResult, error in
-                    if let error = error {
-                        print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
-                        self.deleteWithCredential(credential: credential)
+                    if let error = error as NSError?, error.code == AuthErrorCode.credentialAlreadyInUse.rawValue {
+                        print("기존의 소셜 사용자가 익명 계정 이용 중 변경: \(error.localizedDescription)")
+                        self.deleteWithCredential(credential: credential) {
+                            // Apple 로그인 에러 처리
+                            if let updatedCredential = error.userInfo[AuthErrorUserInfoUpdatedCredentialKey] as? AuthCredential {
+                                // 에러 객체에서 업데이트된 크리덴셜을 받아 재사용
+                                Auth.auth().signIn(with: updatedCredential) { authResult, error in
+                                    if let error = error {
+                                        print("Apple 로그인 재시도 중 오류 발생: \(error.localizedDescription)")
+                                    } else {
+                                        // 로그인 성공 처리
+                                        print("Apple 로그인 성공, 익명 계정에서 Apple 계정으로 전환됨")
+                                        NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                                        self.dismiss(animated: true, completion: nil)
+                                    }
+                                }
+                            }
+                        }
                     } else {
-                        print("익명 사용자를 영구 계정으로 전환 성공")
+                        print("익명 사용자가 최초로 소셜 계정으로 전환")
                         self.updateUserProfile(withCredential: appleIDCredential)
                     }
                 }
             } else {
-                print("현재 사용자가 없습니다. 애플 로그인을 진행합니다.")
+                print("비로그인 상태에 소셜 계정 로그인")
                 self.signInWithCredential(credential: credential)
             }
-            self.signInWithCredential(credential: credential)
             
             // 사용자의 authorizationCode를 로그인 시 미리 가져온다. 회원 탈퇴 시, 필요하기 때문이다.
             if let authorizationCode = appleIDCredential.authorizationCode, let codeString = String(data: authorizationCode, encoding: .utf8) {
@@ -283,7 +299,6 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
                 let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
                     if let data = data {
                         let refreshToken = String(data: data, encoding: .utf8) ?? ""
-                        print(refreshToken)
                         UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
                         UserDefaults.standard.synchronize()
                     }
@@ -310,8 +325,9 @@ extension LoginVC {
         let changeRequest = currentUser.createProfileChangeRequest()
         
         if let fullName = credential.fullName {
-            //            changeRequest.displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
-            changeRequest.displayName = Auth.auth().currentUser?.displayName
+                let names = [fullName.givenName, fullName.familyName].compactMap { $0 }
+                let displayName = names.joined(separator: " ")
+                changeRequest.displayName = displayName
         }
         
         changeRequest.commitChanges { error in
@@ -328,14 +344,16 @@ extension LoginVC {
         Auth.auth().signIn(with: credential) { authResult, error in
             if let error = error {
                 print("로그인 중 오류 발생: \(error.localizedDescription)")
+                print("\(AuthErrorCode.credentialAlreadyInUse)")
                 return
             }
+            print("로그인 성공!")
             NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
             self.dismiss(animated: true, completion: nil)
         }
     }
     
-    func deleteWithCredential(credential: AuthCredential) {
+    func deleteWithCredential(credential: AuthCredential, completion: @escaping() -> Void) {
         guard let currentUser = Auth.auth().currentUser else {
             print("사용자가 없습니다.")
             return
@@ -346,6 +364,7 @@ extension LoginVC {
                 print("Error deleting user from Firebase: \(error.localizedDescription)")
             } else {
                 print("User successfully deleted from Firebase.")
+                completion()
             }
         }
     }

@@ -211,8 +211,8 @@ extension DiaryListVC {
         navigationItem.rightBarButtonItems = [settingButton, magnifyingButton]
         searchBar.text = ""
         searchBar.resignFirstResponder() // 키보드 숨김
-        refreshDiaryData()
         isSearching = false
+        refreshDiaryData()
     }
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
