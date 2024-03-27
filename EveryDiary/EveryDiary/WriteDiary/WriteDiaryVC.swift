@@ -45,6 +45,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
     private var currentUIStatus: UIstatus = .writeNewDiary      // 현재의 diary의 상태
     private var existingImageURLs: [String] = []                // 이미지 목록을 저장할 변수
     private var isSavingDiary = false                           // 중복저장을 방지하기 위한 변수(플래그)
+    private var isLoadingImages = false                         // 이미지 불러오는 중임을 나타내는 플래그
     private lazy var dateString: String = {                     // 날짜선택 버튼에 사용되는 String
         let dateString = DateFormatter.yyyyMMddE.string(from: selectedDate)
         return dateString
@@ -193,6 +194,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
         imagesCollectionView.dataSource = self
         imagesCollectionView.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: ImageCollectionViewCell.reuseIdentifier)
         imagesCollectionView.register(MapCollectionViewCell.self, forCellWithReuseIdentifier: MapCollectionViewCell.reuseIdentifier)
+        imagesCollectionView.register(LoadingIndicatorCell.self, forCellWithReuseIdentifier: LoadingIndicatorCell.reuseIdentifier)
     }
 }
 
@@ -588,6 +590,9 @@ extension WriteDiaryVC {
 extension WriteDiaryVC {
     func showsDiary(with diary: DiaryEntry) {
         updateUIWithDiaryEntry(diary)
+        isLoadingImages = true              // 이미지 로딩 시작
+        imagesCollectionView.reloadData()   // LoadingIndicatorCell 표시
+        updateImageCollectionViewHeight()   // CollectionView 높이 설정
         loadDisplayImages(with: diary)
         self.existingImageURLs = diary.imageURL ?? []
     }
@@ -623,13 +628,19 @@ extension WriteDiaryVC {
         self.tempImagesLocationInfo = Array(repeating: nil, count: diary.imageURL?.count ?? 0)
         
         guard let imageURLs = diary.imageURL, !imageURLs.isEmpty else {
-            self.imagesCollectionView.reloadData()
+            self.isLoadingImages = false                // 이미지가 없다면 로딩 플래그 false
+            DispatchQueue.main.async {
+                self.imagesCollectionView.reloadData()
+                self.updateImageCollectionViewHeight()
+            }
             return
         }
         
         imageURLs.enumerated().forEach { index, urlString in
             FirebaseStorageManager.downloadImage(urlString: urlString) { [weak self] downloadedImage, metadata in
-                self?.handleDownloadedImage(downloadedImage, metadata: metadata, index: index, totalImages: imageURLs.count)
+                DispatchQueue.main.async {
+                    self?.handleDownloadedImage(downloadedImage, metadata: metadata, index: index, totalImages: imageURLs.count)
+                }
             }
         }
     }
@@ -652,6 +663,7 @@ extension WriteDiaryVC {
         if tempImagesLocationInfo.compactMap({ $0 }).count == totalImages {
             DispatchQueue.main.async {
                 // 다운로드된 이미지를 순서대로 배열에 저장
+                self.isLoadingImages = false    // 이미지 로딩 완료 플래그 설정
                 self.imagesLocationInfo = self.tempImagesLocationInfo.compactMap { $0 }
                 self.imagePickerManager.selectedPhotoIdentifiers = self.imagesLocationInfo.compactMap { $0.assetIdentifier }
                 self.imagesCollectionView.reloadData()
@@ -839,76 +851,86 @@ extension WriteDiaryVC {
 // MARK: CollectioinView DataSource, Delegate, FlowLayout
 extension WriteDiaryVC: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return imagesLocationInfo.count + 1
+        // 이미지를 불러오는 중이라면, LoadingIndicatorCell만, 로딩 중이 아니라면 이미지 셀 + 맵 셀
+        return isLoadingImages ? 1 : imagesLocationInfo.count + 1
+//        return 1
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        // 마지막 셀에는 MapCollectionViewCell을 반환
-        if indexPath.item < imagesLocationInfo.count {
-            // 이미지 셀 구성
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCollectionViewCell.reuseIdentifier, for: indexPath) as? ImageCollectionViewCell else {
-                fatalError("Unalble to dequeue ImageCollectionView Cell")
-            }
-            // 현재 UIstatus에 따라 삭제 버튼의 표시 여부 결정
-            let shouldHideDeleteButton = currentUIStatus == .showDiary
-            cell.configureDeleteButton(hidden: shouldHideDeleteButton)
-            
-//            if !shouldHideDeleteButton {
-//                cell.startJiggling()
-//            } else {
-//                cell.stopJiggling()
-//            }
-            
-            let info = imagesLocationInfo[indexPath.item]
-            cell.configure(with: info.image)
-            // cell 내의 삭제버튼을 트리거로 하는 closer를 정의
-            cell.onDeleteButtonTapped = { [weak self] in
-                guard let self = self else { return }
-                // 현재 셀의 assetIdentifier를 가져온다.
-                guard let assetIdentifier = self.imagesLocationInfo[indexPath.item].assetIdentifier else { return }
-                
-                // assetIdentifier를 기반으로 imagesLocationInfo 배열에서 해당 이미지 정보를 삭제한다.
-                if let assetIdentifier = self.imagesLocationInfo[indexPath.item].assetIdentifier {
-                    // indexPath.item이 imagesLocation 배열의 범위 내에 있는지 확인 후, 범위 내라면 해당 항목을 배열에서 삭제
-                    if indexPath.item < self.imagesLocationInfo.count {
-                        self.imagesLocationInfo.remove(at: indexPath.item)
-                    }
-                    // 해당 assetIdentifier를, selectedPhotoIdentifier에서도 삭제
-                    // firstIndex(of:)메서드로 assetIdentifier와 일치하는 첫번째 인덱스를 찾고, 해당 인덱스를 가진 항목을 selectedPhotoIdentifier에서 삭제
-                    if let index = self.selectedPhotoIdentifiers.firstIndex(of: assetIdentifier) {
-                        self.selectedPhotoIdentifiers.remove(at: index)
-                        // ImagePickerManager로 변경된 selectedPhotoIdentifier 업데이트
-                        imagePickerManager.updateSelectedPhotoIdentifier(selectedPhotoIdentifiers)
-                    }
-                }
-                // collectionView 업데이트(performBatchUpdates는 여러 UI 변경사항을 그룹화하여 하나의 애니메이션으로 표현)
-                self.imagesCollectionView.performBatchUpdates({
-                    // deleteItems 메서드를 사용해 지정된 indexPath의 셀을 삭제
-                    self.imagesCollectionView.deleteItems(at: [indexPath])
-                }) { complted in
-                    // UI 업데이트 완료 후, reloadData를 통해서 잠재적인 UI불일치를 방지.
-                    self.imagesCollectionView.reloadData()
-                }
+        if isLoadingImages {
+            // 로딩 중이라면 LoadingIndicatorCell 반환
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: LoadingIndicatorCell.reuseIdentifier, for: indexPath) as? LoadingIndicatorCell else {
+                fatalError("Unable To dequeue LoadingIndicatorCell")
             }
             return cell
         } else {
-            // 맵 셀 구성
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MapCollectionViewCell.reuseIdentifier, for: indexPath) as? MapCollectionViewCell else {
-                fatalError("Unable to dequeue MapCollectionViewCell")
+            // 마지막 셀에는 MapCollectionViewCell을 반환
+            if indexPath.item < imagesLocationInfo.count {
+                // 이미지 셀 구성
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCollectionViewCell.reuseIdentifier, for: indexPath) as? ImageCollectionViewCell else {
+                    fatalError("Unalble to dequeue ImageCollectionView Cell")
+                }
+                // 현재 UIstatus에 따라 삭제 버튼의 표시 여부 결정
+                let shouldHideDeleteButton = currentUIStatus == .showDiary
+                cell.configureDeleteButton(hidden: shouldHideDeleteButton)
+                
+                //            if !shouldHideDeleteButton {
+                //                cell.startJiggling()
+                //            } else {
+                //                cell.stopJiggling()
+                //            }
+                
+                let info = imagesLocationInfo[indexPath.item]
+                cell.configure(with: info.image)
+                // cell 내의 삭제버튼을 트리거로 하는 closer를 정의
+                cell.onDeleteButtonTapped = { [weak self] in
+                    guard let self = self else { return }
+                    // 현재 셀의 assetIdentifier를 가져온다.
+                    guard let assetIdentifier = self.imagesLocationInfo[indexPath.item].assetIdentifier else { return }
+                    
+                    // assetIdentifier를 기반으로 imagesLocationInfo 배열에서 해당 이미지 정보를 삭제한다.
+                    if let assetIdentifier = self.imagesLocationInfo[indexPath.item].assetIdentifier {
+                        // indexPath.item이 imagesLocation 배열의 범위 내에 있는지 확인 후, 범위 내라면 해당 항목을 배열에#imageLiteral(resourceName: "simulator_screenshot_7C28BD0E-CCF2-4306-98D4-5F082BBF4790.png")서 삭제
+                        if indexPath.item < self.imagesLocationInfo.count {
+                            self.imagesLocationInfo.remove(at: indexPath.item)
+                        }
+                        // 해당 assetIdentifier를, selectedPhotoIdentifier에서도 삭제
+                        // firstIndex(of:)메서드로 assetIdentifier와 일치하는 첫번째 인덱스를 찾고, 해당 인덱스를 가진 항목을 selectedPhotoIdentifier에서 삭제
+                        if let index = self.selectedPhotoIdentifiers.firstIndex(of: assetIdentifier) {
+                            self.selectedPhotoIdentifiers.remove(at: index)
+                            // ImagePickerManager로 변경된 selectedPhotoIdentifier 업데이트
+                            imagePickerManager.updateSelectedPhotoIdentifier(selectedPhotoIdentifiers)
+                        }
+                    }
+                    // collectionView 업데이트(performBatchUpdates는 여러 UI 변경사항을 그룹화하여 하나의 애니메이션으로 표현)
+                    self.imagesCollectionView.performBatchUpdates({
+                        // deleteItems 메서드를 사용해 지정된 indexPath의 셀을 삭제
+                        self.imagesCollectionView.deleteItems(at: [indexPath])
+                    }) { complted in
+                        // UI 업데이트 완료 후, reloadData를 통해서 잠재적인 UI불일치를 방지.
+                        self.imagesCollectionView.reloadData()
+                    }
+                }
+                return cell
+            } else {
+                // 맵 셀 구성
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MapCollectionViewCell.reuseIdentifier, for: indexPath) as? MapCollectionViewCell else {
+                    fatalError("Unable to dequeue MapCollectionViewCell")
+                }
+                if self.useMetadataLocation {
+                    // 사진에 설정된 위치로 맵 셀 구성
+                    let locationInfos = imagesLocationInfo.compactMap { $0.locationInfo }
+                    cell.configureMapWith(locationsInfo: locationInfos)
+                    print("imagesLocationInfo: \(locationInfos)")
+                } else if !self.useMetadataLocation {
+                    // 현재 위치로 맵 셀 구성
+                    cell.currentLocationInfo = self.currentLocationInfo
+                    cell.configureMapCellWithCurrentLocation()
+                    print("currentLocationInfo: \(String(describing: self.currentLocationInfo))")
+                }
+                cell.delegate = self
+                return cell
             }
-            if self.useMetadataLocation {
-                // 사진에 설정된 위치로 맵 셀 구성
-                let locationInfos = imagesLocationInfo.compactMap { $0.locationInfo }
-                cell.configureMapWith(locationsInfo: locationInfos)
-                print("imagesLocationInfo: \(locationInfos)")
-            } else if !self.useMetadataLocation {
-                // 현재 위치로 맵 셀 구성
-                cell.currentLocationInfo = self.currentLocationInfo
-                cell.configureMapCellWithCurrentLocation()
-                print("currentLocationInfo: \(String(describing: self.currentLocationInfo))")
-            }
-            cell.delegate = self
-            return cell
         }
     }
     private func refreshMapCell() {
@@ -1094,12 +1116,12 @@ extension WriteDiaryVC {
     
     // collectionView 높이 조절 로직
     private func updateImageCollectionViewHeight() {
-        // 이미지가 없을 경우 높이를 0으로 설정
-        if imagesLocationInfo.isEmpty {
-            imageCollectionViewHeightConstraint?.constant = 0
-        } else {
-            // 이미지가 있을 경우, 높이를 조정
+        // 이미지가 비어있지 않거나, 로딩 중일 경우 높이를 너비와 동일하게 설정
+        if isLoadingImages || !imagesLocationInfo.isEmpty {
             imageCollectionViewHeightConstraint?.constant = imagesCollectionView.frame.width
+        } else {
+            // 이미지가 없으며 로딩 중도 아니라면 높이를 0으로 설정
+            imageCollectionViewHeightConstraint?.constant = 0
         }
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
@@ -1286,6 +1308,20 @@ extension WriteDiaryVC {
             print("Updated Location: \(self.currentLocationInfo ?? "Unknown"))")
         }
         mapManager.locationManager.startUpdatingLocation()
+    }
+}
+
+extension WriteDiaryVC {
+    func willStartImageLoading() {
+        isLoadingImages = true
+        imagesCollectionView.reloadData()
+        updateImageCollectionViewHeight()
+    }
+    
+    func didFinishImageLoading() {
+        isLoadingImages = false
+        imagesCollectionView.reloadData()
+        updateImageCollectionViewHeight()
     }
 }
 

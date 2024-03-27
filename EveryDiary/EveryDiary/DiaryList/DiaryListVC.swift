@@ -510,7 +510,7 @@ extension DiaryListVC {
     
     private func setLayout() {
         journalCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(32)
+            make.top.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.leading.equalTo(self.view.safeAreaLayoutGuide).offset(0)
             make.trailing.equalTo(self.view.safeAreaLayoutGuide).offset(0)

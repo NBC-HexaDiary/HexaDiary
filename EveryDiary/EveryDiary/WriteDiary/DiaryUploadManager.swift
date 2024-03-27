@@ -44,21 +44,30 @@ class DiaryUploadManager {
         // 1단계: 기존 이미지 삭제
         deleteExistingImgaes(urls: existingImageURLs) {
             // 2단계: 새 이미지 업로드
-            self.uploadImages(imagesLocationInfo) { newImageURLs in
-                guard !newImageURLs.isEmpty else {
-                    completion(false)
-                    return
+            if !imagesLocationInfo.isEmpty {
+                self.uploadImages(imagesLocationInfo) { newImageURLs in
+                    // 3단계: 다이어리 엔트리 업데이트
+                    // 업로드 된 이미지 URL을 포함하여 다이어리 엔트리 업데이트
+                    var updatedDiaryEntry = diaryEntry
+                    updatedDiaryEntry.imageURL = newImageURLs
+                    self.updateDiaryEntry(diaryID: diaryID, updatedDiaryEntry: updatedDiaryEntry, completion: completion)
                 }
-                // 3단계: 다이어리 엔트리 업데이트
+            } else {
+                // 3단계: 다이어리 엔트리 업데이트(no Image)
                 var updatedDiaryEntry = diaryEntry
-                updatedDiaryEntry.imageURL = newImageURLs
-                DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: updatedDiaryEntry) { error in
-                    if let error = error {
-                        completion(false)
-                    } else {
-                        completion(true)
-                    }
-                }
+                updatedDiaryEntry.imageURL = nil
+                self.updateDiaryEntry(diaryID: diaryID, updatedDiaryEntry: updatedDiaryEntry, completion: completion)
+            }
+        }
+    }
+    private func updateDiaryEntry(diaryID: String, updatedDiaryEntry: DiaryEntry, completion: @escaping (Bool) -> Void) {
+        DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: updatedDiaryEntry) { error in
+            if let error = error {
+                print("Error updating diary entry in Firestore: \(error.localizedDescription)")
+                completion(false)
+            } else {
+                print("Diary entry successfully updated in Firestore.")
+                completion(true)
             }
         }
     }

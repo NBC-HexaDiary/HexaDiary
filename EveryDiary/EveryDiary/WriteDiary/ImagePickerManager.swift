@@ -13,6 +13,8 @@ import UIKit
 protocol ImagePickerDelegate: AnyObject {
     func didPickImages(_ imagesLocationInfo: [ImageLocationInfo], retainedIdentifiers: [String])
     func timeAndLocationChoiceAlert(time: String, address: String, completion: @escaping (Bool) -> Void)
+    func willStartImageLoading()    // 로딩 인디케이터를 불러오기 위한 메서드
+    func didFinishImageLoading()    // 로딩 인디케이터를 제거하기 위한 메서드
 }
 
 class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
@@ -48,7 +50,8 @@ class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
     }
     
     private func processPickedImages(results: [PHPickerResult]) {
-        var newImagesLocationInfo: [Int: ImageLocationInfo] = [:]                     // 새로 선택한 이미지와 메타데이터의 순서를 담는 딕셔너리
+        self.delegate?.willStartImageLoading()                                  // 이미지 불러오기 시작 알림
+        var newImagesLocationInfo: [Int: ImageLocationInfo] = [:]               // 새로 선택한 이미지와 메타데이터의 순서를 담는 딕셔너리
         let newResultsIdentifiers = results.compactMap { $0.assetIdentifier }   // 새로운 결과의 식별자 배열
         
         // 모든 비동기작업을 추적하기 위한 DispatchGroup
@@ -73,6 +76,7 @@ class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
             // 임시 딕셔너리를 배열로 다시 변환하고 원래의 순서대로 정렬
             let orderedImagesLocationInfo = newImagesLocationInfo.sorted(by: { $0.key < $1.key}).map { $0.value }
             self?.handleImageSelectionCompleted(with: orderedImagesLocationInfo, identifiers: newResultsIdentifiers)
+            self?.delegate?.didFinishImageLoading()     // 이미지 불러오기 완료 알림
         }
     }
     private func loadImageAndMetadata(from result: PHPickerResult, with identifier: String, completion: @escaping (ImageLocationInfo?) -> Void) {
