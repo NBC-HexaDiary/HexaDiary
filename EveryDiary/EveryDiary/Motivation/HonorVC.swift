@@ -16,6 +16,7 @@ class HonorVC: UIViewController {
     let db = Firestore.firestore()
     
     private var dataByYearMonth = [String: Set<Int>]()
+    private var sortedYearMonths: [String] = []
     var listener: ListenerRegistration?
     
     private lazy var backgroundImage: UIImageView = {
@@ -74,12 +75,18 @@ extension HonorVC {
             guard let self = self, let diaries = diaries, error == nil else {
                 return
             }
-            let filteredDiaries = diaries.filter { !$0.isDeleted }.sorted(by: { $0.date > $1.date })
+            
+            self.dataByYearMonth.removeAll()
+            
+            let filteredDiaries = diaries.filter { !$0.isDeleted }
             for diary in filteredDiaries {
                 let yearMonth = DateFormatter.yyyyMM.string(from: diary.date)
                 let day = Calendar.current.component(.day, from: diary.date)
                 dataByYearMonth[yearMonth, default: []].insert(day)
             }
+            
+            sortedYearMonths = self.dataByYearMonth.keys.sorted(by: >)
+            
             print("Data by year and month: \(self.dataByYearMonth)")
             DispatchQueue.main.async {
                  self.honorCollectionView.reloadData()
@@ -107,7 +114,7 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
             return 0
         } else {
             honorCollectionView.backgroundView = nil
-            return dataByYearMonth.keys.count
+            return sortedYearMonths.count
         }
     }
     //셀 설정
@@ -158,9 +165,9 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
         guard let headerView = honorCollectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: honorHeaderView.honorHeaderIdentifier, for: indexPath) as? honorHeaderView else {
             fatalError("Failed to dequeue honor header view")
         }
-        let keys = Array(dataByYearMonth.keys)
-        let keyForSection = keys[indexPath.section]
-        headerView.headerLabel.text = keyForSection
+        // 정렬된 연-월 데이터를 사용
+        let yearMonth = sortedYearMonths[indexPath.section]
+        headerView.headerLabel.text = yearMonth
         return headerView
     }
     

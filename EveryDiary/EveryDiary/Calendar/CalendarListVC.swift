@@ -15,7 +15,7 @@ class CalendarListVC: UIViewController {
     
     private lazy var dateLabel: UILabel = {
         let dateLabel = UILabel()
-        dateLabel.font = UIFont(name: "SFProDisplay-Bold", size: 33)
+        dateLabel.font = UIFont(name: "SFProDisplay-Bold", size: 20)
         dateLabel.textColor = .mainTheme
         return dateLabel
     }()
@@ -44,14 +44,8 @@ class CalendarListVC: UIViewController {
     }
     
     private func autoLayoutCalendarListVC() {
-        dateLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
-            make.left.equalTo(view.safeAreaLayoutGuide).offset(16)
-            make.width.equalTo(view.safeAreaLayoutGuide).inset(16)
-            make.height.equalTo(50)
-        }
         dailyListCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(dateLabel.snp.bottom).offset(0)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(0)
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(0)
             make.leading.equalTo(view.safeAreaLayoutGuide).offset(0)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(0)
@@ -60,7 +54,11 @@ class CalendarListVC: UIViewController {
     
     private func addSubViewCalendarListVC() {
         view.addSubview(dailyListCollectionView)
-        view.addSubview(dateLabel)
+        setNavigationBar()
+    }
+    
+    private func setNavigationBar() {
+        navigationItem.titleView = dateLabel
     }
     
     private func fetchUpdateDiaries() {
