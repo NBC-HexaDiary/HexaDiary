@@ -7,8 +7,7 @@
 import LocalAuthentication
 import UIKit
 
-class BiometricsAuth {
-    
+class BiometricsAuth {    
     func authenticateWithBiometrics(completion: @escaping (Bool, Error?) -> Void) {
         let context = LAContext()
         
