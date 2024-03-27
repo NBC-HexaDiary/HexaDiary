@@ -34,6 +34,7 @@ class HonorVC: UIViewController {
         
         let honorCollectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         honorCollectionView.backgroundColor = .clear
+        honorCollectionView.isScrollEnabled = true
         honorCollectionView.register(honorCollectionViewCell.self, forCellWithReuseIdentifier: honorCollectionViewCell.honorIdentifier)
         honorCollectionView.register(honorHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "honorHeaderViewIdentifier")
         
@@ -107,7 +108,7 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
         if dataByYearMonth.isEmpty {
             let message = UILabel(frame: CGRect(x: 0, y: 0, width: honorCollectionView.bounds.width, height: honorCollectionView.bounds.height))
             message.text = "당신의 여정을 시작하세요."
-            message.font = UIFont(name: "SFProDisplay-Regular", size: 16)
+            message.font = UIFont(name: "SFProDisplay-Bold", size: 20)
             message.textColor = .black
             message.textAlignment = .center
             honorCollectionView.backgroundView = message
