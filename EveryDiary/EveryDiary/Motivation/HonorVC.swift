@@ -87,8 +87,6 @@ extension HonorVC {
             }
             
             sortedYearMonths = self.dataByYearMonth.keys.sorted(by: >)
-            
-            print("Data by year and month: \(self.dataByYearMonth)")
             DispatchQueue.main.async {
                  self.honorCollectionView.reloadData()
              }
@@ -147,18 +145,15 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let keys = Array(dataByYearMonth.keys)
-        let keyForSection = keys[indexPath.section]
-        let selectedData = dataByYearMonth[keyForSection]
+//        let keys = Array(dataByYearMonth.keys)
+//        let keyForSection = keys[indexPath.section]
+        let yearMonthKey = sortedYearMonths[indexPath.section]
+        let daysSet = dataByYearMonth[yearMonthKey]
         
         let VC = DetailVC()
-        if let selectedData = selectedData {
-            VC.selectedData = selectedData
-        } else {
-            print("값이 없당")
-        }
+        VC.yearMonthKey = yearMonthKey // 연-월 문자열을 전달합니다.
+        VC.selectedData = daysSet ?? Set<Int>() // 해당하는 일자 세트를 전달합니다.
         navigationController?.pushViewController(VC, animated: true)
-        
     }
     
     //헤더 설정

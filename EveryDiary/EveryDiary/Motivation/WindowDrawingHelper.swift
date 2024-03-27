@@ -21,6 +21,7 @@ class WindowDrawingHelper {
     static func drawBuildingWithWindows(buildings: [BuildingSize], onLayer layer: CALayer, diaryDays: Set<Int>) {
         drawWindowInBuilding(buildings: buildings, onLayer: layer, diaryDays: diaryDays)
     }
+    
     static func createWindowLayer(at position: CGPoint, color: UIColor, windowSize: CGSize) -> CAShapeLayer {
         let windowPath = UIBezierPath(rect: CGRect(origin: position, size: windowSize))
         let windowLayer = CAShapeLayer()
@@ -74,7 +75,6 @@ class WindowDrawingHelper {
                 context.fill(CGRect(origin: .zero, size: windowSize))
             }
             MotivationImageCache.shared.setImage(windowImage, forKey: "window_\(windowIndex)")
-            print("Image for window \(windowIndex) is cached successfully.")
         }
     }
 }
