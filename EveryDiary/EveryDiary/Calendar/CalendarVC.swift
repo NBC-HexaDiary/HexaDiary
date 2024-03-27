@@ -161,7 +161,7 @@ extension CalendarVC {
     private func setDateComponents() {
         let fromDateComponents = DateComponents(
             calendar: calendarView.calendar,
-            year: 2024,
+            year: 2011,
             month: 1,
             day: 1
         )
