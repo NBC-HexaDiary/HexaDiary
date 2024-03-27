@@ -16,7 +16,7 @@ class PageVC: UIPageViewController {
         OnboardingModel(descriptionImage: "onBoarding2", descriptionLabel: "일기를 작성하고 불을 밝히세요"),
         OnboardingModel(descriptionImage: "onBoarding3", descriptionLabel: "일기를 채우고 건물을 세우세요"),
         OnboardingModel(descriptionImage: "onBoarding4", descriptionLabel: "캘린더로 기록한 일기를 확인해요"),
-        OnboardingModel(descriptionImage: "", descriptionLabel: "로그인하여 일기를 안전하게 보관하세요")
+        OnboardingModel(descriptionImage: "onBoarding5", descriptionLabel: "일기를 안전하게 저장하세요")
     ]
     
     var pages: [UIViewController] = []

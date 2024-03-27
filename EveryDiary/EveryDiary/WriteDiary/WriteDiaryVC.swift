@@ -10,6 +10,11 @@ import UIKit
 import Firebase
 import SnapKit
 
+protocol WriteDiaryDelegate: AnyObject {
+    func diaryUploadDidStart()
+    func diaryUploadDidFinish()
+}
+
 // WriteDiaryVC를 호출하는 목적에 따라 WriteDiaryVC의 UI컴포넌트 상태 구분
 enum UIstatus {
     case writeNewDiary      // 새로운 일기 작성
@@ -20,6 +25,8 @@ enum UIstatus {
 class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
     
     weak var delegate: DiaryUpdateDelegate?     // Delegate 프로토콜을 통한 데이터 업데이트 각 VC 통지
+    weak var loadingDiaryDelegate: WriteDiaryDelegate?  // 데이터 전송, 종료를 알리는 delegate
+    
     private var diaryManager = DiaryManager()
     private var imagePickerManager = ImagePickerManager()
     private var mapManager = MapManager()
@@ -36,6 +43,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
     
     private var diaryID: String?                                // 수정할 일기의 ID를 저장하는 변수
     private var currentUIStatus: UIstatus = .writeNewDiary      // 현재의 diary의 상태
+    private var existingImageURLs: [String] = []                // 이미지 목록을 저장할 변수
     private var isSavingDiary = false                           // 중복저장을 방지하기 위한 변수(플래그)
     private lazy var dateString: String = {                     // 날짜선택 버튼에 사용되는 String
         let dateString = DateFormatter.yyyyMMddE.string(from: selectedDate)
@@ -58,7 +66,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
         textFont: "SFProDisplay-Bold",
         fontSize: 20,
         buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(completeButtonTapped),
+        for: #selector(completeButtonTapped1),
         hidden: true
     )
     private lazy var updateButton = setButton(
@@ -67,7 +75,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
         textFont: "SFProDisplay-Bold",
         fontSize: 20,
         buttonSize: CGSize(width: 15, height: 15),
-        for: #selector(updateButtonTapped),
+        for: #selector(updateButtonTapped1),
         hidden: true
     )
     private lazy var allowEditButton = setButton(
@@ -149,7 +157,7 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
     private let weatherTempLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.text = "날씨를 불러오는 중입니다."
+        label.text = ""
         label.font = .systemFont(ofSize: 13, weight: .light)
         label.textColor = .gray
         return label
@@ -192,18 +200,73 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
 extension WriteDiaryVC {
     // 일기 저장 로직
     @objc func completeButtonTapped() {
+        print(#function)
         guard !isSavingDiary, validateInput() else { return }    // 저장 중(=true)이면 실행되지 않음
         isSavingDiary = true                    // 저장 시작
+        self.loadingDiaryDelegate?.diaryUploadDidStart()
         uploadImagesAndSaveDiary()
+    }
+    // 일기 저장 로직
+    @objc func completeButtonTapped1() {
+        print(#function)
+        guard !isSavingDiary, validateInput() else { return }    // 저장 중(=true)이면 실행되지 않음
+        isSavingDiary = true                    // 저장 시작
+        self.loadingDiaryDelegate?.diaryUploadDidStart()
+        
+        // DiaryUploadManager를 사용하여 self를 유지
+        DiaryUploadManager.shared.retain(self)
+        
+        // WriteDiaryVC dismiss 및 업로드 작업 시작
+        self.dismiss(animated: true) { [weak self] in
+            guard let self = self else { return }
+            
+            self.uploadImagesAndSaveDiary1 { success in
+                // 이미지 업로드 및 일기 저장을 비동기적으로 시작
+                DispatchQueue.main.async {
+                    if success {
+                        self.delegate?.diaryDidUpdate()
+                        self.loadingDiaryDelegate?.diaryUploadDidFinish()
+                    } else {
+                        TemporaryAlert.presentTemporaryMessage(with: "업로드 실패", message: "일기를 업로드하지 못했습니다.", interval: 2.0, for: DiaryListVC())
+                        self.isSavingDiary = false
+                        self.loadingDiaryDelegate?.diaryUploadDidFinish()
+                        DiaryUploadManager.shared.release(self)
+                    }
+                }
+            }
+        }
     }
     // 이미지 업로드 및 일기 저장
     private func uploadImagesAndSaveDiary() {
+        let titleText = self.titleTextField.text
         let formattedDateString = DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
         let contentText = contentTextView.text == textViewPlaceHolder ? "" : contentTextView.text ?? ""
+        let selectedEmotion = self.selectedEmotion
+        let selectedWeather = self.selectedWeather
+        let useMetadataLocation = self.useMetadataLocation
+        let currentLocationInfo = self.currentLocationInfo
         
-        uploadImages { [weak self] uploadImageURLs in
-            print("Start upload diary")
-            self?.createAndUploadDiaryEntry(with: self?.titleTextField.text ?? "", content: contentText, dateString: formattedDateString, imageUrls: uploadImageURLs)
+        self.uploadImages { uploadImageURLs in
+            print("DiaryEntry Upload Start")
+            self.createAndUploadDiaryEntry(with: titleText ?? "", content: contentText, dateString: formattedDateString, emotion: selectedEmotion, weather: selectedWeather, useMetadataLocation: useMetadataLocation, currentLocationInfo: currentLocationInfo ?? "", imageUrls: uploadImageURLs)
+            print("DiaryEntry Upload Finish")
+        }
+    }
+    
+    // 이미지 업로드 및 일기 저장2
+    private func uploadImagesAndSaveDiary1(completion: @escaping (Bool) -> Void) {
+        let titleText = self.titleTextField.text
+        let formattedDateString = DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
+        let contentText = contentTextView.text == textViewPlaceHolder ? "" : contentTextView.text ?? ""
+        let selectedEmotion = self.selectedEmotion
+        let selectedWeather = self.selectedWeather
+        let useMetadataLocation = self.useMetadataLocation
+        let currentLocationInfo = self.currentLocationInfo
+        
+        self.uploadImages { uploadImageURLs in
+            print("DiaryEntry Upload Start")
+            self.createAndUploadDiaryEntry(with: titleText ?? "", content: contentText, dateString: formattedDateString, emotion: selectedEmotion, weather: selectedWeather, useMetadataLocation: useMetadataLocation, currentLocationInfo: currentLocationInfo ?? "", imageUrls: uploadImageURLs)
+            print("DiaryEntry Upload Finish")
         }
     }
     
@@ -212,9 +275,11 @@ extension WriteDiaryVC {
         var uploadedImageURLs = Array(repeating: String?.none, count: imagesLocationInfo.count) // URL 배열을 nil로 초기화
         
         // 이미지와 메타데이터 업로드
+        print("before enter")
         for (index ,imageLocationInfo) in imagesLocationInfo.enumerated() {
             guard let assetIdentifier = imageLocationInfo.assetIdentifier else { continue }
             dispatchGroup.enter()
+            print("dispatchGroup entered")
             // 촬영 시간과 위치 정보를 포함하여 업로드
             FirebaseStorageManager.uploadImage(
                 image: [imageLocationInfo.image],
@@ -232,8 +297,45 @@ extension WriteDiaryVC {
             }
         }
         dispatchGroup.notify(queue: .main) {
+            print("dispatchGroup notify")
             let orderedUploadImageURLs = uploadedImageURLs.compactMap { $0 }     // nil 값을 제거하고 URL 순서대로 정렬
+            print("completion 콜백 호출 전: \(orderedUploadImageURLs)")
             completion(Array(orderedUploadImageURLs))     // 순서대로 정렬된 URL 배열로 완료 콜백 호출
+        }
+    }
+    
+    // DiaryEntry 생성 및 Firestore 저장
+    private func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, emotion: String, weather: String, useMetadataLocation: Bool, currentLocationInfo: String, imageUrls: [String] = []) {
+        print("Start Creating DiaryEntry")
+        let newDiaryEntry = DiaryEntry(
+            title: title,
+            content: content,
+            dateString: dateString,
+            emotion: emotion,
+            weather: weather,
+            imageURL: imageUrls,
+            useMetadataLocation: useMetadataLocation,
+            currentLocationInfo: currentLocationInfo
+            )
+        
+        // DiaryManager를 사용해 FireStore에 저장
+        print("Adding DiaryEntry Start")
+        diaryManager.addDiary(diary: newDiaryEntry) { [weak self] error in
+            print("Adding DiaryEntry Finish")
+            guard let self = self else { return }
+            self.isSavingDiary = false  // 성공, 실패 여부를 떠나서 저장 시도가 완료되었으므로 변수 초기화
+            if let error = error {
+                // 에러처리
+                print("Error saving diary to Firestore: \(error.localizedDescription)")
+            } else {
+                // 에러가 없다면, 화면 닫기
+                print("Saved Diary Successfully.")
+//                self.dismiss(animated: true, completion: nil)
+                print("dismiss WriteDiaryVC")
+                self.delegate?.diaryDidUpdate()
+            }
+            // 작업종료를 DiaryListVC에 전달
+            self.loadingDiaryDelegate?.diaryUploadDidFinish()
         }
     }
     
@@ -249,52 +351,83 @@ extension WriteDiaryVC {
         return true
     }
     
-    // 일기 업데이트 로직
+    // 일기 업데이트 로직(업로드 완료 후 dismiss)
     @objc func updateButtonTapped() {
-        guard !isSavingDiary, let diaryID = self.diaryID else { return }
+        guard !isSavingDiary, let diaryID = self.diaryID, validateInput() else { return }
         
-        isSavingDiary = true
-    }
-    private func prepareDiaryForUpdate(diaryID: String) {
-        guard validateInput() else {
-            isSavingDiary = false
-            return
-        }
+        isSavingDiary = true    // 업로드 플래그
         
-        let formattedDateString =  DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
-        let contentText = contentTextView.text == textViewPlaceHolder ? "" : contentTextView.text ?? ""
-        let titleText = titleTextField.text ?? ""
-        
-        uploadImagesForUpdate { [weak self] uploadImageURLs in
-            self?.finalizeDiaryUpdate(diaryID: diaryID, title: titleText, content: contentText, dateString: formattedDateString, imageUrls: uploadImageURLs)
-        }
-    }
-    private func uploadImagesForUpdate(completion: @escaping ([String]) -> Void) {
-        // 이미지 업로드 작업을 관리하기 위한 DispatchGroup
-        let dispatchGroup = DispatchGroup()
-        var uploadedImageURLs = [String?](repeating: nil, count: imagesLocationInfo.count)
-        
-        for (index, imagesLocationInfo) in imagesLocationInfo.enumerated() {
-            guard let assetIdentifier = imagesLocationInfo.assetIdentifier else { continue }
-            dispatchGroup.enter()
+        // 1단계: 이미지 삭제
+        deleteExistingImages { [weak self] in
+            guard let self = self else { return }
             
-            FirebaseStorageManager.uploadImage(
-                image: [imagesLocationInfo.image],
-                pathRoot: "diary_images",
-                assetIdentifier: assetIdentifier,
-                captureTime: imagesLocationInfo.captureTime,
-                location: imagesLocationInfo.location
-            ) { urls in
-                defer { dispatchGroup.leave() }
-                if let url = urls?.first?.absoluteString {
-                    uploadedImageURLs[index] = url
+            // 2단계: 이미지 업로드
+            self.uploadImages { [weak self] uploadImageURLs in
+                guard let self = self else { return }
+                
+                // 3단계: 일기 엔트리 업데이트
+                let formattedDateString = DateFormatter.yyyyMMddHHmmss.string(from: self.selectedDate)
+                let contentText = contentTextView.text == textViewPlaceHolder ? "" : contentTextView.text ?? ""
+                let titleText = titleTextField.text ?? ""
+                
+                self.finalizeDiaryUpdate(diaryID: diaryID, title: titleText, content: contentText, dateString: formattedDateString, imageUrls: uploadImageURLs)
+            }
+        }
+    }
+    // 일기 업데이트 로직(업로드 완료 전 dismiss)
+    @objc func updateButtonTapped1() {
+        guard !isSavingDiary, let diaryID = self.diaryID, validateInput() else { return }
+        // 업로드 플래그 및 업로드 시작 알림
+        isSavingDiary = true
+        self.loadingDiaryDelegate?.diaryUploadDidStart()
+        
+        DiaryUploadManager.shared.retain(self)
+        
+        self.dismiss(animated: true) { [weak self] in
+            guard let self = self else { return }
+            
+            
+            // 현재 입력된 일기 내용을 기반으로 DiaryEntry 객체 생성
+            let updatedDiaryEntry = DiaryEntry(
+                id: diaryID,
+                title: titleTextField.text ?? "",
+                content: contentTextView.text == self.textViewPlaceHolder ? "" : self.contentTextView.text ?? "",
+                dateString: DateFormatter.yyyyMMddHHmmss.string(from: self.selectedDate),
+                emotion: selectedEmotion,
+                weather: selectedWeather,
+                imageURL: existingImageURLs,
+                useMetadataLocation: useMetadataLocation,
+                currentLocationInfo: currentLocationInfo
+            )
+            
+            DiaryUploadManager.shared.updateDiary(diaryID: diaryID, diaryEntry: updatedDiaryEntry, imagesLocationInfo: imagesLocationInfo, existingImageURLs: existingImageURLs) { success in
+                DispatchQueue.main.async {
+                    if success {
+                        self.delegate?.diaryDidUpdate()
+                    } else {
+                        TemporaryAlert.presentTemporaryMessage(with: "업데이트 실패", message: "일기를 수정하지 못했습니다.\n일기를 다시 한 번 확인해주세요.", interval: 2.0, for: DiaryListVC())
+                    }
+                    self.isSavingDiary = false
+                    self.loadingDiaryDelegate?.diaryUploadDidFinish()
+                    DiaryUploadManager.shared.release(self)
                 }
             }
         }
+    }
+    private func deleteExistingImages(completion: @escaping () -> Void) {
+        let dispatchGroup = DispatchGroup()
+        
+        for urlString in self.existingImageURLs {
+            dispatchGroup.enter()
+            FirebaseStorageManager.deleteImage(urlString: urlString) { error in
+                dispatchGroup.leave()
+            }
+        }
         dispatchGroup.notify(queue: .main) {
-            completion(uploadedImageURLs.compactMap { $0 })
+            completion()
         }
     }
+
     private func finalizeDiaryUpdate(diaryID: String, title: String, content: String, dateString: String, imageUrls: [String]) {
         let updatedDiaryEntry = DiaryEntry(
             id: diaryID,
@@ -303,9 +436,23 @@ extension WriteDiaryVC {
             dateString: dateString,
             emotion: selectedEmotion,
             weather: selectedWeather,
-            imageURL: imageUrls
+            imageURL: imageUrls,
+            useMetadataLocation: useMetadataLocation,
+            currentLocationInfo: currentLocationInfo
         )
-        self.updateDiaryInFirestore(diaryID: diaryID, diaryEntry: updatedDiaryEntry)
+        // Firestore 문서 업데이트
+        DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: updatedDiaryEntry) { [weak self] error in
+            guard let self = self else { return }
+            
+            self.isSavingDiary = false
+            if let error = error {
+                print("Error updating diary: \(error.localizedDescription)")
+            } else {
+                print("Dairy updated successfully")
+                self.dismiss(animated: true, completion: nil)
+                self.delegate?.diaryDidUpdate()
+            }
+        }
     }
     // 일기 편집 가능 상태로 변경
     @objc func allowEditButtonTapped() {
@@ -350,8 +497,13 @@ extension WriteDiaryVC {
         imagePickerManager.requestPhotoLibraryAccess(from: self)
     }
     
+    // contentTextView 'Done' 클릭 시 호출.
     @objc func dismissKeyboard() {
+        // 키보드를 내리고
         view.endEditing(true)
+        
+        // scrollView를 최상단으로 스크롤
+        scrollView.setContentOffset(.zero, animated: true)
     }
     
     @objc func collectionViewEdgeTapped(_ recognizer: UITapGestureRecognizer) {
@@ -393,49 +545,42 @@ extension WriteDiaryVC {
 
 // MARK: 네트워크 요청
 extension WriteDiaryVC {
-    // DiaryEntry 생성 및 Firestore 저장
-    private func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, imageUrls: [String] = []) {
-        let newDiaryEntry = DiaryEntry(
-            title: title,
-            content: content,
-            dateString: dateString,
-            emotion: selectedEmotion,
-            weather: selectedWeather,
-            imageURL: imageUrls,
-            useMetadataLocation: useMetadataLocation, 
-            currentLocationInfo: currentLocationInfo
-            )
-        print("newDiaryEntry: \(newDiaryEntry)")
-        
-        // DiaryManager를 사용해 FireStore에 저장
-        diaryManager.addDiary(diary: newDiaryEntry) { [weak self] error in
-            guard let self = self else { return }
-            self.isSavingDiary = false  // 성공, 실패 여부를 떠나서 저장 시도가 완료되었으므로 변수 초기화
-            if let error = error {
-                // 에러처리
-                print("Error saving diary to Firestore: \(error.localizedDescription)")
-            } else {
-                // 에러가 없다면, 화면 닫기
-                print("Saved Diary Successfully.")
-                self.dismiss(animated: true, completion: nil)
-                print("dismiss WriteDiaryVC")
-                self.delegate?.diaryDidUpdate()
-            }
-        }
-    }
+//    // DiaryEntry 생성 및 Firestore 저장
+//    private func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, emotion: String, weather: String, useMetadataLocation: Bool, currentLocationInfo: String, imageUrls: [String] = []) {
+//        print("Start Creating DiaryEntry")
+//        let newDiaryEntry = DiaryEntry(
+//            title: title,
+//            content: content,
+//            dateString: dateString,
+//            emotion: emotion,
+//            weather: weather,
+//            imageURL: imageUrls,
+//            useMetadataLocation: useMetadataLocation,
+//            currentLocationInfo: currentLocationInfo
+//            )
+//        
+//        // DiaryManager를 사용해 FireStore에 저장
+//        diaryManager.addDiary(diary: newDiaryEntry) { [weak self] error in
+//            guard let self = self else { return }
+//            self.isSavingDiary = false  // 성공, 실패 여부를 떠나서 저장 시도가 완료되었으므로 변수 초기화
+//            if let error = error {
+//                // 에러처리
+//                print("Error saving diary to Firestore: \(error.localizedDescription)")
+//            } else {
+//                // 에러가 없다면, 화면 닫기
+//                print("Saved Diary Successfully.")
+////                self.dismiss(animated: true, completion: nil)
+//                print("dismiss WriteDiaryVC")
+//                self.delegate?.diaryDidUpdate()
+//            }
+//            // 작업종료를 DiaryListVC에 전달
+//            self.loadingDiaryDelegate?.diaryUploadDidFinish()
+//        }
+//    }
     
     // DiaryEntry 수정 및 Firestore 업데이트
     private func updateDiaryInFirestore(diaryID: String, diaryEntry: DiaryEntry) {
-        // Firestore 문서 업데이트
-        DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: diaryEntry) { error in
-            if let error = error {
-                print("Error updating diary: \(error.localizedDescription)")
-            } else {
-                print("Dairy updated successfully")
-                self.dismiss(animated: true, completion: nil)
-                self.delegate?.diaryDidUpdate()
-            }
-        }
+
     }
 }
 
@@ -444,14 +589,18 @@ extension WriteDiaryVC {
     func showsDiary(with diary: DiaryEntry) {
         updateUIWithDiaryEntry(diary)
         loadDisplayImages(with: diary)
+        self.existingImageURLs = diary.imageURL ?? []
     }
     private func updateUIWithDiaryEntry(_ diary: DiaryEntry) {
+        print("Loaded Diary: \(diary)")
         // UI 내 일기 내용 반영
         self.diaryID = diary.id
         self.titleTextField.text = diary.title
         self.contentTextView.text = diary.content
         self.selectedEmotion = diary.emotion
         self.selectedWeather = diary.weather
+        self.useMetadataLocation = diary.useMetadataLocation
+        self.currentLocationInfo = diary.currentLocationInfo
         updateDateAndEmotionWeatherImages(diary: diary)
     }
     
@@ -923,8 +1072,8 @@ extension WriteDiaryVC {
         
         imagesCollectionView.snp.makeConstraints { make in
             make.top.equalTo(titleTextField.snp.bottom).offset(15)
-            make.leading.equalToSuperview().offset(0)
-            make.trailing.equalToSuperview().offset(0)
+            make.leading.trailing.equalTo(contentView).offset(0)
+            make.height.equalTo(0).priority(.high)  // 초기 상태 높이 0
         }
         
         // contentTextView의 최소 높이 설정
@@ -932,8 +1081,8 @@ extension WriteDiaryVC {
             make.top.equalTo(imagesCollectionView.snp.bottom).offset(5)
             make.leading.trailing.equalTo(titleTextField)
             // 최소 높이 제약 조건 추가
-            make.height.greaterThanOrEqualTo(self.view).multipliedBy(0.75).priority(.high)
-            make.bottom.equalTo(contentView.snp.bottom)
+            make.bottom.equalTo(contentView.snp.bottom).offset(-20)
+            make.height.greaterThanOrEqualTo(200).priority(.low)
         }
         setupImageCollectionViewHeightConstraint()
     }

@@ -14,7 +14,6 @@ enum NetworkError: Error {
 }
 
 class WeatherService: NSObject, CLLocationManagerDelegate {
-    
     let locationManager = CLLocationManager()
     let apiKey = Bundle.main.apiKey
     
