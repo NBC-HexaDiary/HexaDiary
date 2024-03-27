@@ -14,17 +14,24 @@ import SnapKit
 }
 
 class DetailVC: UIViewController {
-    private let buildingView = BuildingView()
+    private var firstLayer = CAShapeLayer()
+    private var secondLayer = CAShapeLayer()
+    private let windowLayer = CALayer()
     
     var selectedData = Set<Int>()
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        autoLayout()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemIndigo
+        view.backgroundColor = .white
         addSubView()
         drawCacheBackBuildingPath()
         drawCacheBuildingPath()
-        autoLayout()
+        drawWindows()
     }
     
     private func drawCacheBuildingPath() {
@@ -33,11 +40,11 @@ class DetailVC: UIViewController {
             buildingPath = cachedBuildingPath
         } else {
             print("drawCacheBuildingPath에서 drawBuilding")
-            buildingPath = buildingView.drawBuilding()
-            buildingView.cacheBuildingPath(buildingPath)
+            buildingPath = BuildingView().drawBuilding()
+            BezierPathCache.shared.setBezierPath(buildingPath, forKey: "cachedBuildingPath")
         }
-        buildingView.buildingLayer.path = buildingPath.cgPath
-        buildingView.buildingLayer.fillColor = UIColor.black.cgColor
+        secondLayer.path = buildingPath.cgPath
+        secondLayer.fillColor = UIColor.black.cgColor
     }
     
     private func drawCacheBackBuildingPath() {
@@ -46,24 +53,55 @@ class DetailVC: UIViewController {
             backBuildingPath = cachedBackBuildingPath
         } else {
             print("drawCacheBackBuildingPath에서 drawBackBuilding")
-            backBuildingPath = buildingView.drawBackBuilding()
-            buildingView.cacheBackBuildingPath(backBuildingPath)
+            backBuildingPath = BuildingView().drawBackBuilding()
+            BezierPathCache.shared.setBezierPath(backBuildingPath, forKey: "cachedBackBuildingPath")
         }
-        buildingView.backBuildingLayer.path = backBuildingPath.cgPath
-        buildingView.backBuildingLayer.fillColor = UIColor.darkGray.cgColor
+        firstLayer.path = backBuildingPath.cgPath
+        firstLayer.fillColor = UIColor.darkGray.cgColor
+    }
+    
+    private func drawWindows() {
+        let building1 = BuildingSize(position: CGPoint(x: 0, y: view.layer.bounds.height * 0.78),
+                         size: CGSize(width: view.layer.bounds.width * 0.07, height: view.layer.bounds.height * 0.22),
+                         windowLayout: WindowLayout(columns: [[0, 1], [1, 1], [1], [1, 1], [1]]))
+        
+        let building2 = BuildingSize(position: CGPoint(x: view.layer.bounds.width * 0.21, y: view.layer.bounds.height * 0.77),
+                                     size: CGSize(width: view.layer.bounds.width * 0.07, height: view.layer.bounds.height * 0.21),
+                         windowLayout: WindowLayout(columns: [[0, 1, 1], [1, 0, 1],[1, 1], [0, 1]]))
+            
+        let building3 = BuildingSize(position: CGPoint(x: view.layer.bounds.width * 0.51, y: view.layer.bounds.height * 0.82),
+                         size: CGSize(width: view.layer.bounds.width * 0.048, height: view.layer.bounds.height * 0.19),
+                         windowLayout: WindowLayout(columns: [[1, 1, 0],[0, 1, 1], [1, 0, 1], [0, 1]]))
+            
+        let building4 = BuildingSize(position: CGPoint(x: view.layer.bounds.width * 0.73, y: view.layer.bounds.height * 0.83),
+                                     size: CGSize(width: (view.layer.bounds.width - view.layer.bounds.width * 0.92), height: view.layer.bounds.height * 0.3),
+                         windowLayout: WindowLayout(columns: [[1], [1], [1, 1, 1], [1, 1]]))
+            
+        let building5 = BuildingSize(position: CGPoint(x: 0, y: view.layer.bounds.height * 0.75),
+                         size: CGSize(width: view.layer.bounds.width * 0.045, height: view.layer.bounds.height * 0.3),
+                         windowLayout: WindowLayout(columns: [[0, 1, 1]]))
+            
+        let building6 = BuildingSize(position: CGPoint(x: view.layer.bounds.width * 0.94, y: view.layer.bounds.height * 0.75),
+                         size: CGSize(width: view.layer.bounds.width * 0.045, height: view.layer.bounds.height * 0.3),
+                         windowLayout: WindowLayout(columns: [[1]]))
+        
+        let buildings = [building1, building2, building3, building4, building5, building6]
+        WindowDrawingHelper.drawBuildingWithWindows(buildings: buildings, onLayer: windowLayer, diaryDays: selectedData)
+        view.layer.addSublayer(windowLayer)
     }
 }
 
 extension DetailVC {
     private func addSubView() {
-        view.addSubview(buildingView)
-        view.layer.addSublayer(buildingView.backBuildingLayer)
-        view.layer.addSublayer(buildingView.buildingLayer)
+        view.layer.addSublayer(firstLayer)
+        view.layer.addSublayer(secondLayer)
     }
     
     private func autoLayout() {
-        buildingView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
-        }
-    }
+        
+        let layoutFrame = view.safeAreaLayoutGuide.layoutFrame
+        firstLayer.frame = layoutFrame
+        secondLayer.frame = layoutFrame
+        windowLayer.frame = layoutFrame
+   }
 }
