@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1A03BDA12B92F910008C13DC /* FirebaseStorage */; };
 		1AF880D32B8DB5A2004076EB /* Api.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880D22B8DB5A2004076EB /* Api.plist */; };
+		3FB6D74E2BB2E8EF0098F29F /* LoadingIndicatorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB6D74D2BB2E8EF0098F29F /* LoadingIndicatorCell.swift */; };
+		3FB6D7502BB316820098F29F /* DiaryUploadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB6D74F2BB316820098F29F /* DiaryUploadManager.swift */; };
 		3FF0FEEA2BB14F140045EBB7 /* TemporaryAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FF0FEE92BB14F140045EBB7 /* TemporaryAlert.swift */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
 		6B95C03E2B8C7A3B00DBB175 /* SFProRounded-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C0352B8C7A3B00DBB175 /* SFProRounded-Bold.otf */; };
@@ -24,6 +26,8 @@
 		6BB23A352BAD9EE300C3DA25 /* honorCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A342BAD9EE300C3DA25 /* honorCollectionViewCell.swift */; };
 		6BB23A372BB13B7E00C3DA25 /* honorHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A362BB13B7E00C3DA25 /* honorHeaderView.swift */; };
 		6BB23A392BB171D100C3DA25 /* BezierPathCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A382BB171D100C3DA25 /* BezierPathCache.swift */; };
+		6BB23A3D2BB3BCF200C3DA25 /* WindowLayoutCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A3C2BB3BCF200C3DA25 /* WindowLayoutCacheManager.swift */; };
+		6BB23A3F2BB40F9E00C3DA25 /* WindowDrawingHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A3E2BB40F9E00C3DA25 /* WindowDrawingHelper.swift */; };
 		6BB3CE462B8619D0005BC3E1 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE452B8619D0005BC3E1 /* FirebaseFirestore */; };
 		6BB3CE482B8619D5005BC3E1 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE472B8619D5005BC3E1 /* FirebaseFirestoreSwift */; };
 		D294E7592BB148E000F92D44 /* PageVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D294E7582BB148E000F92D44 /* PageVC.swift */; };
@@ -39,7 +43,6 @@
 		D2F0EF3A2BAAAD51008736F1 /* PaginationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A6D90672BA05B8500DEBB12 /* PaginationManager.swift */; };
 		D2F0EF3B2BAAAD51008736F1 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA0115E2B8878F600A26CE0 /* DataModel.swift */; };
 		D2F0EF3C2BAAAD51008736F1 /* WeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D42B8DB715004076EB /* WeatherModel.swift */; };
-		D2F0EF3D2BAAAD51008736F1 /* MotivationImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BE7C99E2BA07D2700374A2A /* MotivationImageCache.swift */; };
 		D2F0EF3E2BAAAD51008736F1 /* MotivationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */; };
 		D2F0EF3F2BAAAD51008736F1 /* BuildingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B42613C2B8C579F00F12CE3 /* BuildingView.swift */; };
 		D2F0EF402BAAAD51008736F1 /* HonorVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA0115A2B886A9100A26CE0 /* HonorVC.swift */; };
@@ -110,6 +113,8 @@
 		3F9E0A542BA35E72004BF1CB /* MapCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F9E0A562BA44CE2004BF1CB /* ImageZoomCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomCollectionViewController.swift; sourceTree = "<group>"; };
 		3F9E0A582BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomCollectionViewCell.swift; sourceTree = "<group>"; };
+		3FB6D74D2BB2E8EF0098F29F /* LoadingIndicatorCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicatorCell.swift; sourceTree = "<group>"; };
+		3FB6D74F2BB316820098F29F /* DiaryUploadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryUploadManager.swift; sourceTree = "<group>"; };
 		3FF0FEE92BB14F140045EBB7 /* TemporaryAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryAlert.swift; sourceTree = "<group>"; };
 		6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		6B3C4CCC2B8EDACD00C53005 /* SettingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingCell.swift; sourceTree = "<group>"; };
@@ -134,12 +139,14 @@
 		6BB23A342BAD9EE300C3DA25 /* honorCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = honorCollectionViewCell.swift; sourceTree = "<group>"; };
 		6BB23A362BB13B7E00C3DA25 /* honorHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = honorHeaderView.swift; sourceTree = "<group>"; };
 		6BB23A382BB171D100C3DA25 /* BezierPathCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BezierPathCache.swift; sourceTree = "<group>"; };
+		6BB23A3A2BB2645D00C3DA25 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; name = "GoogleService-Info.plist"; path = "../../../GoogleService-Info.plist"; sourceTree = "<group>"; };
+		6BB23A3C2BB3BCF200C3DA25 /* WindowLayoutCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowLayoutCacheManager.swift; sourceTree = "<group>"; };
+		6BB23A3E2BB40F9E00C3DA25 /* WindowDrawingHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowDrawingHelper.swift; sourceTree = "<group>"; };
 		6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
 		6BB3CE3B2B85F606005BC3E1 /* WriteDiaryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteDiaryVC.swift; sourceTree = "<group>"; };
 		6BB3CE3D2B85F66E005BC3E1 /* SettingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingVC.swift; sourceTree = "<group>"; };
 		6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationVC.swift; sourceTree = "<group>"; };
 		6BB3CE432B85F6B1005BC3E1 /* DiaryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryListVC.swift; sourceTree = "<group>"; };
-		6BE7C99E2BA07D2700374A2A /* MotivationImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationImageCache.swift; sourceTree = "<group>"; };
 		D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryDataDelegate.swift; sourceTree = "<group>"; };
 		D2094B342BA14A6600508230 /* NotificationName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationName.swift; sourceTree = "<group>"; };
 		D26829EF2B99A16F00A1F0E5 /* DailyListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyListCell.swift; sourceTree = "<group>"; };
@@ -184,6 +191,7 @@
 			children = (
 				D2F0EF6D2BAAD909008736F1 /* calendar.json */,
 				1A7A87BF2BB12CBF008F3923 /* GoogleService-Info.plist */,
+				6BB23A3A2BB2645D00C3DA25 /* GoogleService-Info.plist */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -320,6 +328,7 @@
 				3FF0FEE92BB14F140045EBB7 /* TemporaryAlert.swift */,
 				3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */,
 				3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */,
+				3FB6D74D2BB2E8EF0098F29F /* LoadingIndicatorCell.swift */,
 				3F3DE3032B9EFC0900BC2038 /* ImageCacheManager.swift */,
 				3F3DE30E2BA1451600BC2038 /* TrashVC.swift */,
 				3F3DE3102BA1461200BC2038 /* TrashCollectionViewCell.swift */,
@@ -330,10 +339,11 @@
 		6BB3CE372B85F07C005BC3E1 /* Motivation */ = {
 			isa = PBXGroup;
 			children = (
-				6BE7C99E2BA07D2700374A2A /* MotivationImageCache.swift */,
 				6BB23A382BB171D100C3DA25 /* BezierPathCache.swift */,
+				6BB23A3C2BB3BCF200C3DA25 /* WindowLayoutCacheManager.swift */,
 				6BB3CE412B85F6A0005BC3E1 /* MotivationVC.swift */,
 				6B42613C2B8C579F00F12CE3 /* BuildingView.swift */,
+				6BB23A3E2BB40F9E00C3DA25 /* WindowDrawingHelper.swift */,
 				6BB23A362BB13B7E00C3DA25 /* honorHeaderView.swift */,
 				6BA0115A2B886A9100A26CE0 /* HonorVC.swift */,
 				6BB23A342BAD9EE300C3DA25 /* honorCollectionViewCell.swift */,
@@ -358,6 +368,7 @@
 			isa = PBXGroup;
 			children = (
 				6BB3CE3B2B85F606005BC3E1 /* WriteDiaryVC.swift */,
+				3FB6D74F2BB316820098F29F /* DiaryUploadManager.swift */,
 				3F7831572BA9FE4C00354211 /* KeyboardManager.swift */,
 				3F7831532BA9D2C700354211 /* ImagePickerManager.swift */,
 				3F7831552BA9EC0700354211 /* MapManager.swift */,
@@ -499,7 +510,6 @@
 				D2F0EF3A2BAAAD51008736F1 /* PaginationManager.swift in Sources */,
 				D2F0EF3B2BAAAD51008736F1 /* DataModel.swift in Sources */,
 				D2F0EF3C2BAAAD51008736F1 /* WeatherModel.swift in Sources */,
-				D2F0EF3D2BAAAD51008736F1 /* MotivationImageCache.swift in Sources */,
 				D2F0EF3E2BAAAD51008736F1 /* MotivationVC.swift in Sources */,
 				D2F0EF3F2BAAAD51008736F1 /* BuildingView.swift in Sources */,
 				D2F0EF402BAAAD51008736F1 /* HonorVC.swift in Sources */,
@@ -514,6 +524,7 @@
 				D2F0EF482BAAAD51008736F1 /* CalendarVC.swift in Sources */,
 				D2F0EF492BAAAD51008736F1 /* CalendarListVC.swift in Sources */,
 				D2F0EF4A2BAAAD51008736F1 /* DailyListCell.swift in Sources */,
+				3FB6D74E2BB2E8EF0098F29F /* LoadingIndicatorCell.swift in Sources */,
 				D2F0EF4B2BAAAD51008736F1 /* WriteDiaryVC.swift in Sources */,
 				D2F0EF4C2BAAAD51008736F1 /* KeyboardManager.swift in Sources */,
 				D2F0EF4D2BAAAD51008736F1 /* ImagePickerManager.swift in Sources */,
@@ -522,10 +533,12 @@
 				D2F0EF502BAAAD51008736F1 /* ImageCollectionViewCell.swift in Sources */,
 				D2F0EF512BAAAD51008736F1 /* MapCollectionViewCell.swift in Sources */,
 				D2F0EF532BAAAD51008736F1 /* ImageZoomCollectionViewController.swift in Sources */,
+				6BB23A3F2BB40F9E00C3DA25 /* WindowDrawingHelper.swift in Sources */,
 				D2F0EF542BAAAD51008736F1 /* ImageZoomCollectionViewCell.swift in Sources */,
 				D2F0EF552BAAAD51008736F1 /* DateConditionSelectVC.swift in Sources */,
 				D2F0EF562BAAAD51008736F1 /* DateSelectVC.swift in Sources */,
 				D2F0EF572BAAAD51008736F1 /* SettingVC.swift in Sources */,
+				3FB6D7502BB316820098F29F /* DiaryUploadManager.swift in Sources */,
 				D2F0EF582BAAAD51008736F1 /* SignOutCell.swift in Sources */,
 				D2F0EF592BAAAD51008736F1 /* ProfileCell.swift in Sources */,
 				D2F0EF5A2BAAAD51008736F1 /* SettingCell.swift in Sources */,
@@ -540,6 +553,7 @@
 				D2F0EF642BAAAD51008736F1 /* StartVC.swift in Sources */,
 				D2F0EF652BAAAD51008736F1 /* SceneDelegate.swift in Sources */,
 				3FF0FEEA2BB14F140045EBB7 /* TemporaryAlert.swift in Sources */,
+				6BB23A3D2BB3BCF200C3DA25 /* WindowLayoutCacheManager.swift in Sources */,
 				D2F0EF662BAAAD51008736F1 /* TabBarController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

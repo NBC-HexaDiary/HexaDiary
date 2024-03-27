@@ -18,7 +18,7 @@ protocol ImagePickerDelegate: AnyObject {
 class ImagePickerManager: NSObject, PHPickerViewControllerDelegate {
     weak var delegate: ImagePickerDelegate?
     weak var presentingViewController: UIViewController?
-    
+     
     // 이미 선택했던 사진들을 구분하는 assetIdentifier를 저장하기 위한 변수 선언. showsDiary에서 업데이트
     var selectedPhotoIdentifiers: [String] = []
     
