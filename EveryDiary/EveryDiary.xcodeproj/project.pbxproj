@@ -139,7 +139,6 @@
 		6BB23A342BAD9EE300C3DA25 /* honorCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = honorCollectionViewCell.swift; sourceTree = "<group>"; };
 		6BB23A362BB13B7E00C3DA25 /* honorHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = honorHeaderView.swift; sourceTree = "<group>"; };
 		6BB23A382BB171D100C3DA25 /* BezierPathCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BezierPathCache.swift; sourceTree = "<group>"; };
-		6BB23A3A2BB2645D00C3DA25 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; name = "GoogleService-Info.plist"; path = "../../../GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6BB23A3C2BB3BCF200C3DA25 /* WindowLayoutCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowLayoutCacheManager.swift; sourceTree = "<group>"; };
 		6BB23A3E2BB40F9E00C3DA25 /* WindowDrawingHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowDrawingHelper.swift; sourceTree = "<group>"; };
 		6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
@@ -161,7 +160,6 @@
 		D2B878572BA2B01400AB71A0 /* DateCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateCell.swift; sourceTree = "<group>"; };
 		D2B878592BA2BF3F00AB71A0 /* TimePickerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimePickerCell.swift; sourceTree = "<group>"; };
 		D2B8785B2BA2BF4A00AB71A0 /* DayPickerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayPickerCell.swift; sourceTree = "<group>"; };
-		D2F0EF6D2BAAD909008736F1 /* calendar.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = calendar.json; sourceTree = "<group>"; };
 		D2F0EF882BAC5A32008736F1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -189,9 +187,7 @@
 		1A6D90662BA059DB00DEBB12 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
-				D2F0EF6D2BAAD909008736F1 /* calendar.json */,
 				1A7A87BF2BB12CBF008F3923 /* GoogleService-Info.plist */,
-				6BB23A3A2BB2645D00C3DA25 /* GoogleService-Info.plist */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";

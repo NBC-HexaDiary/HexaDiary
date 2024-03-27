@@ -20,7 +20,11 @@ class ImageCollectionViewCell: UICollectionViewCell {
     // 이미지 삭제 버튼
     private lazy var deleteButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "trashRed"), for: .normal)
+        button.setImage(UIImage(named: "minus"), for: .normal)
+        button.layer.shadowColor = UIColor(named: "mainCell")?.cgColor
+        button.layer.shadowOpacity = 0.3
+        button.layer.shadowRadius = 3
+        button.layer.shadowOffset = CGSize(width: 0, height: 0)
         button.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -45,8 +49,8 @@ class ImageCollectionViewCell: UICollectionViewCell {
             make.edges.equalToSuperview()
         }
         deleteButton.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(10)
-            make.trailing.equalToSuperview().offset(-10)
+            make.top.equalToSuperview().offset(6)
+            make.trailing.equalToSuperview().offset(-6)
             make.width.height.equalTo(25)
         }
     }
