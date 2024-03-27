@@ -13,7 +13,7 @@ class honorHeaderView: UICollectionReusableView {
     let headerLabel: UILabel = {
         let headerLabel = UILabel()
         headerLabel.textColor = .black
-        headerLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        headerLabel.font = UIFont.systemFont(ofSize: 16, weight: .light)
         return headerLabel
     }()
     

@@ -11,10 +11,6 @@ import SnapKit
 import Firebase
 import FirebaseFirestore
 
-#Preview {
-    BuildingView()
-}
-
 protocol BuildingViewDelegate: AnyObject {
     func didUpdateDiaryCount(_ diaryCount: Int)
 }
@@ -23,24 +19,14 @@ class BuildingView: UIView {
     static let shared = BuildingView()
     weak var delegate: BuildingViewDelegate?
 
+    var buildings: [BuildingSize] = []
+    
     let db = Firestore.firestore()
     var diaryDays: Set<Int> = []
     
-    struct BuildingSize {
-        let position: CGPoint
-        let size: CGSize
-        let windowLayout: WindowLayout
-    }
-
-    struct WindowLayout {
-        let columns: [[Int]]
-    }
-
-    var buildings: [BuildingSize] = []
-
     let backBuildingLayer = CAShapeLayer()
     let buildingLayer = CAShapeLayer()
-
+    
     let windowSize = CGSize(width: 10, height: 22)
     let windowSpacing: CGFloat = 15
     
@@ -67,7 +53,7 @@ class BuildingView: UIView {
                          size: CGSize(width: layer.bounds.width * 0.048, height: layer.bounds.height * 0.25), windowLayout: WindowLayout(columns: [[1, 1, 0],[0, 1, 1], [1, 0, 1], [0, 1]])),
             
             BuildingSize(position: CGPoint(x: layer.bounds.width * 0.73, y: layer.bounds.height * 1.03),
-                         size: CGSize(width: (layer.bounds.width - layer.bounds.width * 0.92), height: layer.bounds.height * 0.4), windowLayout: WindowLayout(columns: [[0], [1, 0, 1], [1, 1, 1], [1, 1]])),
+                         size: CGSize(width: (layer.bounds.width - layer.bounds.width * 0.92), height: layer.bounds.height * 0.4), windowLayout: WindowLayout(columns: [[1], [1], [1, 1, 1], [1, 1]])),
             
             BuildingSize(position: CGPoint(x: 0, y: layer.bounds.height * 0.9),
                          size: CGSize(width: layer.bounds.width * 0.045, height: layer.bounds.height * 0.3), windowLayout: WindowLayout(columns: [[0, 1, 1]])),
@@ -117,7 +103,7 @@ class BuildingView: UIView {
     
     func drawBackBuilding() -> UIBezierPath {
         let backPath = UIBezierPath()
-
+        
         backPath.move(to: CGPoint(x: backBuildingLayer.bounds.width * 0.01, y: backBuildingLayer.bounds.height))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.01, y: backBuildingLayer.bounds.height * 0.55))
         backPath.addLine(to: CGPoint(x: backBuildingLayer.bounds.width * 0.04, y: backBuildingLayer.bounds.height * 0.55))
@@ -158,20 +144,6 @@ class BuildingView: UIView {
     }
     
     //MARK: - Image Caching
-    func cacheWindowImageIfNeeded(windowIndex: Int, color: UIColor, windowSize: CGSize) {
-        if MotivationImageCache.shared.getImage(forKey: "window_\(windowIndex)") != nil {
-            return
-        } else {
-            let renderer = UIGraphicsImageRenderer(size: windowSize)
-            let windowImage = renderer.image { context in
-                color.setFill()
-                context.fill(CGRect(origin: .zero, size: windowSize))
-            }
-            MotivationImageCache.shared.setImage(windowImage, forKey: "window_\(windowIndex)")
-            print("Image for window \(windowIndex) is cached successfully.")
-        }
-    }
-    
     func cacheBuildingPath(_ path: UIBezierPath) {
         BezierPathCache.shared.setBezierPath(path, forKey: "cachedBuildingPath")
     }
@@ -207,56 +179,11 @@ class BuildingView: UIView {
         backBuildingLayer.fillColor = UIColor.darkGray.cgColor
         layer.addSublayer(backBuildingLayer)
     }
-    
-    //MARK: - 창문 관련 함수
-    func createWindowLayer(at position: CGPoint, color: UIColor, windowIndex: Int) -> CAShapeLayer {
-        let windowPath = UIBezierPath(rect: CGRect(origin: position, size: windowSize))
-        let windowLayer = CAShapeLayer()
-        windowLayer.path = windowPath.cgPath
-        windowLayer.fillColor = color.cgColor
-        return windowLayer
-    }
-    
-    func drawWindowInBuilding() {
-        guard !buildings.isEmpty else { return }
-        var windowOrder = 1
-        for building in buildings {
-            handleBuilding(building, &windowOrder)
-        }
-    }
-    func handleBuilding(_ building: BuildingSize, _ windowOrder: inout Int) {
-        for (i, row) in building.windowLayout.columns.enumerated() {
-            handleFloor(i, row, building, &windowOrder)
-        }
-    }
-    
-    func handleFloor(_ floorIndex: Int, _ floorWindows: [Int], _ building: BuildingSize, _ windowOrder: inout Int) {
-        for (windowIndex, windowColumns) in floorWindows.enumerated() {
-            if windowColumns == 0 { continue }
-            let windowWidth = building.size.width / CGFloat(windowColumns)
-            let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
-            let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(windowIndex), y: building.position.y - windowHeight * CGFloat(floorIndex+1))
-            
-            if !diaryDays.isEmpty && windowOrder <= diaryDays.count {
-                cacheWindowImageIfNeeded(windowIndex: windowOrder, color: .yellow, windowSize: CGSize(width: windowWidth, height: windowHeight))
-                let windowLayer = createWindowLayer(at: windowPosition, color: .yellow, windowIndex: windowOrder)
-                buildingLayer.addSublayer(windowLayer)
-                windowOrder += 1
-            } else {
-                cacheWindowImageIfNeeded(windowIndex: windowOrder, color: .darkGray, windowSize: CGSize(width: windowWidth, height: windowHeight))
-                let windowLayer = createWindowLayer(at: windowPosition, color: .darkGray, windowIndex: windowOrder)
-                buildingLayer.addSublayer(windowLayer)
-            }
-        }
-    }
 }
+
+
 //MARK: - firebase
 extension BuildingView {
-    func updateWindowsWithDiaryCount(_ count: Int) {
-        self.diaryDays = Set(1...count)
-        drawWindowInBuilding()
-    }
-    
     func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
         
         guard let userID = DiaryManager.shared.getUserID() else {
@@ -266,7 +193,7 @@ extension BuildingView {
         
         let startOfMonth = "\(year)-\(String(format: "%02d", month))-01 00:00:00 +0000"
         let endOfMonth = month == 12 ? "\(year + 1)-01-01 23:59:59 +0000" : "\(year)-\(String(format: "%02d", month + 1))-01 23:59:59 +0000"
-
+        
         DiaryManager.shared.db.collection("users").document(userID).collection("diaries").whereField("dateString", isGreaterThanOrEqualTo: startOfMonth).whereField("dateString", isLessThan: endOfMonth).addSnapshotListener { (querySnapshot, error) in
             if let error = error {
                 print("Error getting documents: \(error)")
@@ -286,11 +213,11 @@ extension BuildingView {
             }
         }
     }
-
+    
     func windowsInBuildingData() {
         let currentYear = Calendar.current.component(.year, from: Date())
         let currentMonth = Calendar.current.component(.month, from: Date())
-
+        
         fetchDiariesForCurrentMonth(year: currentYear, month: currentMonth) { (diaries, error) in
             if let error = error {
                 print("Error fetching diaries: \(error)")
@@ -310,7 +237,7 @@ extension BuildingView {
                     self.diaryDays = Set(diaryDays)
                     print("self.diaryDays: \(self.diaryDays)")
                     self.delegate?.didUpdateDiaryCount(self.diaryDays.count)
-                    self.drawWindowInBuilding()
+                    WindowDrawingHelper.drawBuildingWithWindows(buildings: self.buildings, onLayer: self.buildingLayer, diaryDays: self.diaryDays)
                 }
             }
         }
