@@ -75,55 +75,6 @@ class LoginVC: UIViewController {
         dismiss(animated: true, completion: nil)
     }
     
-    func updateUserProfile(withCredential credential: ASAuthorizationAppleIDCredential) {
-        guard let currentUser = Auth.auth().currentUser else {
-            print("사용자가 없습니다.")
-            return
-        }
-        
-        let changeRequest = currentUser.createProfileChangeRequest()
-        
-        if let fullName = credential.fullName {
-            changeRequest.displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
-        }
-        
-        changeRequest.commitChanges { error in
-            if let error = error {
-                print("Error updating user profile: \(error)")
-            } else {
-                NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                self.dismiss(animated: true, completion: nil)
-            }
-        }
-    }
-    
-    func signInWithCredential(credential: AuthCredential) {
-        Auth.auth().signIn(with: credential) { authResult, error in
-            if let error = error {
-                print("로그인 중 오류 발생: \(error.localizedDescription)")
-                return
-            }
-            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-            self.dismiss(animated: true, completion: nil)
-        }
-    }
-    
-    func deleteWithCredential(credential: AuthCredential) {
-        guard let currentUser = Auth.auth().currentUser else {
-            print("사용자가 없습니다.")
-            return
-        }
-        
-        currentUser.delete { error in
-            if let error = error {
-                print("Error deleting user from Firebase: \(error.localizedDescription)")
-            } else {
-                print("User successfully deleted from Firebase.")
-                DiaryManager.shared.deleteUserData(for: currentUser.uid )
-            }
-        }
-    }
-    
     //MARK: - Google로 로그인 및 Firebase 인증
     private func handleGIDSignIn() {
         // 버튼 클릭 시, 인증
@@ -146,17 +97,12 @@ class LoginVC: UIViewController {
             let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
             
             if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
-                print("Firebase login 성공 \(String(describing: email)),\(String(describing: fullName))")
-                
                 currentUser.link(with: credential) { authResult, error in
                     if let error = error {
                         print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
-                        
                         self.deleteWithCredential(credential: credential)
-                        
-                        self.signInWithCredential(credential: credential)
-                        
-                        print("로그인 성공")
+                    } else {
+                        print("익명 사용자를 영구 계정으로 전환 성공")
                         let changeRequest = currentUser.createProfileChangeRequest()
                         changeRequest.displayName = fullName
                         changeRequest.commitChanges { error in
@@ -166,24 +112,14 @@ class LoginVC: UIViewController {
                             print("사용자 프로필 업데이트 완료")
                             NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
                             self.dismiss(animated: true, completion: nil)
-                            
                         }
-                        return
-                    }
-                    let changeRequest = currentUser.createProfileChangeRequest()
-                    changeRequest.displayName = fullName
-                    changeRequest.commitChanges { error in
-                        if let error = error {
-                            print("Error updating user profile: \(error)")
-                        }
-                        print("익명 사용자를 영구 계정으로 전환 성공")
-                        NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                        self.dismiss(animated: true, completion: nil)
                     }
                 }
             } else {
+                print("현재 사용자가 없습니다. 구글 로그인을 진행합니다.")
                 self.signInWithCredential(credential: credential)
             }
+            self.signInWithCredential(credential: credential)
         }
     }
 }
@@ -321,16 +257,15 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
             }
             
             // 변환한 identityToken을 Firebase 로그인 인증에 맞게 할당
-            let credential = OAuthProvider.credential(withProviderID: "apple.com",
-                                                      idToken: idTokenString,
-                                                      rawNonce: nonce)
+            let credential = OAuthProvider.appleCredential(withIDToken: idTokenString,
+                                                           rawNonce: nonce,
+                                                           fullName: appleIDCredential.fullName)
             
             if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
                 currentUser.link(with: credential) { authResult, error in
                     if let error = error {
                         print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
-//                        if let error = error as? AuthErrorCode, error.code == .credentialAlreadyInUse {
-//                    }
+                        self.deleteWithCredential(credential: credential)
                     } else {
                         print("익명 사용자를 영구 계정으로 전환 성공")
                         self.updateUserProfile(withCredential: appleIDCredential)
@@ -357,7 +292,6 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
             }
         }
     }
-
     
     // 로그인이 제대로 되지 않았을 경우, Error 발생
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
@@ -366,3 +300,53 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
     }
 }
 
+extension LoginVC {
+    func updateUserProfile(withCredential credential: ASAuthorizationAppleIDCredential) {
+        guard let currentUser = Auth.auth().currentUser else {
+            print("사용자가 없습니다.")
+            return
+        }
+        
+        let changeRequest = currentUser.createProfileChangeRequest()
+        
+        if let fullName = credential.fullName {
+            //            changeRequest.displayName = "\(fullName.givenName ?? "") \(fullName.familyName ?? "")"
+            changeRequest.displayName = Auth.auth().currentUser?.displayName
+        }
+        
+        changeRequest.commitChanges { error in
+            if let error = error {
+                print("Error updating user profile: \(error)")
+            } else {
+                NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
+    }
+    
+    func signInWithCredential(credential: AuthCredential) {
+        Auth.auth().signIn(with: credential) { authResult, error in
+            if let error = error {
+                print("로그인 중 오류 발생: \(error.localizedDescription)")
+                return
+            }
+            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+            self.dismiss(animated: true, completion: nil)
+        }
+    }
+    
+    func deleteWithCredential(credential: AuthCredential) {
+        guard let currentUser = Auth.auth().currentUser else {
+            print("사용자가 없습니다.")
+            return
+        }
+        
+        currentUser.delete { error in
+            if let error = error {
+                print("Error deleting user from Firebase: \(error.localizedDescription)")
+            } else {
+                print("User successfully deleted from Firebase.")
+            }
+        }
+    }
+}

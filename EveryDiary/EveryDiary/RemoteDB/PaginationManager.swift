@@ -35,7 +35,7 @@ class PaginationManager {
             guard let self = self else { return }
             
             if let error = error {
-                print("Error fetching documents: \(error)")
+//                print("Error fetching documents: \(error)")
                 completion(nil)
                 return
             }

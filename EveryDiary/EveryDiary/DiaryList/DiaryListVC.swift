@@ -527,7 +527,8 @@ extension DiaryListVC: UICollectionViewDelegate {
                     self.journalCollectionView.reloadData()
                 }
             } else {
-                print("Failed to fetch new diaries.")
+//                print("Failed to fetch new diaries.")
+                return
             }
         }
     }

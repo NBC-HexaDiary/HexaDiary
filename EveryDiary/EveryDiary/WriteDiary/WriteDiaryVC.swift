@@ -8,6 +8,7 @@ import CoreLocation
 import UIKit
 
 import Firebase
+import FirebaseAuth
 import SnapKit
 
 // WriteDiaryVC를 호출하는 목적에 따라 WriteDiaryVC의 UI컴포넌트 상태 구분
@@ -195,7 +196,10 @@ extension WriteDiaryVC {
     @objc func completeButtonTapped() {
         guard !isSavingDiary, validateInput() else { return }    // 저장 중(=true)이면 실행되지 않음
         isSavingDiary = true                    // 저장 시작
-        uploadImagesAndSaveDiary()
+        //        uploadImagesAndSaveDiary()
+        createAnonymousAccount { [weak self] in
+            self?.uploadImagesAndSaveDiary()
+        }
     }
     // 이미지 업로드 및 일기 저장
     private func uploadImagesAndSaveDiary() {
@@ -205,6 +209,18 @@ extension WriteDiaryVC {
         uploadImages { [weak self] uploadImageURLs in
             print("Start upload diary")
             self?.createAndUploadDiaryEntry(with: self?.titleTextField.text ?? "", content: contentText, dateString: formattedDateString, imageUrls: uploadImageURLs)
+        }
+    }
+    
+    // 익명 계정 생성
+    private func createAnonymousAccount(completion: @escaping () -> Void) {
+        DiaryManager.shared.authenticateAnonymouslyIfNeeded { error in
+            if let error = error {
+                print("Error creating anonymous account: \(error.localizedDescription)")
+            } else {
+                print("Anonymous account created successfully.")
+                completion()
+            }
         }
     }
     
@@ -219,7 +235,8 @@ extension WriteDiaryVC {
             // 촬영 시간과 위치 정보를 포함하여 업로드
             FirebaseStorageManager.uploadImage(
                 image: [imageLocationInfo.image],
-                pathRoot: "diary_images",
+//                pathRoot: "diary_images",
+                pathRoot: Auth.auth().currentUser?.uid ?? "UnknownUser",
                 assetIdentifier: assetIdentifier,
                 captureTime: imageLocationInfo.captureTime,
                 location: imageLocationInfo.location

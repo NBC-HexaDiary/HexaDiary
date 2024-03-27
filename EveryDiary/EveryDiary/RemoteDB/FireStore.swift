@@ -52,12 +52,12 @@ class DiaryManager {
     
     //MARK: 일기 추가
     func addDiary(diary: DiaryEntry, completion: @escaping (Error?) -> Void) {
-        authenticateAnonymouslyIfNeeded { error in
-            if let error = error {
-                print("Error authenticating anonymously: \(error)")
-                completion(error)
-                return
-            }
+//        authenticateAnonymouslyIfNeeded { error in
+//            if let error = error {
+//                print("Error authenticating anonymously: \(error)")
+//                completion(error)
+//                return
+//            }
             guard let userID = self.getUserID() else {
                 completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
                 return
@@ -111,7 +111,7 @@ class DiaryManager {
                     completion(error)
                 }
             }
-        }
+//        }
     }
     
     //MARK: 다이어리 조회
@@ -123,7 +123,7 @@ class DiaryManager {
         
         listener = db.collection("users").document(userID).collection("diaries").order(by: "dateString", descending: true).addSnapshotListener { querySnapshot, error in
             if let error = error {
-                print("Error listening for real-time updates: \(error)")
+//                print("Error listening for real-time updates: \(error)")
                 completion([], error)
             } else {
                 var diaries = [DiaryEntry]()

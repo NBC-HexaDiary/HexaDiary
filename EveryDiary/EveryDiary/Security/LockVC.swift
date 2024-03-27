@@ -94,7 +94,7 @@ class LockVC: UIViewController {
             checkBiometryAvailability()
         }
     }
-
+    
     private func checkBiometryAvailability() {
         biometricsAuth.authenticateWithBiometrics { [weak self] success, error in
             guard let self = self else { return }
@@ -114,7 +114,7 @@ class LockVC: UIViewController {
     
     private func showPermissionDeniedAlert() {
         let authorizationAlert = UIAlertController(title: "Face ID 권한 거부", message: "Face ID 권한을 사용하려면 설정에서 Face ID 권한을 허용해주세요", preferredStyle: .alert)
-
+        
         let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { (_) -> Void in
             guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
                 return
@@ -125,10 +125,10 @@ class LockVC: UIViewController {
         }
         
         let cancelAction = UIAlertAction(title: "취소", style: .default, handler: nil)
-
+        
         authorizationAlert.addAction(settingsAction)
         authorizationAlert.addAction(cancelAction)
-
+        
         DispatchQueue.main.async { [weak self] in
             self?.present(authorizationAlert, animated: true, completion: nil)
         }
