@@ -1,8 +1,8 @@
 //
-//  MotivationImageCache.swift
+//  WindowLayoutCacheManager.swift
 //  EveryDiary
 //
-//  Created by t2023-m0099 on 3/12/24.
+//  Created by t2023-m0099 on 3/27/24.
 //
 
 import UIKit
