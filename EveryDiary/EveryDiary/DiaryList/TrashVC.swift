@@ -557,7 +557,8 @@ extension TrashVC: UICollectionViewDelegate {
                     self.trashCollectionView.reloadData()
                 }
             } else {
-                print("Failed to fetch new diaries.")
+//                print("Failed to fetch new diaries.")
+                return
             }
         }
     }

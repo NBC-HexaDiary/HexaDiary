@@ -88,7 +88,6 @@ class SettingVC: UIViewController {
 
 // MARK: - 사용자의 로그인 상태 유무 감지 & 로그아웃 기능
 extension SettingVC {
-    
     // 로그인 상태 별 TableView의 구성
     private func refresh() {
         if let currentUser = Auth.auth().currentUser {
@@ -235,7 +234,6 @@ extension SettingVC {
             print("No user is currently signed in.")
             return
         }
-        DiaryManager.shared.deleteUserData(for: currentUser.uid)
 
         // 사용자 계정 삭제
         currentUser.delete { error in
@@ -243,8 +241,6 @@ extension SettingVC {
                 print("Error deleting user from Firebase: \(error.localizedDescription)")
             } else {
                 print("User successfully deleted from Firebase.")
-                // 사용자 계정에 저장되있던 모든 데이터 삭제
-//                DiaryManager.shared.deleteUserData(for: currentUser.uid)
             }
         }
     }
@@ -317,8 +313,6 @@ extension SettingVC {
 extension SettingVC : UITableViewDelegate, UITableViewDataSource {
     // TableView의 Cell 갯수는 datasource의 조건에 따라 달라진다
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        print("\(dataSource.count)")
-        
         return dataSource.count
     }
     

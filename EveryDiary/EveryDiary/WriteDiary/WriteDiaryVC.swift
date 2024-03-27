@@ -8,6 +8,7 @@ import CoreLocation
 import UIKit
 
 import Firebase
+import FirebaseAuth
 import SnapKit
 
 protocol WriteDiaryDelegate: AnyObject {
@@ -203,8 +204,10 @@ extension WriteDiaryVC {
         print(#function)
         guard !isSavingDiary, validateInput() else { return }    // 저장 중(=true)이면 실행되지 않음
         isSavingDiary = true                    // 저장 시작
-        self.loadingDiaryDelegate?.diaryUploadDidStart()
-        uploadImagesAndSaveDiary()
+        //        uploadImagesAndSaveDiary()
+        createAnonymousAccount { [weak self] in
+            self?.uploadImagesAndSaveDiary()
+        }
     }
     // 일기 저장 로직
     @objc func completeButtonTapped1() {
@@ -270,6 +273,18 @@ extension WriteDiaryVC {
         }
     }
     
+    // 익명 계정 생성
+    private func createAnonymousAccount(completion: @escaping () -> Void) {
+        DiaryManager.shared.authenticateAnonymouslyIfNeeded { error in
+            if let error = error {
+                print("Error creating anonymous account: \(error.localizedDescription)")
+            } else {
+                print("Anonymous account created successfully.")
+                completion()
+            }
+        }
+    }
+    
     private func uploadImages(completion: @escaping ([String]) -> Void) {
         let dispatchGroup = DispatchGroup()
         var uploadedImageURLs = Array(repeating: String?.none, count: imagesLocationInfo.count) // URL 배열을 nil로 초기화
@@ -283,7 +298,8 @@ extension WriteDiaryVC {
             // 촬영 시간과 위치 정보를 포함하여 업로드
             FirebaseStorageManager.uploadImage(
                 image: [imageLocationInfo.image],
-                pathRoot: "diary_images",
+//                pathRoot: "diary_images",
+                pathRoot: Auth.auth().currentUser?.uid ?? "UnknownUser",
                 assetIdentifier: assetIdentifier,
                 captureTime: imageLocationInfo.captureTime,
                 location: imageLocationInfo.location
