@@ -24,7 +24,6 @@
 		6BB23A352BAD9EE300C3DA25 /* honorCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A342BAD9EE300C3DA25 /* honorCollectionViewCell.swift */; };
 		6BB23A372BB13B7E00C3DA25 /* honorHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A362BB13B7E00C3DA25 /* honorHeaderView.swift */; };
 		6BB23A392BB171D100C3DA25 /* BezierPathCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A382BB171D100C3DA25 /* BezierPathCache.swift */; };
-		6BB23A3B2BB2645D00C3DA25 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6BB23A3A2BB2645D00C3DA25 /* GoogleService-Info.plist */; };
 		6BB23A3D2BB3BCF200C3DA25 /* WindowLayoutCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A3C2BB3BCF200C3DA25 /* WindowLayoutCacheManager.swift */; };
 		6BB23A3F2BB40F9E00C3DA25 /* WindowDrawingHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB23A3E2BB40F9E00C3DA25 /* WindowDrawingHelper.swift */; };
 		6BB3CE462B8619D0005BC3E1 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6BB3CE452B8619D0005BC3E1 /* FirebaseFirestore */; };
@@ -135,7 +134,6 @@
 		6BB23A342BAD9EE300C3DA25 /* honorCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = honorCollectionViewCell.swift; sourceTree = "<group>"; };
 		6BB23A362BB13B7E00C3DA25 /* honorHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = honorHeaderView.swift; sourceTree = "<group>"; };
 		6BB23A382BB171D100C3DA25 /* BezierPathCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BezierPathCache.swift; sourceTree = "<group>"; };
-		6BB23A3A2BB2645D00C3DA25 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Desktop/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6BB23A3C2BB3BCF200C3DA25 /* WindowLayoutCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowLayoutCacheManager.swift; sourceTree = "<group>"; };
 		6BB23A3E2BB40F9E00C3DA25 /* WindowDrawingHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowDrawingHelper.swift; sourceTree = "<group>"; };
 		6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
@@ -298,7 +296,6 @@
 				6BB3CE342B85EFB1005BC3E1 /* TabBarController.swift */,
 				6BABC3732B85D109009267B3 /* LaunchScreen.storyboard */,
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
-				6BB23A3A2BB2645D00C3DA25 /* GoogleService-Info.plist */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
 				D2F0EF882BAC5A32008736F1 /* PrivacyInfo.xcprivacy */,
 				1AF880D22B8DB5A2004076EB /* Api.plist */,
@@ -473,7 +470,6 @@
 			files = (
 				6B95C0512B8C7A5A00DBB175 /* SFProRounded-Regular.otf in Resources */,
 				1AF880D32B8DB5A2004076EB /* Api.plist in Resources */,
-				6BB23A3B2BB2645D00C3DA25 /* GoogleService-Info.plist in Resources */,
 				6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */,
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
 				6BABC3722B85D109009267B3 /* Assets.xcassets in Resources */,
