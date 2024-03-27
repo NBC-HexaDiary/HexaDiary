@@ -43,6 +43,7 @@ class DiaryManager {
                     print("Error signing in anonymously: \(error)")
                     completion(error)
                 } else {
+                    NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
                     print("익명 인증 성공")
                     completion(nil)
                 }
