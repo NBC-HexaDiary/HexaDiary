@@ -27,6 +27,8 @@ class DiaryListVC: UIViewController {
     private let paginationManager = PaginationManager()         // 페이지네이션 관리
     private var isLoadingData: Bool = false                     // 데이터 로딩 중을 표시하는 플래그
     
+    private var searchTimer: Timer? // 디바운싱을 위한 타이머
+    private var isSearching: Bool = false
     // 화면 구성 요소 정의
     private lazy var themeLabel : UILabel = {
         let label = UILabel()
@@ -189,6 +191,7 @@ extension DiaryListVC {
         searchBar.text = ""
         searchBar.resignFirstResponder() // 키보드 숨김
         refreshDiaryData()
+        isSearching = false
     }
     @objc private func tabWriteDiaryBTN() {
         let writeDiaryVC = WriteDiaryVC()
@@ -375,27 +378,44 @@ extension DiaryListVC: UICollectionViewDelegateFlowLayout {
 extension DiaryListVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
-            refreshDiaryData()
+            refreshDiaryData() // 검색어가 비워지면 전체 일기 데이터를 다시 표시
+            isSearching = false // 검색 중 플래그 해제
         } else {
-            var filteredDiaries: [String: [DiaryEntry]] = [:]
-            
-            for (month, diaries) in monthlyDiaries {
-                let filtered = diaries.filter { diary in
-                    diary.title.range(of: searchText, options: .caseInsensitive) != nil || diary.content.range(of: searchText, options: .caseInsensitive) != nil
-                }
-                if !filtered.isEmpty {
-                    filteredDiaries[month] = filtered
-                }
+            isSearching = true // 검색 중 플래그 설정
+            searchTimer?.invalidate() // 이전 타이머가 있으면 무효화합니다.
+            searchTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
+                self.searchDiaries(with: searchText) // 입력이 멈추면 검색을 실행합니다.
             }
-            monthlyDiaries = filteredDiaries
-            months = monthlyDiaries.keys.sorted().reversed()
-            journalCollectionView.reloadData()
         }
     }
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.resignFirstResponder()    // 키보드 숨김
+        searchTimer?.invalidate() // 검색 버튼을 누르면 현재 진행 중인 검색을 중지합니다.
+        guard let searchText = searchBar.text, !searchText.isEmpty else {
+            return
+        }
+        searchDiaries(with: searchText) // 검색을 수행합니다.
     }
     
+    private func searchDiaries(with searchText: String) {
+        diaryManager.fetchDiaries { [weak self] (diaries, error) in
+            guard let self = self else { return }
+            if let diaries = diaries {
+                let filteredDiaries = diaries.filter { diary in
+                    let isMatch = diary.title.localizedCaseInsensitiveContains(searchText) ||
+                    diary.content.localizedCaseInsensitiveContains(searchText)
+                    return isMatch && !diary.isDeleted
+                }
+                self.diaries = filteredDiaries
+                self.organizeDiariesByMonth(diaries: self.diaries)
+                DispatchQueue.main.async {
+                    self.journalCollectionView.reloadData()
+                }
+            } else if let error = error {
+                print("Error searching diaries: \(error)")
+            }
+        }
+    }
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
         searchBar.resignFirstResponder() // 키보드 숨김
@@ -474,6 +494,8 @@ extension DiaryListVC : DiaryUpdateDelegate {
 extension DiaryListVC: UICollectionViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard !isSearching else { return } // 검색 중일 때는 페이지네이션 비활성화
+
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         let height = scrollView.frame.size.height
@@ -488,6 +510,8 @@ extension DiaryListVC: UICollectionViewDelegate {
     }
     
     func getPage() {
+        guard !isSearching else { return } // 검색 중일 때는 페이지네이션 비활성화
+
         paginationManager.getNextPage { [weak self] newDiaries in
             guard let self = self, let newDiaries = newDiaries else {
                 self?.isLoadingData = false
@@ -515,6 +539,8 @@ extension DiaryListVC: UICollectionViewDelegate {
     }
     
     func refreshDiaryData() {
+        guard !isSearching else { return } // 검색 중일 때는 페이지네이션 비활성화
+
         paginationManager.resetQuery()
         
         paginationManager.getNextPage { newDiaries in
