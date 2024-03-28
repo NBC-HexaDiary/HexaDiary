@@ -17,6 +17,15 @@ class DetailVC: UIViewController {
     var selectedData = Set<Int>()
     var yearMonthKey = String()
     
+    private lazy var closeButton : UIButton = {
+        let closeButton = UIButton()
+        closeButton.setImage(UIImage(systemName:"xmark"), for: .normal)
+        closeButton.sizeToFit()
+        closeButton.tintColor = .mainCell
+        closeButton.addTarget(self, action: #selector(closeDetailVC), for: .touchUpInside)
+        return closeButton
+    }()
+
     private lazy var detailImageView: UIImageView = {
         let detailImageView = UIImageView()
         detailImageView.contentMode = .scaleToFill
@@ -45,6 +54,7 @@ class DetailVC: UIViewController {
         if let month = Int(monthString) {
             let imageName: String
             switch month {
+
             case 3...5:
                 imageName = "detailImage3"
             case 6...8:
@@ -56,6 +66,10 @@ class DetailVC: UIViewController {
             }
             detailImageView.image = UIImage(named: imageName)
         }
+    }
+
+        @objc private func closeDetailVC() {
+        self.dismiss(animated: true, completion: nil)
     }
     
     private func drawCacheBuildingPath() {
@@ -119,6 +133,7 @@ extension DetailVC {
     private func addSubView() {
         view.addSubview(detailImageView)
         view.addSubview(detailView)
+        view.addSubview(closeButton)
     }
     
     private func autoLayout() {
@@ -126,7 +141,16 @@ extension DetailVC {
             make.edges.equalToSuperview()
         }
         detailView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
+            make.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            make.top.bottom.equalTo(view.safeAreaLayoutGuide).offset(100)
+        }
+        closeButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+            make.right.equalTo(view.safeAreaLayoutGuide).inset(16)
+            make.width.height.equalTo(25)
+        }
+        closeButton.imageView?.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
         }
     }
     
