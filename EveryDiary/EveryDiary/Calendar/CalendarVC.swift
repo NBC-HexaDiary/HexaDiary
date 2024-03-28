@@ -124,10 +124,21 @@ class CalendarVC: UIViewController {
 //MARK: - UICalendarView Custom & Decorations
 extension CalendarVC {
     private func updateCalendarDecoration(with diaries: [DiaryEntry]) {
-        let updateDateComponents = Set(diaries.compactMap { diary -> DateComponents? in
-            let diaryDate = diary.date
-            return Calendar.current.dateComponents([.year, .month, .day], from: diaryDate)
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+        
+        // 현재 년도에 해당하는 일기만 필터링합니다.
+        let validDiaries = diaries.filter { diary in
+            let diaryYear = calendar.component(.year, from: diary.date)
+            return diaryYear == currentYear
+        }
+        
+        // 필터링된 일기의 날짜로 DateComponents 배열을 생성합니다.
+        let updateDateComponents = Set(validDiaries.compactMap { diary -> DateComponents? in
+            return calendar.dateComponents([.year, .month, .day], from: diary.date)
         })
+        
+        // UICalendarView에 데코레이션을 업데이트합니다.
         self.calendarView.reloadDecorations(forDateComponents: Array(updateDateComponents), animated: true)
     }
     
@@ -178,7 +189,8 @@ extension CalendarVC {
 extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDelegate {
    
     func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
-        guard let date = Calendar.current.date(from: dateComponents) else {
+        guard let date = Calendar.current.date(from: dateComponents),
+              calendarView.availableDateRange.contains(date) else {
             return nil
         }
         
