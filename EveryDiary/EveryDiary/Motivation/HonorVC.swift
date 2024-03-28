@@ -102,7 +102,6 @@ extension HonorVC {
 extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     //섹션 설정
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        print("numberOfSections : \(dataByYearMonth.keys)")
         if dataByYearMonth.isEmpty {
             let message = UILabel(frame: CGRect(x: 0, y: 0, width: honorCollectionView.bounds.width, height: honorCollectionView.bounds.height))
             message.text = "당신의 여정을 시작하세요."

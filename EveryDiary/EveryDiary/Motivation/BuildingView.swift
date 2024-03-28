@@ -11,6 +11,10 @@ import SnapKit
 import Firebase
 import FirebaseFirestore
 
+#Preview {
+    BuildingView()
+}
+
 protocol BuildingViewDelegate: AnyObject {
     func didUpdateDiaryCount(_ diaryCount: Int)
 }
@@ -205,7 +209,6 @@ extension BuildingView {
                 }
                 diaries = diaries.filter { !$0.isDeleted }
                 DispatchQueue.main.async {
-                    print("Fetched diaries: \(diaries)")
                 }
                 completion(diaries, nil)
             }
