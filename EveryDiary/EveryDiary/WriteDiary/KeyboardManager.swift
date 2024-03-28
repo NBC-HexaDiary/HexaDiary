@@ -13,6 +13,10 @@ class KeyboardManager {
     private weak var scrollView: UIScrollView?
     private var bottomConstraint: Constraint
     
+    // 키보드 상태 변화에 대한 콜백 클로저
+    var onKeyboardShow: (() -> Void)?
+    var onKeyboardHide: (() -> Void)?
+    
     init(scrollView: UIScrollView, bottomConstraint: Constraint, viewController: UIViewController) {
         self.scrollView = scrollView
         self.bottomConstraint = bottomConstraint
@@ -29,6 +33,7 @@ class KeyboardManager {
     }
     
     @objc private func keyboardWillShow(notification: NSNotification) {
+        onKeyboardShow?()
         guard let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue,
                 let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
                 let window = windowScene.windows.first(where: { $0.isKeyWindow }) else { return }
@@ -41,6 +46,7 @@ class KeyboardManager {
     }
     
     @objc private func keyboardWillHide(notification: NSNotification) {
+        onKeyboardHide?()
         adjustScrollViewForKeyboardAppearance(with: 0, show: false)
     }
     

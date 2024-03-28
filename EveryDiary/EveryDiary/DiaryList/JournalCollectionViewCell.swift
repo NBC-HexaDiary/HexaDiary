@@ -12,6 +12,9 @@ import SnapKit
 class JournalCollectionViewCell: UICollectionViewCell {
     static let reuseIdentifier = "JournalCollectionView"
     
+    // 현재 로딩해야 할 이미지의 URL을 저장하는 프로퍼티
+    private var loadingImageURL: URL?
+    
     override var isSelected: Bool {
         didSet {
             if self.isSelected {
@@ -78,6 +81,7 @@ class JournalCollectionViewCell: UICollectionViewCell {
         super.prepareForReuse()
         
         // UI 컴포넌트를 초기 상태로 리셋(cell 재사용시 다른 cell의 요소가 삽입되지 않도록)
+        loadingImageURL = nil
         thumnailView.image = nil
         contentTitle.text = ""
         contentTextView.text = ""
@@ -105,8 +109,24 @@ class JournalCollectionViewCell: UICollectionViewCell {
             thumnailView.image = UIImage(named: imageName)
         }
     }
-    func setImage(_ image: UIImage?) {
-        thumnailView.image = image
+    func loadImageAsync(url: URL, completion: @escaping (UIImage?) -> Void) {
+        // 이미지 로딩 시작 전에 현재 셀에 대한 URL을 기록
+        self.loadingImageURL = url
+        
+        // 비동기 이미지 로딩 로직
+        ImageCacheManager.shared.loadImage(from: url) { [weak self] image in
+            DispatchQueue.main.async {
+                // 이미지 로딩이 완료된 시점에 현재 셀의 URL이 로딩을 시작할 때의 URL과 동일한지 확인
+                if self?.loadingImageURL == url {
+                    completion(image)
+                }
+            }
+        }
+    }
+    func setImage(_ image: UIImage?, for url: URL) {
+        if self.loadingImageURL == url {
+            thumnailView.image = image
+        }
         thumnailView.isHidden = false
         updateLayoutForImageVisible(true)
     }
