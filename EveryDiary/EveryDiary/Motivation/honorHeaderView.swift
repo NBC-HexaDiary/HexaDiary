@@ -23,7 +23,6 @@ class honorHeaderView: UICollectionReusableView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(headerLabel)
-        
         headerLabel.snp.makeConstraints { make in
             make.centerX.centerY.equalToSuperview()
             make.top.equalToSuperview().inset(4)

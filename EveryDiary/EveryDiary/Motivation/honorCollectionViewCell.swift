@@ -29,6 +29,7 @@ class honorCollectionViewCell: UICollectionViewCell {
     private func addSubView() {
         contentView.addSubview(images)
     }
+    
     private func autoLayout() {
         images.snp.makeConstraints { make in
             make.top.bottom.leading.trailing.equalToSuperview()

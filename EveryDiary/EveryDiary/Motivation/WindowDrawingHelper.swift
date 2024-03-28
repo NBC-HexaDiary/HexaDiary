@@ -15,7 +15,7 @@ struct BuildingSize {
 
 struct WindowLayout {
     let columns: [[Int]]
-} 
+}
 
 class WindowDrawingHelper {
     static func drawBuildingWithWindows(buildings: [BuildingSize], onLayer layer: CALayer, diaryDays: Set<Int>) {
@@ -45,7 +45,6 @@ class WindowDrawingHelper {
     }
     
     static func handleFloor(_ floorIndex: Int, _ floorWindows: [Int], _ building: BuildingSize, onLayer layer: CALayer, diaryDays: Set<Int>, windowOrder: inout Int) {
-        
         for (windowIndex, windowColumns) in floorWindows.enumerated() {
             if windowColumns == 0 { continue }
             let windowWidth = building.size.width / CGFloat(windowColumns)
