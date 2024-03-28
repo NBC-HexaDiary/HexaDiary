@@ -628,6 +628,11 @@ extension WriteDiaryVC {
         updateImageCollectionViewHeight()   // CollectionView 높이 설정
         loadDisplayImages(with: diary)
         self.existingImageURLs = diary.imageURL ?? []
+        
+        // 일기 내용이 있을 경우, 텍스트 색상을 검정색으로 설정
+        if !diary.content.isEmpty {
+            contentTextView.textColor = .black
+        }
     }
     private func updateUIWithDiaryEntry(_ diary: DiaryEntry) {
         print("Loaded Diary: \(diary)")
