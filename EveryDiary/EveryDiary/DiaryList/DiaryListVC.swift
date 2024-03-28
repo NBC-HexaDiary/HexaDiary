@@ -114,7 +114,8 @@ class DiaryListVC: UIViewController {
         addSubviews()
         setLayout()
         setNavigationBar()
-        loadDiaries()
+//        loadDiaries()
+        refreshDiaryData()
         
         NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
     }
@@ -413,9 +414,8 @@ extension DiaryListVC: UISearchBarDelegate {
     //FIXME: 기존 검색 메서드
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
-            refreshDiaryData() // 검색어가 비워지면 전체 일기 데이터를 다시 표시
             isSearching = false // 검색 중 플래그 해제
-
+            refreshDiaryData() // 검색어가 비워지면 전체 일기 데이터를 다시 표시
         } else {
             isSearching = true // 검색 중 플래그 설정
             searchTimer?.invalidate() // 이전 타이머가 있으면 무효화합니다.
@@ -452,11 +452,14 @@ extension DiaryListVC: UISearchBarDelegate {
             }
         }
     }
+    
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
         searchBar.resignFirstResponder() // 키보드 숨김
+        isSearching = false // 검색 중 플래그 해제
         refreshDiaryData()
     }
+    
     // searchBar의 적절한 사이즈 조절하는 메서드
     private func adjustSearchBarWidth() {
         let screenWidth = UIScreen.main.bounds.width
@@ -527,8 +530,8 @@ extension DiaryListVC : DiaryUpdateDelegate {
         refreshDiaryData()
     }
 }
+
 extension DiaryListVC: UICollectionViewDelegate {
-    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard !isSearching else { return } // 검색 중일 때는 페이지네이션 비활성화
 
