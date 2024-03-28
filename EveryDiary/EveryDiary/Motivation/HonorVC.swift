@@ -153,7 +153,8 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
         let VC = DetailVC()
         VC.yearMonthKey = yearMonthKey // 연-월 문자열을 전달합니다.
         VC.selectedData = daysSet ?? Set<Int>() // 해당하는 일자 세트를 전달합니다.
-        navigationController?.pushViewController(VC, animated: true)
+        VC.modalPresentationStyle = .fullScreen
+        self.present(VC, animated: true)
     }
     
     //헤더 설정
