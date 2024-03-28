@@ -15,7 +15,7 @@ struct BuildingSize {
 
 struct WindowLayout {
     let columns: [[Int]]
-} 
+}
 
 class WindowDrawingHelper {
     static func drawBuildingWithWindows(buildings: [BuildingSize], onLayer layer: CALayer, diaryDays: Set<Int>) {
@@ -45,13 +45,13 @@ class WindowDrawingHelper {
     }
     
     static func handleFloor(_ floorIndex: Int, _ floorWindows: [Int], _ building: BuildingSize, onLayer layer: CALayer, diaryDays: Set<Int>, windowOrder: inout Int) {
-        
         for (windowIndex, windowColumns) in floorWindows.enumerated() {
             if windowColumns == 0 { continue }
             let windowWidth = building.size.width / CGFloat(windowColumns)
             let windowHeight = building.size.height / CGFloat(building.windowLayout.columns.count)
             let windowPosition = CGPoint(x: building.position.x + windowWidth * CGFloat(windowIndex), y: building.position.y - windowHeight * CGFloat(floorIndex+1))
             let windowSize = CGSize(width: 10, height: 22)
+            print("Processing windowOrder: \(windowOrder), diaryDays.count: \(diaryDays.count)")
             if !diaryDays.isEmpty && windowOrder <= diaryDays.count {
                 cacheWindowImageIfNeeded(windowIndex: windowOrder, color: .yellow, windowSize: windowSize)
                 let windowLayer = createWindowLayer(at: windowPosition, color: .yellow, windowSize: windowSize)

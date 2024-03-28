@@ -9,10 +9,6 @@ import UIKit
 
 import SnapKit
 
-#Preview{
-    DetailVC()
-}
-
 class DetailVC: UIViewController {
     private var firstLayer = CAShapeLayer()
     private var secondLayer = CAShapeLayer()
@@ -24,7 +20,6 @@ class DetailVC: UIViewController {
     private lazy var detailImageView: UIImageView = {
         let detailImageView = UIImageView()
         detailImageView.contentMode = .scaleToFill
-        detailImageView.image = UIImage(named: "detailImage")
         return detailImageView
     }()
     
@@ -41,7 +36,24 @@ class DetailVC: UIViewController {
         drawCacheBackBuildingPath()
         drawCacheBuildingPath()
         drawWindows()
+        updateImageForMonth()
         autoLayout()
+    }
+    
+    private func updateImageForMonth() {
+        let monthString = yearMonthKey.suffix(2)
+        if let month = Int(monthString) {
+            let imageName: String
+            switch month {
+            case 2...5:
+                imageName = "detailImage3"
+            case 6...8:
+                imageName = "detailImage2"
+            default:
+                imageName = "detailImage" // 기본 이미지 이름
+            }
+            detailImageView.image = UIImage(named: imageName)
+        }
     }
     
     private func drawCacheBuildingPath() {

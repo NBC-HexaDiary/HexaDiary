@@ -18,7 +18,7 @@ protocol BuildingViewDelegate: AnyObject {
 class BuildingView: UIView {
     static let shared = BuildingView()
     weak var delegate: BuildingViewDelegate?
-
+    
     var buildings: [BuildingSize] = []
     
     let db = Firestore.firestore()
@@ -179,7 +179,6 @@ class BuildingView: UIView {
     }
 }
 
-
 //MARK: - firebase
 extension BuildingView {
     func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
@@ -205,7 +204,6 @@ extension BuildingView {
                 }
                 diaries = diaries.filter { !$0.isDeleted }
                 DispatchQueue.main.async {
-                    print("Fetched diaries: \(diaries)")
                 }
                 completion(diaries, nil)
             }
