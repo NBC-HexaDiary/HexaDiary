@@ -9,10 +9,6 @@ import UIKit
 
 import SnapKit
 
-#Preview{
-    DetailVC()
-}
-
 class DetailVC: UIViewController {
     private var firstLayer = CAShapeLayer()
     private var secondLayer = CAShapeLayer()

@@ -16,7 +16,7 @@ class MotivationVC: UIViewController {
         let background = UIImageView(image: UIImage(named: "View.Background"))
         return background
     }()
-
+    
     private lazy var settingButton : UIBarButtonItem = {
         let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
         return button

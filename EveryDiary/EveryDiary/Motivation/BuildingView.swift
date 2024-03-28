@@ -11,10 +11,6 @@ import SnapKit
 import Firebase
 import FirebaseFirestore
 
-#Preview {
-    BuildingView()
-}
-
 protocol BuildingViewDelegate: AnyObject {
     func didUpdateDiaryCount(_ diaryCount: Int)
 }
@@ -22,7 +18,7 @@ protocol BuildingViewDelegate: AnyObject {
 class BuildingView: UIView {
     static let shared = BuildingView()
     weak var delegate: BuildingViewDelegate?
-
+    
     var buildings: [BuildingSize] = []
     
     let db = Firestore.firestore()
@@ -182,7 +178,6 @@ class BuildingView: UIView {
         layer.addSublayer(backBuildingLayer)
     }
 }
-
 
 //MARK: - firebase
 extension BuildingView {

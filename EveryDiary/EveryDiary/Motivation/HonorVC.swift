@@ -88,8 +88,8 @@ extension HonorVC {
             
             sortedYearMonths = self.dataByYearMonth.keys.sorted(by: >)
             DispatchQueue.main.async {
-                 self.honorCollectionView.reloadData()
-             }
+                self.honorCollectionView.reloadData()
+            }
         }
     }
     
@@ -115,6 +115,7 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
             return sortedYearMonths.count
         }
     }
+    
     //셀 설정
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 1
@@ -144,8 +145,8 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        let keys = Array(dataByYearMonth.keys)
-//        let keyForSection = keys[indexPath.section]
+        //        let keys = Array(dataByYearMonth.keys)
+        //        let keyForSection = keys[indexPath.section]
         let yearMonthKey = sortedYearMonths[indexPath.section]
         let daysSet = dataByYearMonth[yearMonthKey]
         
