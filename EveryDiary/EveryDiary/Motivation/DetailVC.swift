@@ -25,7 +25,7 @@ class DetailVC: UIViewController {
         closeButton.addTarget(self, action: #selector(closeDetailVC), for: .touchUpInside)
         return closeButton
     }()
-    
+
     private lazy var detailImageView: UIImageView = {
         let detailImageView = UIImageView()
         detailImageView.contentMode = .scaleToFill
@@ -54,10 +54,13 @@ class DetailVC: UIViewController {
         if let month = Int(monthString) {
             let imageName: String
             switch month {
-            case 2...5:
+
+            case 3...5:
                 imageName = "detailImage3"
             case 6...8:
                 imageName = "detailImage2"
+            case 9...11:
+                imageName = "detailImage4"
             default:
                 imageName = "detailImage" // 기본 이미지 이름
             }
