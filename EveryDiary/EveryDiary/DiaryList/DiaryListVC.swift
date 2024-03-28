@@ -114,7 +114,8 @@ class DiaryListVC: UIViewController {
         addSubviews()
         setLayout()
         setNavigationBar()
-        loadDiaries()
+//        loadDiaries()
+        refreshDiaryData()
         
         NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
     }
