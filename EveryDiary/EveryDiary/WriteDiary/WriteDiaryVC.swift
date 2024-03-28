@@ -628,6 +628,11 @@ extension WriteDiaryVC {
         updateImageCollectionViewHeight()   // CollectionView 높이 설정
         loadDisplayImages(with: diary)
         self.existingImageURLs = diary.imageURL ?? []
+        
+        // 일기 내용이 있을 경우, 텍스트 색상을 검정색으로 설정
+        if !diary.content.isEmpty {
+            contentTextView.textColor = .black
+        }
     }
     private func updateUIWithDiaryEntry(_ diary: DiaryEntry) {
         print("Loaded Diary: \(diary)")
@@ -1099,7 +1104,7 @@ extension WriteDiaryVC: UICollectionViewDataSourcePrefetching {
         if useMetadataLocation {
             let locationInfos = imagesLocationInfo.compactMap { $0.locationInfo }
             MapManager.shared.prefetchMapData(for: locationInfos)
-        } else if let currentLocation = currentLocationInfo {
+        } else if let currentLocation = currentLocationInfo, !useMetadataLocation {
             // 사용자의 현재 위치 정보를 사용
             let components = currentLocation.split(separator: ", ").compactMap { CLLocationDegrees($0) }
             guard components.count == 2 else { return }
