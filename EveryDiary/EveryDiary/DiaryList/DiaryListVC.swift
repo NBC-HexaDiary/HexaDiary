@@ -12,7 +12,7 @@ import FirebaseFirestore
 import SnapKit
 
 // 사용자가 작성한 일기 리스트를 보여주는 ViewController
-class DiaryListVC: UIViewController {
+class DiaryListVC: UIViewController, UIAdaptivePresentationControllerDelegate {
     // 다이어리 관리를 위한 변수
     private var diaryManager = DiaryManager()
     private var monthlyDiaries: [String: [DiaryEntry]] = [:]    // 월별로 정렬된 DiaryEntry
@@ -221,6 +221,7 @@ extension DiaryListVC {
         writeDiaryVC.delegate = self
         writeDiaryVC.loadingDiaryDelegate = self
         writeDiaryVC.modalPresentationStyle = .automatic
+        writeDiaryVC.presentationController?.delegate = self
         self.present(writeDiaryVC, animated: true)
     }
     // 설정 화면(SettingVC)으로 이동
@@ -288,14 +289,10 @@ extension DiaryListVC: UICollectionViewDataSource {
                 // 여러 이미지 중 첫번째 이미지로 셀 설정
                 if let firstImageUrlString = diary.imageURL?.first, let imageUrl = URL(string: firstImageUrlString) {
                     
-                    // ImageCacheManager를 사용하여 이미지 로드
-                    ImageCacheManager.shared.loadImage(from: imageUrl) { image in
-                        DispatchQueue.main.async {
-                            // 셀이 재사용되며 이미지가 다른 항목에 들어갈 수 있으므로 다운로드가 완료된 시점의 indexPath가 동일한지 다시 확인.
-                            if let currntIndexPath = collectionView.indexPath(for: cell), currntIndexPath == indexPath {
-                                cell.setImage(image)
-                            }
-                        }
+                    // ImageCacheManager를 사용하는 loadImageAsync를 사용하여 비동기 이미지 다운로드
+                    cell.loadImageAsync(url: imageUrl) { image in
+                        // setImage로 이미지와 URL을 함께 전달하여 잘못된 indexPath에 이미지가 전달되는 현상 방지
+                        cell.setImage(image, for: imageUrl)
                     }
                 } else {
                     // 이미지 URL이 없을 경우 imageView를 숨김

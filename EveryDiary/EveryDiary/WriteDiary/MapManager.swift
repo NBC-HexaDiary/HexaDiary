@@ -10,12 +10,23 @@ import CoreLocation
 import Contacts
 import MapKit
 
+// 위치에 대한 MapView 데이터를 저장하기 위한 구조체
+struct MapViewData {
+    var annotation: [MKPointAnnotation]
+    var placeName: String
+}
+
 class MapManager: NSObject, CLLocationManagerDelegate {
     static let shared = MapManager()
     weak var presentingViewController: UIViewController?
     var locationManager = CLLocationManager()
     // 위치 정보 업데이트 콜백을 위한 속성
     var onLocationUpdate: ((CLLocationDegrees, CLLocationDegrees) -> Void)?
+    
+
+    
+    // prefetched map data를 저장하는 딕셔너리
+    var prefetchedMapData: [String: MapViewData] = [:]
     
     override init() {
         super.init()
@@ -49,6 +60,38 @@ class MapManager: NSObject, CLLocationManagerDelegate {
             locationManager.startUpdatingLocation()
         @unknown default:
             fatalError("Unhandled authorization status.")
+        }
+    }
+    
+    // 주어진 위치 정보에 대한 prefetched 데이터를 반환하는 메서드
+    func getPrefetchedMapData(for locationInfo: LocationInfo) -> MapViewData? {
+        let key = "\(locationInfo.latitude),\(locationInfo.longitude)"
+        return prefetchedMapData[key]
+    }
+    
+    func prefetchMapData(for locations: [LocationInfo]) {
+        let dispatchGroup = DispatchGroup()
+        
+        locations.forEach { location in
+            let cacheKey = "\(location.latitude), \(location.longitude)"
+            guard prefetchedMapData[cacheKey] == nil else { return }
+            
+            dispatchGroup.enter()
+            getPlaceName(latitude: location.latitude, longitude: location.longitude) { [weak self] placeName in
+                
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+                annotation.title = placeName
+                
+                let mapViewData = MapViewData(annotation: [annotation], placeName: placeName)
+                self?.prefetchedMapData[cacheKey] = mapViewData
+                
+                dispatchGroup.leave()
+            }
+        }
+        dispatchGroup.notify(queue: .main) {
+            // prefetch가 완료된 후 수행할 작업
+            print("모든 위치 데이터 prefetch 완료.")
         }
     }
     

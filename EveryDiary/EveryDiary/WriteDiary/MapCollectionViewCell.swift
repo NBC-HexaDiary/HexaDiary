@@ -82,6 +82,17 @@ class MapCollectionViewCell: UICollectionViewCell {
         let locationInfo = LocationInfo(latitude: latitude, longitude: longitude)
         configureMapWith(locationsInfo: [locationInfo])
     }
+    
+    func configureWithPrefetchedData(_ mapViewData: MapViewData) {
+        mapView.removeAnnotations(mapView.annotations) // 기존 애너테이션 제거
+        mapView.addAnnotations(mapViewData.annotation) // 새로운 애너테이션 추가
+
+        // 맵 뷰를 첫 번째 애너테이션의 위치로 이동
+        if let firstAnnotation = mapViewData.annotation.first {
+            let region = MKCoordinateRegion(center: firstAnnotation.coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
+            mapView.setRegion(region, animated: false)
+        }
+    }
 }
 
 extension MapCollectionViewCell: MKMapViewDelegate {
